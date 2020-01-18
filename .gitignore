@@ -1,0 +1,10 @@
+.DS_Store
+desktop.ini
+
+.idea
+.vscode
+
+log
+test
+build/log
+build/binary/*

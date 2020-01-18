@@ -1,0 +1,20 @@
+syntax = "proto3";
+package auth;
+message AuthRequest {
+    string mobile = 1;
+    string smsCode = 2;
+}
+
+message Token {
+    string token = 1;
+    string tokenType = 2;
+    int32 expiresIn = 3;
+}
+
+message AuthResponse {
+    Token token = 1;
+}
+
+service LoginService {
+    rpc Login (AuthRequest) returns (AuthResponse);
+}

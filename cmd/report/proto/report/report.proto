@@ -1,0 +1,18 @@
+syntax = "proto3";
+package protos;
+
+message ReportResponse {
+    int64 examId = 1;
+}
+message Foo {
+}
+message Bar {
+}
+message ReportRequest {
+    int64 examId = 1;
+}
+
+
+service ReportRpc {
+    rpc Show (ReportRequest) returns (ReportResponse);
+}

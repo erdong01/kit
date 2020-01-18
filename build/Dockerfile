@@ -1,0 +1,10 @@
+FROM golang
+
+ARG NAME=${NAME}
+ARG VERSION=${VERSION}
+
+ENV NAME=${NAME} VERSION=${VERSION} ENV=production GIN_MODE=release
+
+ADD ./binary bin
+
+EXPOSE 8080
