@@ -7,7 +7,7 @@ import (
 )
 
 func userGroup(group *gin.RouterGroup) {
-	g := group.Group("/user")
+	g := group.Group("/auth")
 	{
 		g.GET("/login", user.Login)
 	}

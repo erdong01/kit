@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"rxt/cmd/rxtmr/route"
 	"rxt/internal/core"
 )
 
@@ -13,6 +14,6 @@ func App(name, env, version string) {
 		core.RedisRegister(),
 		core.ConfigRegister(),
 		core.Port(5002),
-		//core.Engine(route.Init),
+		core.Engine(route.Init),
 	).Init()
 }

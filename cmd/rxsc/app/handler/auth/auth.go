@@ -3,14 +3,14 @@ package auth
 import (
 	"github.com/gin-gonic/gin"
 	auth "rxt/cmd/auth/proto/sc"
-	"rxt/internal/api"
 	"rxt/internal/http/restful"
+	"rxt/rpc/client/sc/authClient"
 )
 
 func Login(context *gin.Context) {
-	var AuthRequest = auth.AuthRequest{}
+	var AuthRequest *auth.AuthRequest
 	context.BindJSON(&AuthRequest)
-	res, err := api.New("auth", "Login", false).Call(&AuthRequest)
+	res, err := authClient.New().Logic(AuthRequest)
 	if err != nil {
 		restful.Exception(context, err)
 		return

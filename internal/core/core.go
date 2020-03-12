@@ -15,13 +15,14 @@ type info struct {
 	version string
 }
 type Core struct {
-	Db     *gorm.DB
-	Redis  *redis.Client
-	Config *config.Config
-	Cache  *I.ICache
-	Info   info
-	opts   []Option
-	once   sync.Once
+	Db          *gorm.DB
+	Transaction *gorm.DB
+	Redis       *redis.Client
+	Config      *config.Config
+	Cache       *I.ICache
+	Info        info
+	opts        []Option
+	once        sync.Once
 }
 
 var (
@@ -45,3 +46,4 @@ func Close() {
 		defer c.Db.Close()
 	}
 }
+

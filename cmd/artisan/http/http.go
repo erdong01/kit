@@ -1,61 +1,40 @@
 package http
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"golang.org/x/sync/errgroup"
-	"net/http"
-	scApp "rxt/cmd/rxsc/bootstrap"
-	"rxt/cmd/rxsc/route"
-	tmrApp "rxt/cmd/rxtmr/bootstrap"
-	"rxt/internal/core"
+	"context"
+	"os"
+	"os/signal"
+	"rxt/cmd/artisan/http/errGroup"
+	"rxt/cmd/artisan/http/scHttp"
+	"rxt/cmd/artisan/http/studentHttp"
+	"rxt/cmd/artisan/http/tmrHttp"
 	"rxt/internal/log"
 	"time"
 )
 
-var (
-	g errgroup.Group
-)
-
-func Sc() http.Handler {
-	e := gin.Default()
-	route.Init(e)
-	return e
-}
-
-func Tmr() http.Handler {
-	e := gin.Default()
-
-	return e
-}
-
 func New() {
-	server01 := &http.Server{
-		Addr:         ":5001",
-		Handler:      Sc(),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
-	g.Go(func() error {
-		scApp.App("", "", "")
-		fmt.Println(core.New().GetPort())
-		defer core.Close()
-		return server01.ListenAndServe()
-	})
-	server02 := &http.Server{
-		Addr:         ":5002",
-		Handler:      Tmr(),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
-	g.Go(func() error {
-		tmrApp.App("", "", "")
-		fmt.Println(core.New().GetPort())
-		defer core.Close()
-		return server02.ListenAndServe()
-	})
+	scHttp := scHttp.Start()
+	tmrHttp := tmrHttp.Start()
+	studentHttp := studentHttp.Start()
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	log.Info("Shutdown Server ...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	if err := g.Wait(); err != nil {
+	if err := tmrHttp.Shutdown(ctx); err != nil {
+		log.Fatal("Server02 Shutdown:", err)
+	}
+	if err := scHttp.Shutdown(ctx); err != nil {
+		log.Fatal("Server01 Shutdown:", err)
+	}
+	if err := studentHttp.Shutdown(ctx); err != nil {
+		log.Fatal("Server03 Shutdown:", err)
+	}
+
+	log.Info("Server exiting")
+	if err := errGroup.ErrGroup.Wait(); err != nil {
 		log.Fatal(err)
 	}
 }

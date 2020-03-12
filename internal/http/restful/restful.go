@@ -1,10 +1,11 @@
 package restful
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"rxt/internal/log"
 	"rxt/internal/wrong"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Exception(c *gin.Context, err error) {
@@ -20,7 +21,7 @@ func Success(c *gin.Context, obj interface{}) {
 }
 
 func SuccessCreated(c *gin.Context, obj ...interface{}) {
-	c.JSON(http.StatusNoContent, obj)
+	c.JSON(http.StatusCreated, obj)
 }
 
 func SuccessNoContent(c *gin.Context) {

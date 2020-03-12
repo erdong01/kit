@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package auth;
+
+message LogicRequest {
+    string student_user_login_name = 1;
+    string password = 2;
+}
+
+message Token {
+    string token = 1;
+    string token_type = 2;
+    int32 expires_in = 3;
+}
+message Student {
+    string student_real_name = 1;
+    int64 student_sex = 2;
+    int64 student_user_no = 3;
+    int64 in_class = 4;
+}
+message LogicResponse{
+       Token token = 1;
+       string student_user_head = 2;
+       Student student = 3;
+}
+
+service AuthService {
+    rpc Login (LogicRequest) returns (LogicResponse);
+}

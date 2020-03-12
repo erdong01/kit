@@ -15,6 +15,25 @@ message AuthResponse {
     Token token = 1;
 }
 
-service LoginService {
+
+
+message TokenRequest {
+    string token = 1;
+}
+
+message UserResponse {
+    int64 student_user_id = 1;
+    int64 student_user_no  = 2;
+    string student_user_name = 3;
+    int32 student_user_status = 4;
+    string student_user_mobile = 5;
+    string student_user_head = 6;
+    int64 last_login_ip = 7;
+    string last_login_time = 8;
+}
+
+
+service AuthService {
     rpc Login (AuthRequest) returns (AuthResponse);
+    rpc Validate (TokenRequest) returns (UserResponse);
 }

@@ -1,25 +1,25 @@
 info:
-  name: test
+  name: rxtedu
   env: local  #本地开发:local, 测试:test, 线上:production
 api_port:
   sc: 5001
   tmr: 5002
 mysql:
-  host: 127.0.0.1
-  port: 3307
-  user: db_test
-  password: db_test
-  database: db_test
+  host: 101.132.145.239
+  port: 33057
+  user: api.rxt
+  password: a18@990Wll0C3
+  database: api.517rxt.com
   parameters: false
   max_idle_conn: 40
   max_open_conn: 40
 redis:
-  addr: 127.0.0.1:6379
-  password: db_test
+  addr: 101.132.145.239:6379
+  password: m7ictwC7b0xnc3H8
   db: 1
 jwt:
-  secret: db_test
-  issuer: db_test
+  secret: Y1HH999gmSmGvVddzmhGhThiOEBQBPbj
+  issuer: http://student-2c-api.517rxt.test/v1/auth/login
   expire: 10
 cache:
   drive: redis

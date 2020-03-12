@@ -17,7 +17,7 @@ const (
 var name, env, version string
 
 func main() {
-	core.Construct(
+	core.Make(
 		core.DbRegister(),
 	).Init()
 	defer core.Close()

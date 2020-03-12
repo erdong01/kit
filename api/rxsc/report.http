@@ -1,0 +1,8 @@
+@host = {{schema}}://{{hostname}}:{{port}}/{{version}}
+
+### 展示
+# @name show
+GET {{host}}/report/show HTTP/1.1
+Content-Type: : {{type}}
+Accept: : {{type}}
+Authorization: Bearer {{token}}

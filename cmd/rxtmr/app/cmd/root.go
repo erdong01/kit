@@ -17,8 +17,8 @@ func New() *cobra.Command {
 	}
 
 	if env == "" {
-		c.PersistentFlags().StringVar(&name, "name", "", "app's name variable.")
-		c.PersistentFlags().StringVarP(&version, "version", "v", "", "app's version variable.")
+		c.PersistentFlags().StringVar(&name, "name", "", "handler's name variable.")
+		c.PersistentFlags().StringVarP(&version, "version", "v", "", "handler's version variable.")
 		c.PersistentFlags().StringVarP(&env, "env", "e", "local", "environment variable.")
 		c.PersistentFlags().StringVarP(&configFile, "config", "c", "", "config path.")
 

@@ -9,8 +9,8 @@ import (
 )
 
 // 全局初始化
-func GlobalInit() {
-	new(Register).ConfigRegister().
+func GlobalInit() *Register {
+	return new(Register).ConfigRegister().
 		RedisRegister().
 		DbRegister().
 		FacadeCacheRegister().

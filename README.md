@@ -79,7 +79,7 @@
     - 本机编译： `make build` 可在 `build/binay`目录下生成对应二进制文件（`todo`: 交叉编译配置）
 
     - 使用`Docker`: `make deploy`
-6. 后续工作
+6. 后续建议
 
     - `log`包支持 `ELK`驱动
     - 集成`Sentry`错误收集服务
