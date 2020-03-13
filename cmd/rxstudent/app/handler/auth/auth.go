@@ -10,10 +10,11 @@ import (
 // 用户登录
 func Login(context *gin.Context) {
 	var logicRequest *auth.LogicRequest
-	if err := context.Bind(&logicRequest); err != nil {
+	if err := context.BindJSON(&logicRequest); err != nil {
 		restful.Exception(context, err)
 		return
 	}
+	logicRequest.Ip=context.ClientIP()
 	res, err := authClient.New().Logic(logicRequest)
 	if err != nil {
 		restful.Exception(context, err)

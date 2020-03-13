@@ -12,5 +12,5 @@ func GetExpire() int {
 
 // 获取前缀
 func GetPrefix() string {
-	return "rxt"
+	return "api_517rxt_com"
 }

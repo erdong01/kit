@@ -2,7 +2,6 @@ package redis
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-redis/redis/v7"
 	"rxt/internal/cache/uitl"
 	"rxt/internal/db/redis/check"
@@ -18,7 +17,6 @@ func NewCache() *redisCache {
 	if coreReids := check.Connect(); coreReids != nil {
 		conn = coreReids
 	} else {
-		fmt.Println("11111")
 		conn = drive.New()
 	}
 	return &redisCache{

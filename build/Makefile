@@ -5,10 +5,10 @@ BINARY_PATH=$(ROOT)/build/binary
 # MAIN=$(ROOT)/main.go
 MAIN=$(ROOT)/cmd/$(NAME)/main.go
 
-PACKAGE_CMD=rxt/cmd/rxsc/app/cmd
+PACKAGE_CMD=rxt/cmd/$(NAME)/app/cmd
 
 VERSION=0.0.2
-NAME=rxsc
+NAME=rxstudent
 ENV=local
 
 # 本地运行

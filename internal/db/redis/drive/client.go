@@ -19,11 +19,10 @@ func New() *redis.Client {
 		Password: redisConfig.Password,
 		DB:       redisConfig.DB,
 	})
-	pong, err := Redis.Ping().Result()
+	_, err := Redis.Ping().Result()
 	if err != nil {
 		fmt.Printf("ping error[%s]\n", err.Error())
 		err_handler(err)
 	}
-	fmt.Printf("ping result: %s\n", pong)
 	return Redis
 }
