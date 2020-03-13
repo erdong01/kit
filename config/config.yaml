@@ -5,18 +5,18 @@ api_port:
   sc: 5001
   tmr: 5002
 mysql:
-  host: 101.132.145.239
-  port: 33057
-  user: api.rxt
-  password: a18@990Wll0C3
-  database: api.517rxt.com
+  host: 127.0.0.1
+  port: 3306
+  user: root
+  password: password
+  database: test
   parameters: false
   max_idle_conn: 40
   max_open_conn: 40
 redis:
-  addr: 101.132.145.239:6379
-  password: m7ictwC7b0xnc3H8
-  db: 1
+  addr: 127.0.0.1:6379
+  password: password
+  db: 0
 jwt:
   secret: Y1HH999gmSmGvVddzmhGhThiOEBQBPbj
   issuer: http://student-2c-api.517rxt.test/v1/auth/login

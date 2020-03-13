@@ -15,8 +15,8 @@ type RedisConfig struct {
 //reids默认配置
 func GetRedisConfig() *RedisConfig {
 	return &RedisConfig{
-		Addr:     "101.132.145.239:6379",
-		Password: "m7ictwC7b0xnc3H8",
+		Addr:     "127.0.0.1:6379",
+		Password: "",
 		DB:       1,
 	}
 }
@@ -52,11 +52,11 @@ type MySQL struct {
 
 func GetMySQL() *MySQL {
 	return &MySQL{
-		Host:        "101.132.145.239",
-		Port:        33057,
-		User:        "api.rxt",
-		Password:    "a18@990Wll0C3",
-		Database:    "api.517rxt.com",
+		Host:        "127.0.0.1",
+		Port:        3306,
+		User:        "root",
+		Password:    "123456",
+		Database:    "test",
 		Parameters:  "false",
 		MaxIdleConn: 40,
 		MaxOpenConn: 100,
@@ -67,12 +67,12 @@ func GetMySQL() *MySQL {
 // GetQiniu 获取七牛云配置
 func GetQiniu() qiniu.Config {
 	return qiniu.Config{
-		DomainDefault: "api-statics.renxuetang.com",
-		DomainHTTPS:   "api-statics.renxuetang.com",
+		DomainDefault: "api.qiniu.com",
+		DomainHTTPS:   "api-statics.qiniu.com",
 		AccessKey:     "X8rnYilA5bdpOeJl1w1vaLx9J7AmfaXGYBaMSKqB",
 		SecretKey:     "Dd8KGXY_hcVhq_6x8PFfPbJOB-ugyyn1paiTEYNh",
-		Bucket:        "api-renxuetang-com",
+		Bucket:        "api-com",
 		Access:        "public",
-		CachePath:     "rxedu_test/cache/",
+		CachePath:     "qiniu/cache/",
 	}
 }
