@@ -2,56 +2,11 @@ syntax = "proto3";
 package exam;
 
 message ExamRequest {
-    string exam_actual_time = 1;
-    int64 book_no = 2;
     string exam_name = 3;
-    string exam_time = 4;
-    int64 exam_answer_type = 5;
-    int64 company_no = 6;
-    int64 campus_no = 7;
-    int64 subject_id = 8;
-    int64 grade_id = 9;
-    int64 grade_children_id = 10;
-    int64 subject_parent_id = 11;
-    int64 is_review = 12;
-    int64 edition_no = 13;
-    int64 scoring_method = 14;
-    int64 exam_word_status = 15;
-    int64 exam_type_code = 16;
-    repeated Exam exam = 17;
-    Word word = 18;
-    int64 exam_level_type = 19;
-    int64 student_user_no = 20;
-    int64 sc_student_user_no = 21;
-}
-
-message Exam {
-    int64 question_type_id = 1;
-    int64 question_no = 2;
-    repeated ExamQuestionSmall exam_question_small = 3;
-
-}
-
-message ExamQuestionSmall {
-    int64 question_small_id = 1;
-    double exam_question_small_score = 2;
-    repeated string exam_question_small_answer = 3;
-
-    int64 question_small_answer_option_id = 4;
-
-}
-
-message Word {
-    string word_no = 1;
-    WordOption word_option = 2;
-}
-
-message WordOption {
-    string word_no = 1;
 }
 
 message ExamResponse {
-    int64 exam_no = 1;
+    string exam_no = 1;
 }
 service ExamService {
     rpc Submit (ExamRequest) returns (ExamResponse);

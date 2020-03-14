@@ -25,27 +25,7 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type ExamRequest struct {
-	ExamActualTime       string   `protobuf:"bytes,1,opt,name=exam_actual_time,json=examActualTime,proto3" json:"exam_actual_time,omitempty"`
-	BookNo               int64    `protobuf:"varint,2,opt,name=book_no,json=bookNo,proto3" json:"book_no,omitempty"`
 	ExamName             string   `protobuf:"bytes,3,opt,name=exam_name,json=examName,proto3" json:"exam_name,omitempty"`
-	ExamTime             string   `protobuf:"bytes,4,opt,name=exam_time,json=examTime,proto3" json:"exam_time,omitempty"`
-	ExamAnswerType       int64    `protobuf:"varint,5,opt,name=exam_answer_type,json=examAnswerType,proto3" json:"exam_answer_type,omitempty"`
-	CompanyNo            int64    `protobuf:"varint,6,opt,name=company_no,json=companyNo,proto3" json:"company_no,omitempty"`
-	CampusNo             int64    `protobuf:"varint,7,opt,name=campus_no,json=campusNo,proto3" json:"campus_no,omitempty"`
-	SubjectId            int64    `protobuf:"varint,8,opt,name=subject_id,json=subjectId,proto3" json:"subject_id,omitempty"`
-	GradeId              int64    `protobuf:"varint,9,opt,name=grade_id,json=gradeId,proto3" json:"grade_id,omitempty"`
-	GradeChildrenId      int64    `protobuf:"varint,10,opt,name=grade_children_id,json=gradeChildrenId,proto3" json:"grade_children_id,omitempty"`
-	SubjectParentId      int64    `protobuf:"varint,11,opt,name=subject_parent_id,json=subjectParentId,proto3" json:"subject_parent_id,omitempty"`
-	IsReview             int64    `protobuf:"varint,12,opt,name=is_review,json=isReview,proto3" json:"is_review,omitempty"`
-	EditionNo            int64    `protobuf:"varint,13,opt,name=edition_no,json=editionNo,proto3" json:"edition_no,omitempty"`
-	ScoringMethod        int64    `protobuf:"varint,14,opt,name=scoring_method,json=scoringMethod,proto3" json:"scoring_method,omitempty"`
-	ExamWordStatus       int64    `protobuf:"varint,15,opt,name=exam_word_status,json=examWordStatus,proto3" json:"exam_word_status,omitempty"`
-	ExamTypeCode         int64    `protobuf:"varint,16,opt,name=exam_type_code,json=examTypeCode,proto3" json:"exam_type_code,omitempty"`
-	Exam                 []*Exam  `protobuf:"bytes,17,rep,name=exam,proto3" json:"exam,omitempty"`
-	Word                 *Word    `protobuf:"bytes,18,opt,name=word,proto3" json:"word,omitempty"`
-	ExamLevelType        int64    `protobuf:"varint,19,opt,name=exam_level_type,json=examLevelType,proto3" json:"exam_level_type,omitempty"`
-	StudentUserNo        int64    `protobuf:"varint,20,opt,name=student_user_no,json=studentUserNo,proto3" json:"student_user_no,omitempty"`
-	ScStudentUserNo      int64    `protobuf:"varint,21,opt,name=sc_student_user_no,json=scStudentUserNo,proto3" json:"sc_student_user_no,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -76,20 +56,6 @@ func (m *ExamRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ExamRequest proto.InternalMessageInfo
 
-func (m *ExamRequest) GetExamActualTime() string {
-	if m != nil {
-		return m.ExamActualTime
-	}
-	return ""
-}
-
-func (m *ExamRequest) GetBookNo() int64 {
-	if m != nil {
-		return m.BookNo
-	}
-	return 0
-}
-
 func (m *ExamRequest) GetExamName() string {
 	if m != nil {
 		return m.ExamName
@@ -97,338 +63,8 @@ func (m *ExamRequest) GetExamName() string {
 	return ""
 }
 
-func (m *ExamRequest) GetExamTime() string {
-	if m != nil {
-		return m.ExamTime
-	}
-	return ""
-}
-
-func (m *ExamRequest) GetExamAnswerType() int64 {
-	if m != nil {
-		return m.ExamAnswerType
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetCompanyNo() int64 {
-	if m != nil {
-		return m.CompanyNo
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetCampusNo() int64 {
-	if m != nil {
-		return m.CampusNo
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetSubjectId() int64 {
-	if m != nil {
-		return m.SubjectId
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetGradeId() int64 {
-	if m != nil {
-		return m.GradeId
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetGradeChildrenId() int64 {
-	if m != nil {
-		return m.GradeChildrenId
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetSubjectParentId() int64 {
-	if m != nil {
-		return m.SubjectParentId
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetIsReview() int64 {
-	if m != nil {
-		return m.IsReview
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetEditionNo() int64 {
-	if m != nil {
-		return m.EditionNo
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetScoringMethod() int64 {
-	if m != nil {
-		return m.ScoringMethod
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetExamWordStatus() int64 {
-	if m != nil {
-		return m.ExamWordStatus
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetExamTypeCode() int64 {
-	if m != nil {
-		return m.ExamTypeCode
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetExam() []*Exam {
-	if m != nil {
-		return m.Exam
-	}
-	return nil
-}
-
-func (m *ExamRequest) GetWord() *Word {
-	if m != nil {
-		return m.Word
-	}
-	return nil
-}
-
-func (m *ExamRequest) GetExamLevelType() int64 {
-	if m != nil {
-		return m.ExamLevelType
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetStudentUserNo() int64 {
-	if m != nil {
-		return m.StudentUserNo
-	}
-	return 0
-}
-
-func (m *ExamRequest) GetScStudentUserNo() int64 {
-	if m != nil {
-		return m.ScStudentUserNo
-	}
-	return 0
-}
-
-type Exam struct {
-	QuestionTypeId       int64                `protobuf:"varint,1,opt,name=question_type_id,json=questionTypeId,proto3" json:"question_type_id,omitempty"`
-	QuestionNo           int64                `protobuf:"varint,2,opt,name=question_no,json=questionNo,proto3" json:"question_no,omitempty"`
-	ExamQuestionSmall    []*ExamQuestionSmall `protobuf:"bytes,3,rep,name=exam_question_small,json=examQuestionSmall,proto3" json:"exam_question_small,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
-	XXX_unrecognized     []byte               `json:"-"`
-	XXX_sizecache        int32                `json:"-"`
-}
-
-func (m *Exam) Reset()         { *m = Exam{} }
-func (m *Exam) String() string { return proto.CompactTextString(m) }
-func (*Exam) ProtoMessage()    {}
-func (*Exam) Descriptor() ([]byte, []int) {
-	return fileDescriptor_70e600da0d9a195d, []int{1}
-}
-
-func (m *Exam) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Exam.Unmarshal(m, b)
-}
-func (m *Exam) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Exam.Marshal(b, m, deterministic)
-}
-func (m *Exam) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Exam.Merge(m, src)
-}
-func (m *Exam) XXX_Size() int {
-	return xxx_messageInfo_Exam.Size(m)
-}
-func (m *Exam) XXX_DiscardUnknown() {
-	xxx_messageInfo_Exam.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Exam proto.InternalMessageInfo
-
-func (m *Exam) GetQuestionTypeId() int64 {
-	if m != nil {
-		return m.QuestionTypeId
-	}
-	return 0
-}
-
-func (m *Exam) GetQuestionNo() int64 {
-	if m != nil {
-		return m.QuestionNo
-	}
-	return 0
-}
-
-func (m *Exam) GetExamQuestionSmall() []*ExamQuestionSmall {
-	if m != nil {
-		return m.ExamQuestionSmall
-	}
-	return nil
-}
-
-type ExamQuestionSmall struct {
-	QuestionSmallId             int64    `protobuf:"varint,1,opt,name=question_small_id,json=questionSmallId,proto3" json:"question_small_id,omitempty"`
-	ExamQuestionSmallScore      float64  `protobuf:"fixed64,2,opt,name=exam_question_small_score,json=examQuestionSmallScore,proto3" json:"exam_question_small_score,omitempty"`
-	ExamQuestionSmallAnswer     []string `protobuf:"bytes,3,rep,name=exam_question_small_answer,json=examQuestionSmallAnswer,proto3" json:"exam_question_small_answer,omitempty"`
-	QuestionSmallAnswerOptionId int64    `protobuf:"varint,4,opt,name=question_small_answer_option_id,json=questionSmallAnswerOptionId,proto3" json:"question_small_answer_option_id,omitempty"`
-	XXX_NoUnkeyedLiteral        struct{} `json:"-"`
-	XXX_unrecognized            []byte   `json:"-"`
-	XXX_sizecache               int32    `json:"-"`
-}
-
-func (m *ExamQuestionSmall) Reset()         { *m = ExamQuestionSmall{} }
-func (m *ExamQuestionSmall) String() string { return proto.CompactTextString(m) }
-func (*ExamQuestionSmall) ProtoMessage()    {}
-func (*ExamQuestionSmall) Descriptor() ([]byte, []int) {
-	return fileDescriptor_70e600da0d9a195d, []int{2}
-}
-
-func (m *ExamQuestionSmall) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ExamQuestionSmall.Unmarshal(m, b)
-}
-func (m *ExamQuestionSmall) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ExamQuestionSmall.Marshal(b, m, deterministic)
-}
-func (m *ExamQuestionSmall) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ExamQuestionSmall.Merge(m, src)
-}
-func (m *ExamQuestionSmall) XXX_Size() int {
-	return xxx_messageInfo_ExamQuestionSmall.Size(m)
-}
-func (m *ExamQuestionSmall) XXX_DiscardUnknown() {
-	xxx_messageInfo_ExamQuestionSmall.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ExamQuestionSmall proto.InternalMessageInfo
-
-func (m *ExamQuestionSmall) GetQuestionSmallId() int64 {
-	if m != nil {
-		return m.QuestionSmallId
-	}
-	return 0
-}
-
-func (m *ExamQuestionSmall) GetExamQuestionSmallScore() float64 {
-	if m != nil {
-		return m.ExamQuestionSmallScore
-	}
-	return 0
-}
-
-func (m *ExamQuestionSmall) GetExamQuestionSmallAnswer() []string {
-	if m != nil {
-		return m.ExamQuestionSmallAnswer
-	}
-	return nil
-}
-
-func (m *ExamQuestionSmall) GetQuestionSmallAnswerOptionId() int64 {
-	if m != nil {
-		return m.QuestionSmallAnswerOptionId
-	}
-	return 0
-}
-
-type Word struct {
-	WordNo               string      `protobuf:"bytes,1,opt,name=word_no,json=wordNo,proto3" json:"word_no,omitempty"`
-	WordOption           *WordOption `protobuf:"bytes,2,opt,name=word_option,json=wordOption,proto3" json:"word_option,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
-}
-
-func (m *Word) Reset()         { *m = Word{} }
-func (m *Word) String() string { return proto.CompactTextString(m) }
-func (*Word) ProtoMessage()    {}
-func (*Word) Descriptor() ([]byte, []int) {
-	return fileDescriptor_70e600da0d9a195d, []int{3}
-}
-
-func (m *Word) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Word.Unmarshal(m, b)
-}
-func (m *Word) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Word.Marshal(b, m, deterministic)
-}
-func (m *Word) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Word.Merge(m, src)
-}
-func (m *Word) XXX_Size() int {
-	return xxx_messageInfo_Word.Size(m)
-}
-func (m *Word) XXX_DiscardUnknown() {
-	xxx_messageInfo_Word.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Word proto.InternalMessageInfo
-
-func (m *Word) GetWordNo() string {
-	if m != nil {
-		return m.WordNo
-	}
-	return ""
-}
-
-func (m *Word) GetWordOption() *WordOption {
-	if m != nil {
-		return m.WordOption
-	}
-	return nil
-}
-
-type WordOption struct {
-	WordNo               string   `protobuf:"bytes,1,opt,name=word_no,json=wordNo,proto3" json:"word_no,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *WordOption) Reset()         { *m = WordOption{} }
-func (m *WordOption) String() string { return proto.CompactTextString(m) }
-func (*WordOption) ProtoMessage()    {}
-func (*WordOption) Descriptor() ([]byte, []int) {
-	return fileDescriptor_70e600da0d9a195d, []int{4}
-}
-
-func (m *WordOption) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_WordOption.Unmarshal(m, b)
-}
-func (m *WordOption) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_WordOption.Marshal(b, m, deterministic)
-}
-func (m *WordOption) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_WordOption.Merge(m, src)
-}
-func (m *WordOption) XXX_Size() int {
-	return xxx_messageInfo_WordOption.Size(m)
-}
-func (m *WordOption) XXX_DiscardUnknown() {
-	xxx_messageInfo_WordOption.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_WordOption proto.InternalMessageInfo
-
-func (m *WordOption) GetWordNo() string {
-	if m != nil {
-		return m.WordNo
-	}
-	return ""
-}
-
 type ExamResponse struct {
-	ExamNo               int64    `protobuf:"varint,1,opt,name=exam_no,json=examNo,proto3" json:"exam_no,omitempty"`
+	ExamNo               string   `protobuf:"bytes,1,opt,name=exam_no,json=examNo,proto3" json:"exam_no,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -438,7 +74,7 @@ func (m *ExamResponse) Reset()         { *m = ExamResponse{} }
 func (m *ExamResponse) String() string { return proto.CompactTextString(m) }
 func (*ExamResponse) ProtoMessage()    {}
 func (*ExamResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_70e600da0d9a195d, []int{5}
+	return fileDescriptor_70e600da0d9a195d, []int{1}
 }
 
 func (m *ExamResponse) XXX_Unmarshal(b []byte) error {
@@ -459,79 +95,41 @@ func (m *ExamResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ExamResponse proto.InternalMessageInfo
 
-func (m *ExamResponse) GetExamNo() int64 {
+func (m *ExamResponse) GetExamNo() string {
 	if m != nil {
 		return m.ExamNo
 	}
-	return 0
+	return ""
 }
 
 func init() {
 	proto.RegisterType((*ExamRequest)(nil), "exam.ExamRequest")
-	proto.RegisterType((*Exam)(nil), "exam.Exam")
-	proto.RegisterType((*ExamQuestionSmall)(nil), "exam.ExamQuestionSmall")
-	proto.RegisterType((*Word)(nil), "exam.Word")
-	proto.RegisterType((*WordOption)(nil), "exam.WordOption")
 	proto.RegisterType((*ExamResponse)(nil), "exam.ExamResponse")
 }
 
 func init() { proto.RegisterFile("exam.proto", fileDescriptor_70e600da0d9a195d) }
 
 var fileDescriptor_70e600da0d9a195d = []byte{
-	// 694 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x54, 0xdd, 0x6e, 0xd3, 0x4c,
-	0x10, 0x55, 0xbe, 0xa4, 0x69, 0x32, 0x69, 0x93, 0x66, 0xfb, 0x41, 0xdd, 0x56, 0xd0, 0x28, 0xa2,
-	0x25, 0x02, 0xa9, 0x88, 0x72, 0x85, 0x90, 0x90, 0x50, 0x41, 0x28, 0x12, 0x18, 0x70, 0x8a, 0xb8,
-	0xb4, 0x1c, 0xef, 0xa8, 0x5d, 0x88, 0xbd, 0xae, 0xd7, 0x6e, 0x9a, 0x57, 0xe1, 0x31, 0xb9, 0x47,
-	0x42, 0x33, 0xeb, 0xda, 0xa1, 0x29, 0x77, 0xbb, 0xe7, 0x9c, 0xf9, 0xdd, 0xd9, 0x01, 0xc0, 0xeb,
-	0x20, 0x3a, 0x4e, 0x52, 0x9d, 0x69, 0xd1, 0xa0, 0xf3, 0xf0, 0xd7, 0x1a, 0x74, 0xde, 0x5d, 0x07,
-	0x91, 0x87, 0x97, 0x39, 0x9a, 0x4c, 0x8c, 0x60, 0x8b, 0x70, 0x3f, 0x08, 0xb3, 0x3c, 0x98, 0xf9,
-	0x99, 0x8a, 0xd0, 0xa9, 0x0d, 0x6a, 0xa3, 0xb6, 0xd7, 0x25, 0xfc, 0x0d, 0xc3, 0x67, 0x2a, 0x42,
-	0xb1, 0x03, 0xeb, 0x53, 0xad, 0x7f, 0xf8, 0xb1, 0x76, 0xfe, 0x1b, 0xd4, 0x46, 0x75, 0xaf, 0x49,
-	0x57, 0x57, 0x8b, 0x7d, 0x68, 0xb3, 0x8b, 0x38, 0x88, 0xd0, 0xa9, 0xb3, 0x6d, 0x8b, 0x00, 0x37,
-	0x88, 0xb0, 0x24, 0xd9, 0x71, 0xa3, 0x22, 0xd9, 0x65, 0x19, 0x3c, 0x36, 0x73, 0x4c, 0xfd, 0x6c,
-	0x91, 0xa0, 0xb3, 0xc6, 0xbe, 0x6d, 0x70, 0x86, 0xcf, 0x16, 0x09, 0x8a, 0x07, 0x00, 0xa1, 0x8e,
-	0x92, 0x20, 0x5e, 0x50, 0xfc, 0x26, 0x6b, 0xda, 0x05, 0x62, 0x53, 0x08, 0x83, 0x28, 0xc9, 0x0d,
-	0xb1, 0xeb, 0xcc, 0xb6, 0x2c, 0xe0, 0x6a, 0xb2, 0x35, 0xf9, 0xf4, 0x3b, 0x86, 0x99, 0xaf, 0xa4,
-	0xd3, 0xb2, 0xb6, 0x05, 0x32, 0x96, 0x62, 0x17, 0x5a, 0xe7, 0x69, 0x20, 0x91, 0xc8, 0x36, 0x93,
-	0xeb, 0x7c, 0x1f, 0x4b, 0xf1, 0x04, 0xfa, 0x96, 0x0a, 0x2f, 0xd4, 0x4c, 0xa6, 0x18, 0x93, 0x06,
-	0x58, 0xd3, 0x63, 0xe2, 0xb4, 0xc0, 0xad, 0xf6, 0x26, 0x4a, 0x12, 0xa4, 0x18, 0x73, 0xb0, 0x8e,
-	0xd5, 0x16, 0xc4, 0x67, 0xc6, 0xc7, 0x92, 0xd2, 0x55, 0xc6, 0x4f, 0xf1, 0x4a, 0xe1, 0xdc, 0xd9,
-	0xb0, 0xe9, 0x2a, 0xe3, 0xf1, 0x9d, 0xd2, 0x45, 0xa9, 0x32, 0xa5, 0x63, 0x2a, 0x66, 0xd3, 0xa6,
-	0x5b, 0x20, 0xae, 0x16, 0x87, 0xd0, 0x35, 0xa1, 0x4e, 0x55, 0x7c, 0xee, 0x47, 0x98, 0x5d, 0x68,
-	0xe9, 0x74, 0x59, 0xb2, 0x59, 0xa0, 0x1f, 0x19, 0x2c, 0x5b, 0x3b, 0xd7, 0xa9, 0xf4, 0x4d, 0x16,
-	0x64, 0xb9, 0x71, 0x7a, 0x55, 0x6b, 0xbf, 0xe9, 0x54, 0x4e, 0x18, 0x15, 0x8f, 0xa0, 0x6b, 0x5f,
-	0x68, 0x91, 0xa0, 0x1f, 0x6a, 0x89, 0xce, 0x16, 0xeb, 0x36, 0xf8, 0x99, 0x16, 0x09, 0x9e, 0x6a,
-	0x89, 0xe2, 0x21, 0xf0, 0xfc, 0x38, 0xfd, 0x41, 0x7d, 0xd4, 0x39, 0x81, 0x63, 0x1e, 0x2c, 0x1e,
-	0x24, 0xc6, 0x89, 0xa7, 0x50, 0x8e, 0x18, 0xd4, 0x2a, 0x9e, 0xa2, 0x78, 0x8c, 0x8b, 0x23, 0xe8,
-	0x71, 0x94, 0x19, 0x5e, 0xe1, 0xcc, 0xbe, 0xf4, 0xb6, 0xcd, 0x9b, 0xe0, 0x0f, 0x84, 0xf2, 0x43,
-	0x1f, 0x41, 0xcf, 0x64, 0xb9, 0xa4, 0xfe, 0xe5, 0x06, 0x53, 0x6a, 0xc1, 0xff, 0x45, 0x7d, 0x16,
-	0xfe, 0x6a, 0x30, 0x75, 0xb5, 0x78, 0x0a, 0xc2, 0x84, 0xfe, 0x6d, 0xe9, 0xbd, 0xa2, 0xdf, 0xe1,
-	0x64, 0x59, 0x3c, 0xfc, 0x59, 0x83, 0x06, 0xe5, 0x4a, 0x5d, 0xe1, 0xb1, 0xa7, 0xe6, 0x72, 0xbd,
-	0x4a, 0xf2, 0xb4, 0xd7, 0xbd, 0xee, 0x0d, 0x4e, 0x59, 0x8c, 0xa5, 0x38, 0x80, 0x4e, 0xa9, 0x2c,
-	0x27, 0x1e, 0x6e, 0x20, 0x57, 0x8b, 0xf7, 0xb0, 0xcd, 0x05, 0x95, 0x2a, 0x13, 0x05, 0xb3, 0x99,
-	0x53, 0xe7, 0xfe, 0xec, 0x54, 0xfd, 0xf9, 0x52, 0xf0, 0x13, 0xa2, 0xbd, 0x3e, 0xde, 0x86, 0x86,
-	0xbf, 0x6b, 0xd0, 0x5f, 0x11, 0xd2, 0x38, 0xfd, 0xed, 0xb9, 0x4a, 0xb5, 0x77, 0xb9, 0xac, 0x1c,
-	0x4b, 0xf1, 0x12, 0x76, 0xef, 0x48, 0xc5, 0xa7, 0x81, 0x40, 0xce, 0xbc, 0xe6, 0xdd, 0x5f, 0x89,
-	0x3b, 0x21, 0x56, 0xbc, 0x82, 0xbd, 0xbb, 0x4c, 0xed, 0x87, 0xe4, 0x62, 0xda, 0xde, 0xce, 0x8a,
-	0xad, 0xfd, 0x98, 0xe2, 0x2d, 0x1c, 0xdc, 0x69, 0xe7, 0xeb, 0x84, 0x31, 0x25, 0xf9, 0xc7, 0xd7,
-	0xbd, 0xfd, 0xcb, 0x55, 0xeb, 0x4f, 0xac, 0x19, 0xcb, 0xa1, 0x07, 0x0d, 0x9a, 0x13, 0xda, 0x2f,
-	0x3c, 0xac, 0xb1, 0x2e, 0x16, 0x50, 0x93, 0xae, 0xae, 0x16, 0xcf, 0xa1, 0xc3, 0x84, 0xf5, 0xca,
-	0x05, 0x75, 0x4e, 0xb6, 0xaa, 0x09, 0xb3, 0x9e, 0x3c, 0x98, 0x97, 0xe7, 0xe1, 0x21, 0x40, 0xc5,
-	0xfc, 0xd3, 0xf3, 0xf0, 0x31, 0x6c, 0xd8, 0x5d, 0x68, 0x12, 0x1d, 0x1b, 0x5e, 0x71, 0x76, 0x93,
-	0xe9, 0xa2, 0xd5, 0x4d, 0xde, 0x63, 0xfa, 0xe4, 0xb5, 0x5d, 0x9a, 0x13, 0x4c, 0xaf, 0x54, 0x88,
-	0xe2, 0x19, 0x34, 0x27, 0xf9, 0x34, 0x52, 0x99, 0xe8, 0x2f, 0x7d, 0x04, 0xbb, 0x51, 0xf7, 0xc4,
-	0x32, 0x64, 0x1d, 0x4f, 0x9b, 0xbc, 0x82, 0x5f, 0xfc, 0x09, 0x00, 0x00, 0xff, 0xff, 0xf7, 0x6f,
-	0x3d, 0x9d, 0x90, 0x05, 0x00, 0x00,
+	// 147 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4a, 0xad, 0x48, 0xcc,
+	0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x01, 0xb1, 0x95, 0xb4, 0xb8, 0xb8, 0x5d, 0x2b,
+	0x12, 0x73, 0x83, 0x52, 0x0b, 0x4b, 0x53, 0x8b, 0x4b, 0x84, 0xa4, 0xb9, 0x38, 0x41, 0xc2, 0xf1,
+	0x79, 0x89, 0xb9, 0xa9, 0x12, 0xcc, 0x0a, 0x8c, 0x1a, 0x9c, 0x41, 0x1c, 0x20, 0x01, 0xbf, 0xc4,
+	0xdc, 0x54, 0x25, 0x75, 0x2e, 0x1e, 0x88, 0xda, 0xe2, 0x82, 0xfc, 0xbc, 0xe2, 0x54, 0x21, 0x71,
+	0x2e, 0x76, 0x88, 0xe2, 0x7c, 0x09, 0x46, 0xb0, 0x52, 0x36, 0xb0, 0xd2, 0x7c, 0x23, 0x3b, 0x88,
+	0xa1, 0xc1, 0xa9, 0x45, 0x65, 0x99, 0xc9, 0xa9, 0x42, 0xfa, 0x5c, 0x6c, 0xc1, 0xa5, 0x49, 0xb9,
+	0x99, 0x25, 0x42, 0x82, 0x7a, 0x60, 0x07, 0x20, 0xd9, 0x28, 0x25, 0x84, 0x2c, 0x04, 0x31, 0x38,
+	0x89, 0x0d, 0xec, 0x42, 0x63, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0xc5, 0x60, 0xee, 0x7f, 0xaf,
+	0x00, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // ExamServiceClient is the client API for ExamService service.
 //
@@ -541,10 +139,10 @@ type ExamServiceClient interface {
 }
 
 type examServiceClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewExamServiceClient(cc *grpc.ClientConn) ExamServiceClient {
+func NewExamServiceClient(cc grpc.ClientConnInterface) ExamServiceClient {
 	return &examServiceClient{cc}
 }
 

@@ -2,7 +2,6 @@ package exam
 
 import (
 	"github.com/gin-gonic/gin"
-	auth "rxt/cmd/auth/proto/sc"
 	exam "rxt/cmd/exam/proto/sc"
 	"rxt/internal/http/restful"
 	"rxt/rpc/client/sc/examClient"
@@ -10,9 +9,7 @@ import (
 
 // Submit 提交阅卷
 func Submit(c *gin.Context) {
-	user, _ := c.Get("auth")
 	var examRequest *exam.ExamRequest
-	examRequest.ScStudentUserNo = user.(*auth.UserResponse).StudentUserNo
 	if err := c.Bind(&examRequest); err != nil {
 		restful.Exception(c, err)
 		return

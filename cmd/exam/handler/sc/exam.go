@@ -10,26 +10,16 @@ import (
 type Server struct {
 }
 
+// 提交
 func (s Server) Submit(ctx context.Context, request *exam.ExamRequest) (*exam.ExamResponse, error) {
 	var res exam.ExamResponse
 	core := core.GlobalTransaction()
 	examService := examService.New(core)
-	param, err := examService.Submit(request)
+	result, err := examService.Submit(request)
 	if err != nil {
 		core.Transaction.Rollback()
 		return &res, err
 	}
-	reportErr := examService.ReportCreate(param)
-	if reportErr != nil {
-		core.Transaction.Rollback()
-		return &res, err
-	}
-	CreateScExamStudentErr := examService.CreateScExamStudent(param.ExamNo, request.ScStudentUserNo, request.BookNo)
-	if CreateScExamStudentErr != nil {
-		core.Transaction.Rollback()
-		return &res, err
-	}
-	core.Transaction.Commit()
-	res.ExamNo = param.ExamNo
+	res.ExamNo = result
 	return &res, nil
 }

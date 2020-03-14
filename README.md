@@ -1,6 +1,9 @@
 ### Golang
+架构图：
 
-![Image text](20200117103124.png)
+https://www.processon.com/view/link/5b8f1968e4b06fc64ae4949f
+
+https://www.processon.com/view/link/5d65f54de4b09965fad3d701
 
 1. 项目目录介绍
 
@@ -8,7 +11,8 @@
         - `/binary` **编译后的二进制包目录**
         - `Dockerfile` **Docker 镜像构建文件**
         - `Makefile` **自定义命令文件**
-    - `/cmd` **项目目录**
+    - `/cmd` **项目服务目录**
+        - `artisan` **命令中心**
         - `auth` **鉴权服务项目根目录**
         - `rxsc` **学生端 http 网关服务根目录**
         - `...`
@@ -79,9 +83,3 @@
     - 本机编译： `make build` 可在 `build/binay`目录下生成对应二进制文件（`todo`: 交叉编译配置）
 
     - 使用`Docker`: `make deploy`
-6. 后续建议
-
-    - `log`包支持 `ELK`驱动
-    - 集成`Sentry`错误收集服务
-    - 配置 `Drone`执行`CI/CD`流程
-    - 集成 `Zipkin`全链路信息收集

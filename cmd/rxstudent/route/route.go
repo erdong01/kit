@@ -14,7 +14,6 @@ func Init(g *gin.Engine) *gin.Engine {
 
 	// examGroup(g.Group("/v1", middleware.Auth))
 	uploadGroup(g.Group("/v1", middleware.Auth))
-	examGroup(g.Group("/v1"))
 
 	return g
 }
