@@ -24,6 +24,9 @@ var fileConfig = map[string]interface{}{
 type IUpload interface {
 	GetUploadToken(path string, expire uint64) (string, error)
 	Upload(file string) error
+	GetDomain() string
+	GetMimeType() []string
+	GetMaxSize() int64
 }
 
 // Upload 上传文件

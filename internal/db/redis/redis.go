@@ -75,5 +75,6 @@ func (r *redisCache) GetBytes(key string) ([]byte, error) {
 }
 
 func (r *redisCache) Del(key string) error {
+	key = uitl.PrefixKey(key)
 	return r.Conn.Del(key).Err()
 }

@@ -55,6 +55,21 @@ func (q *Qiniu) GetUploadToken(path string, expire uint64) (string, error) {
 	return upToken, nil
 }
 
+// GetDomain 获取访问域
+func (q *Qiniu) GetDomain() string {
+	return q.conf.DomainDefault
+}
+
+// GetMimeType 获取访问域
+func (q *Qiniu) GetMimeType() []string {
+	return q.conf.MimeType
+}
+
+// GetMaxSize 获取访问域
+func (q *Qiniu) GetMaxSize() int64 {
+	return q.conf.MaxSize
+}
+
 // New 返回七牛实例
 func New(conf Config) *Qiniu {
 	return &Qiniu{

@@ -2,9 +2,11 @@ package jwt
 
 import (
 	"errors"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"rxt/internal/config"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -15,6 +17,7 @@ type I interface {
 
 type Claims struct {
 	jwt.StandardClaims
+	Prv string `json:"prv,omitempty"`
 }
 
 // 生产token
@@ -25,13 +28,17 @@ func GenerateToken(user User) (string, error) {
 	nowTime = time.Now()
 	a := time.Duration(jwtCnf.Expire) * time.Hour
 	expireTime := nowTime.Add(a)
-	claims := jwt.MapClaims{
-		"exp": expireTime.Unix(),
-		"iss": jwtCnf.Issuer,
-		"sub": user.Sub,
-		"iat": nowTime.Unix(),
-		"nbf": nowTime.Unix(),
-		"prv": Sha1Encode(user.Prv),
+	SubStr := strconv.FormatInt(user.Sub, 10)
+
+	claims := Claims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expireTime.Unix(),
+			Issuer:    jwtCnf.Issuer,
+			Subject:   SubStr,
+			IssuedAt:  nowTime.Unix(),
+			NotBefore: nowTime.Unix(),
+		},
+		Prv: Sha1Encode(user.Prv),
 	}
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := tokenClaims.SignedString([]byte(jwtCnf.Secret))
@@ -39,20 +46,27 @@ func GenerateToken(user User) (string, error) {
 }
 
 // 验证token
-func ValidateToken(signedToken string) (claims jwt.MapClaims, err error) {
+func ValidateToken(signedToken string) (claims Claims, err error) {
+	jwtCnf := config.GetJwtCnf()
+	jwt.ParseWithClaims(signedToken, &claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(jwtCnf.Secret), nil
+	})
 	token, err := jwt.Parse(signedToken, secret())
 	if err != nil {
-		err = errors.New("cannot convert claim to mapclaim")
-		return
-	}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
 		err = errors.New("cannot convert claim to mapclaim")
 		return
 	}
 	//验证token，如果token被修改过则为false
 	if !token.Valid {
 		err = errors.New("token is invalid")
+		return
+	}
+	fmt.Println(claims.ExpiresAt, time.Now().Unix())
+	if claims.ExpiresAt < time.Now().Unix() {
+		err = errors.New("token已过期")
 		return
 	}
 	return claims, nil
