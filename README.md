@@ -1,11 +1,14 @@
-### Golang
+### Golang 服务组件
+
+安装:go get  github.com/erDong01/micro-kit
+
 架构图：
 
 https://www.processon.com/view/link/5b8f1968e4b06fc64ae4949f
 
 https://www.processon.com/view/link/5d65f54de4b09965fad3d701
 
-1. 项目目录介绍
+#### 1. 目录介绍
 
     - `/build` **项目构建相关文件目录**
         - `/binary` **编译后的二进制包目录**
@@ -23,6 +26,7 @@ https://www.processon.com/view/link/5d65f54de4b09965fad3d701
         - `cache` **缓存模块封装**
         - `config` **读写配置模块封装**
         - `core` **无状态组件封装**
+        - `kit` **go kit封装**
         - `db` **数据库封装**
             - `mysql` **GROM封装**
             - `redis` **Redis客户端封装**
