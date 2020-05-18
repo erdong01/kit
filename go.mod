@@ -1,4 +1,4 @@
-module rxt
+module github.com/erDong01/micro-kit
 
 go 1.13
 
