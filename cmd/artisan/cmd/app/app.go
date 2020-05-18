@@ -2,8 +2,8 @@ package app
 
 import (
 	"github.com/spf13/cobra"
-	"rxt/cmd/artisan/cmd/I"
-	"rxt/cmd/artisan/http"
+	"github.com/erDong01/micro-kit/cmd/artisan/cmd/I"
+	"github.com/erDong01/micro-kit/cmd/artisan/http"
 )
 
 func New() I.ICommand {

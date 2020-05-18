@@ -1,8 +1,8 @@
 package questionDao
 
 import (
-	"rxt/cmd/exam/model"
-	"rxt/internal/core"
+	"github.com/erDong01/micro-kit/cmd/exam/model"
+	"github.com/erDong01/micro-kit/internal/core"
 )
 
 type Question struct {

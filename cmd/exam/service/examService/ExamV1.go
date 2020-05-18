@@ -1,9 +1,9 @@
 package examService
 
 import (
-	"rxt/cmd/exam/logic/aiLogic"
-	exam "rxt/cmd/exam/proto/sc"
-	"rxt/cmd/exam/service/baseService"
+	"github.com/erDong01/micro-kit/cmd/exam/logic/aiLogic"
+	exam "github.com/erDong01/micro-kit/cmd/exam/proto/sc"
+	"github.com/erDong01/micro-kit/cmd/exam/service/baseService"
 )
 
 type V1 struct {

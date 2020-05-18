@@ -3,8 +3,8 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"rxt/cmd/artisan/cmd/I"
-	"rxt/internal/log"
+	"github.com/erDong01/micro-kit/cmd/artisan/cmd/I"
+	"github.com/erDong01/micro-kit/internal/log"
 )
 
 var env, version, name, configFile string

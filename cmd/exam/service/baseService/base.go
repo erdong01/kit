@@ -1,7 +1,7 @@
 package baseService
 
 import (
-	"rxt/internal/core"
+	"github.com/erDong01/micro-kit/internal/core"
 )
 
 type Service struct {

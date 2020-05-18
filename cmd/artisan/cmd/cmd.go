@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"rxt/cmd/artisan/cmd/I"
-	"rxt/cmd/artisan/cmd/app"
+	"github.com/erDong01/micro-kit/cmd/artisan/cmd/I"
+	"github.com/erDong01/micro-kit/cmd/artisan/cmd/app"
 )
 
 func NewApiCommand() I.ICommand {

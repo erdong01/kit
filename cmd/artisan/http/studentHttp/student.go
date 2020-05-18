@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"rxt/cmd/artisan/http/errGroup"
-	student "rxt/cmd/rxstudent/bootstrap"
-	"rxt/cmd/rxstudent/route"
-	"rxt/internal/core"
+	"github.com/erDong01/micro-kit/cmd/artisan/http/errGroup"
+	student "github.com/erDong01/micro-kit/cmd/rxstudent/bootstrap"
+	"github.com/erDong01/micro-kit/cmd/rxstudent/route"
+	"github.com/erDong01/micro-kit/internal/core"
 	"time"
 )
 

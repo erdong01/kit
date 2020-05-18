@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"rxt/cmd/artisan/cmd"
+	"github.com/erDong01/micro-kit/cmd/artisan/cmd"
 )
 
 func main() {

@@ -2,9 +2,9 @@ package sc
 
 import (
 	"context"
-	exam "rxt/cmd/exam/proto/sc"
-	"rxt/cmd/exam/service/examService"
-	"rxt/internal/core"
+	exam "github.com/erDong01/micro-kit/cmd/exam/proto/sc"
+	"github.com/erDong01/micro-kit/cmd/exam/service/examService"
+	"github.com/erDong01/micro-kit/internal/core"
 )
 
 type Server struct {

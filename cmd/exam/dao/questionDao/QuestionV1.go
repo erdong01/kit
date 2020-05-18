@@ -2,8 +2,8 @@ package questionDao
 
 import (
 	"github.com/jinzhu/gorm"
-	"rxt/cmd/exam/dao/base"
-	"rxt/cmd/exam/model"
+	"github.com/erDong01/micro-kit/cmd/exam/dao/base"
+	"github.com/erDong01/micro-kit/cmd/exam/model"
 )
 
 type V1 struct {

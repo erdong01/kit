@@ -4,11 +4,11 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"rxt/cmd/artisan/http/errGroup"
-	"rxt/cmd/artisan/http/scHttp"
-	"rxt/cmd/artisan/http/studentHttp"
-	"rxt/cmd/artisan/http/tmrHttp"
-	"rxt/internal/log"
+	"github.com/erDong01/micro-kit/cmd/artisan/http/errGroup"
+	"github.com/erDong01/micro-kit/cmd/artisan/http/scHttp"
+	"github.com/erDong01/micro-kit/cmd/artisan/http/studentHttp"
+	"github.com/erDong01/micro-kit/cmd/artisan/http/tmrHttp"
+	"github.com/erDong01/micro-kit/internal/log"
 	"time"
 )
 

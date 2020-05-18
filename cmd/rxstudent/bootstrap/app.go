@@ -1,7 +1,7 @@
 package bootstrap
 
 import (
-	"rxt/internal/core/register"
+	"github.com/erDong01/micro-kit/internal/core/register"
 )
 
 func App() *register.Register {
