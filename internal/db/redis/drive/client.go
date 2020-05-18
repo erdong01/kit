@@ -3,7 +3,7 @@ package drive
 import (
 	"fmt"
 	"github.com/go-redis/redis/v7"
-	"github.com/erDong01/gin-kit/internal/config"
+	"github.com/erDong01/micro-kit/internal/config"
 )
 
 func err_handler(err error) {

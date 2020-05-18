@@ -4,10 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	rds "github.com/go-redis/redis/v7"
 	"github.com/jinzhu/gorm"
-	"github.com/erDong01/gin-kit/internal/config"
+	"github.com/erDong01/micro-kit/internal/config"
 	drive2 "rxt/internal/db/mysql/drive"
-	"github.com/erDong01/gin-kit/internal/db/redis/drive"
-	"github.com/erDong01/gin-kit/internal/http"
+	"github.com/erDong01/micro-kit/internal/db/redis/drive"
+	"github.com/erDong01/micro-kit/internal/http"
 )
 
 // ICore 服务核心接口

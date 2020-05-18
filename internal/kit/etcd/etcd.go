@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-kit/kit/sd/etcdv3"
-	"github.com/erDong01/gin-kit/internal/config"
+	"github.com/erDong01/micro-kit/internal/config"
 	"time"
 )
 

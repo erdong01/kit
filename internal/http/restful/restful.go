@@ -2,8 +2,8 @@ package restful
 
 import (
 	"net/http"
-	"github.com/erDong01/gin-kit/internal/log"
-	"github.com/erDong01/gin-kit/internal/wrong"
+	"github.com/erDong01/micro-kit/internal/log"
+	"github.com/erDong01/micro-kit/internal/wrong"
 	"github.com/gin-gonic/gin"
 )
 

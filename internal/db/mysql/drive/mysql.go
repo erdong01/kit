@@ -5,8 +5,8 @@ import (
 
 	"fmt"
 	"github.com/jinzhu/gorm"
-	"github.com/erDong01/gin-kit/internal/config"
-	"github.com/erDong01/gin-kit/internal/log"
+	"github.com/erDong01/micro-kit/internal/config"
+	"github.com/erDong01/micro-kit/internal/log"
 )
 
 // New 初始化数据库

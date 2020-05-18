@@ -2,7 +2,7 @@ package check
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/erDong01/gin-kit/internal/core"
+	"github.com/erDong01/micro-kit/internal/core"
 )
 
 func Connect() *gorm.DB {

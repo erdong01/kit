@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/erDong01/gin-kit/internal/core"
+	"github.com/erDong01/micro-kit/internal/core"
 )
 
 func Db() *gorm.DB {

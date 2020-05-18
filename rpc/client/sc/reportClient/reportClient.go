@@ -1,9 +1,9 @@
 package reportClient
 
 import (
-	"github.com/erDong01/gin-kit/cmd/report/handler"
-	"github.com/erDong01/gin-kit/cmd/report/proto/report"
-	"github.com/erDong01/gin-kit/internal/api"
+	"github.com/erDong01/micro-kit/cmd/report/handler"
+	"github.com/erDong01/micro-kit/cmd/report/proto/report"
+	"github.com/erDong01/micro-kit/internal/api"
 )
 
 type Client struct {

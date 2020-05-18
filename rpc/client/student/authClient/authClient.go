@@ -1,9 +1,9 @@
 package authClient
 
 import (
-	"github.com/erDong01/gin-kit/cmd/auth/handler/student"
-	auth "github.com/erDong01/gin-kit/cmd/auth/proto/student"
-	"github.com/erDong01/gin-kit/internal/api"
+	"github.com/erDong01/micro-kit/cmd/auth/handler/student"
+	auth "github.com/erDong01/micro-kit/cmd/auth/proto/student"
+	"github.com/erDong01/micro-kit/internal/api"
 )
 
 type Client struct {

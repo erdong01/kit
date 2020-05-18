@@ -1,7 +1,7 @@
 package uitl
 
 import (
-	"github.com/erDong01/gin-kit/internal/cache/config"
+	"github.com/erDong01/micro-kit/internal/cache/config"
 	"strings"
 	"time"
 )

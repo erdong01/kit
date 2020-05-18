@@ -2,7 +2,7 @@ package examClient
 
 import (
 	"fmt"
-	exam "github.com/erDong01/gin-kit/cmd/exam/proto/sc"
+	exam "github.com/erDong01/micro-kit/cmd/exam/proto/sc"
 	"testing"
 )
 

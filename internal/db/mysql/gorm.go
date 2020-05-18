@@ -2,8 +2,8 @@ package mysql
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/erDong01/gin-kit/internal/db/mysql/check"
-	"github.com/erDong01/gin-kit/internal/db/mysql/drive"
+	"github.com/erDong01/micro-kit/internal/db/mysql/check"
+	"github.com/erDong01/micro-kit/internal/db/mysql/drive"
 )
 
 // New 初始化数据库ORM

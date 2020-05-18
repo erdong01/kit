@@ -1,11 +1,11 @@
 package register
 
 import (
-	"github.com/erDong01/gin-kit/internal/cache/impl"
-	"github.com/erDong01/gin-kit/internal/config"
-	"github.com/erDong01/gin-kit/internal/core"
-	"github.com/erDong01/gin-kit/internal/db/mysql"
-	"github.com/erDong01/gin-kit/internal/db/redis/drive"
+	"github.com/erDong01/micro-kit/internal/cache/impl"
+	"github.com/erDong01/micro-kit/internal/config"
+	"github.com/erDong01/micro-kit/internal/core"
+	"github.com/erDong01/micro-kit/internal/db/mysql"
+	"github.com/erDong01/micro-kit/internal/db/redis/drive"
 )
 
 // 全局初始化

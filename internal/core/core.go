@@ -3,8 +3,8 @@ package core
 import (
 	"github.com/go-redis/redis/v7"
 	"github.com/jinzhu/gorm"
-	"github.com/erDong01/gin-kit/internal/cache/I"
-	"github.com/erDong01/gin-kit/internal/config"
+	"github.com/erDong01/micro-kit/internal/cache/I"
+	"github.com/erDong01/micro-kit/internal/config"
 	"sync"
 )
 
