@@ -15,8 +15,8 @@ type RedisConfig struct {
 //reids默认配置
 func GetRedisConfig() *RedisConfig {
 	return &RedisConfig{
-		Addr:     "101.132.145.239:6379",
-		Password: "m7ictwC7b0xnc3H8",
+		Addr:     "127.0.0.1:6379",
+		Password: "test",
 		DB:       1,
 	}
 }
@@ -32,7 +32,7 @@ type JwtCnf struct {
 func GetJwtCnf() *JwtCnf {
 	return &JwtCnf{
 		Secret: "Y1HH999gmSmGvVddzmhGhThiOEBQBPbj",
-		Issuer: "http://student-2c-api.517rxt.test/v1/auth/login",
+		Issuer: "",
 		Expire: 10,
 		Ttl:    36000,
 	}

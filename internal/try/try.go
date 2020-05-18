@@ -42,7 +42,7 @@ func Try(fun func(), handler func(interface{})) {
 
 func test() {
 	var rxtError RxtError
-	rxtError.err = errors.New("肖丽我喜欢你")
+	rxtError.err = errors.New("test")
 	rxtError.error_code = 11
 	panic(rxtError)
 }

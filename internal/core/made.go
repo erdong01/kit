@@ -5,7 +5,7 @@ import (
 	rds "github.com/go-redis/redis/v7"
 	"github.com/jinzhu/gorm"
 	"github.com/erDong01/micro-kit/internal/config"
-	drive2 "rxt/internal/db/mysql/drive"
+	drive2 "github.com/erDong01/micro-kit/internal/db/mysql/drive"
 	"github.com/erDong01/micro-kit/internal/db/redis/drive"
 	"github.com/erDong01/micro-kit/internal/http"
 )

@@ -1,9 +1,9 @@
 package impl
 
 import (
-	"rxt/internal/cache/I"
-	"rxt/internal/cache/config"
-	"rxt/internal/db/redis"
+	"github.com/erDong01/micro-kit/internal/cache/I"
+	"github.com/erDong01/micro-kit/internal/cache/config"
+	"github.com/erDong01/micro-kit/internal/db/redis"
 )
 
 func New() *I.ICache {
