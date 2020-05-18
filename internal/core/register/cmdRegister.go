@@ -1,7 +1,7 @@
 package register
 
 import (
-	"rxt/internal/core"
+	"github.com/erDong01/gin-kit/internal/core"
 )
 
 type cmdCore struct {

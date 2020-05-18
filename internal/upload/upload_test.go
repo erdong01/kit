@@ -2,7 +2,7 @@ package upload
 
 import (
 	"log"
-	"rxt/internal/upload/qiniu"
+	"github.com/erDong01/gin-kit/internal/upload/qiniu"
 	"testing"
 )
 

@@ -1,8 +1,8 @@
 package upload
 
 import (
-	"rxt/internal/config"
-	"rxt/internal/upload/qiniu"
+	"github.com/erDong01/gin-kit/internal/config"
+	"github.com/erDong01/gin-kit/internal/upload/qiniu"
 )
 
 var fileConfig = map[string]interface{}{

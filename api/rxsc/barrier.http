@@ -1,6 +1,0 @@
-@host = {{schema}}://{{hostname}}:{{port}}/{{version}}
-
-POST {{host}}/barrier-game/barrier-game-skip/1/45935150
-Content-Type: : {{type}}
-Accept: : {{type}}
-Authorization: Bearer {{token}}

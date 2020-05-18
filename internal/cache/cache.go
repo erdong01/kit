@@ -1,10 +1,10 @@
 package cache
 
 import (
-	"rxt/internal/cache/I"
-	"rxt/internal/cache/config"
-	"rxt/internal/cache/uitl"
-	"rxt/internal/db/redis"
+	"github.com/erDong01/gin-kit/internal/cache/I"
+	"github.com/erDong01/gin-kit/internal/cache/config"
+	"github.com/erDong01/gin-kit/internal/cache/uitl"
+	"github.com/erDong01/gin-kit/internal/db/redis"
 )
 
 const (

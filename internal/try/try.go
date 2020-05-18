@@ -1,9 +1,8 @@
 package try
 
-
 import (
-"errors"
-"fmt"
+	"errors"
+	"fmt"
 )
 
 type RxtError struct {
@@ -19,16 +18,15 @@ func main() {
 
 	Try(func() {
 		panic(rxtError)
-	}, func(err interface{}){
-		errs:=(err).(RxtError)
+	}, func(err interface{}) {
+		errs := (err).(RxtError)
 		fmt.Println(errs.err)
 	})
 
-
 	Try(func() {
 		test()
-	}, func(err interface{}){
-		errs:=(err).(RxtError)
+	}, func(err interface{}) {
+		errs := (err).(RxtError)
 		fmt.Println(errs.err)
 	})
 }
@@ -42,7 +40,7 @@ func Try(fun func(), handler func(interface{})) {
 	fun()
 }
 
-func test(){
+func test() {
 	var rxtError RxtError
 	rxtError.err = errors.New("肖丽我喜欢你")
 	rxtError.error_code = 11

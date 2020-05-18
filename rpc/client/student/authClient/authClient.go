@@ -1,9 +1,9 @@
 package authClient
 
 import (
-	"rxt/cmd/auth/handler/student"
-	auth "rxt/cmd/auth/proto/student"
-	"rxt/internal/api"
+	"github.com/erDong01/gin-kit/cmd/auth/handler/student"
+	auth "github.com/erDong01/gin-kit/cmd/auth/proto/student"
+	"github.com/erDong01/gin-kit/internal/api"
 )
 
 type Client struct {

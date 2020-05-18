@@ -1,8 +1,8 @@
 package cache
 
 import (
-	"rxt/internal/cache/I"
-	"rxt/internal/core"
+	"github.com/erDong01/gin-kit/internal/cache/I"
+	"github.com/erDong01/gin-kit/internal/core"
 )
 
 func New() *I.ICache {

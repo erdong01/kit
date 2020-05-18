@@ -1,9 +1,9 @@
 package reportClient
 
 import (
-	"rxt/cmd/report/handler"
-	"rxt/cmd/report/proto/report"
-	"rxt/internal/api"
+	"github.com/erDong01/gin-kit/cmd/report/handler"
+	"github.com/erDong01/gin-kit/cmd/report/proto/report"
+	"github.com/erDong01/gin-kit/internal/api"
 )
 
 type Client struct {

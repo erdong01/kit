@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"io"
-	"rxt/internal/config"
+	"github.com/erDong01/gin-kit/internal/config"
 )
 
 // 哈希加密

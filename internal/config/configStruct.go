@@ -1,6 +1,6 @@
 package config
 
-import "rxt/internal/upload/qiniu"
+import "github.com/erDong01/gin-kit/internal/upload/qiniu"
 
 type Core struct {
 }

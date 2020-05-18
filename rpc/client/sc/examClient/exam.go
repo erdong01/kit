@@ -1,9 +1,9 @@
 package examClient
 
 import (
-	"rxt/cmd/exam/handler/sc"
-	exam "rxt/cmd/exam/proto/sc"
-	"rxt/internal/api"
+	"github.com/erDong01/gin-kit/cmd/exam/handler/sc"
+	exam "github.com/erDong01/gin-kit/cmd/exam/proto/sc"
+	"github.com/erDong01/gin-kit/internal/api"
 )
 
 type Client struct {

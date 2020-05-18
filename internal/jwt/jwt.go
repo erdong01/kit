@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"rxt/internal/config"
+	"github.com/erDong01/gin-kit/internal/config"
 	"strconv"
 	"strings"
 	"time"

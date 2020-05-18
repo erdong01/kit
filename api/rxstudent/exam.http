@@ -1,7 +1,0 @@
-@host = {{schema}}://{{hostname}}:{{port}}/{{version}}
-
-### Exam
-# @name classwork
-GET {{host}}/exam/classwork HTTP/1.1
-Content-Type: : {{type}}
-Accept: : {{type}}

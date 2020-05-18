@@ -3,7 +3,7 @@ package authClient
 import (
 	"rxt/cmd/auth/handler/sc"
 	auth "rxt/cmd/auth/proto/sc"
-	"rxt/internal/api"
+	"github.com/erDong01/gin-kit/internal/api"
 )
 
 type Client struct {
