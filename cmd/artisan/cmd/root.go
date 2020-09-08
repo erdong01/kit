@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/erDong01/micro-kit/cmd/artisan/cmd/I"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/erDong01/micro-kit/cmd/artisan/cmd/I"
-	"github.com/erDong01/micro-kit/internal/log"
 )
 
 var env, version, name, configFile string
@@ -23,7 +23,7 @@ func newCmd() I.ICommand {
 
 		err := viper.BindPFlags(c.PersistentFlags())
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
 		}
 	}
 
