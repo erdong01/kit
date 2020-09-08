@@ -16,7 +16,7 @@ require (
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
 	github.com/jinzhu/gorm v1.9.12
 	github.com/lestrrat/go-envload v0.0.0-20180220120943-6ed08b54a570 // indirect
-	github.com/lestrrat/go-file-rotatelogs v0.0.0-20180223000712-d3151e2a480f
+	github.com/lestrrat/go-file-rotatelogs v0.0.0-20180223000712-d3151e2a480f // indirect
 	github.com/lestrrat/go-strftime v0.0.0-20180220042222-ba3bf9c1d042 // indirect
 	github.com/mailru/easyjson v0.7.0 // indirect
 	github.com/micro/micro v1.18.0 // indirect
@@ -26,7 +26,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/qiniu/api.v7/v7 v7.4.1
 	github.com/shopspring/decimal v0.0.0-20200227202807-02e2044944cc
-	github.com/sirupsen/logrus v1.4.2
+	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.6.1
 	github.com/tebeka/strftime v0.1.3 // indirect
@@ -37,4 +37,5 @@ require (
 	google.golang.org/genproto v0.0.0-20200204235621-fb4a7afc5178 // indirect
 	google.golang.org/grpc v1.27.0
 	gopkg.in/yaml.v2 v2.2.5 // indirect
+	gorm.io/gorm v1.20.0 // indirect
 )
