@@ -76,3 +76,13 @@ func GetQiniu() qiniu.Config {
 		CachePath:     "rxedu_test/cache/",
 	}
 }
+// mysql数据库配置
+type Etcd struct {
+	Addr []string
+}
+
+func GetEtcd() *Etcd {
+	return &Etcd{
+		Addr: []string{"192.168.123.52:2379"},
+	}
+}

@@ -3,8 +3,8 @@ package etcd
 import (
 	"context"
 	"fmt"
+	"github.com/erDong01/micro-kit/config"
 	config2 "github.com/erDong01/micro-kit/config"
-	"github.com/erDong01/micro-kit/internal/config"
 	"github.com/go-kit/kit/sd/etcdv3"
 	"time"
 )
