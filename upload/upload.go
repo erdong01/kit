@@ -1,8 +1,8 @@
 package upload
 
 import (
-	"github.com/erDong01/micro-kit/internal/config"
-	"github.com/erDong01/micro-kit/internal/upload/qiniu"
+	config2 "github.com/erDong01/micro-kit/config"
+	"github.com/erDong01/micro-kit/upload/qiniu"
 )
 
 var fileConfig = map[string]interface{}{
@@ -35,7 +35,7 @@ type Upload struct {
 
 // NewUpload 上传
 func NewUpload() IUpload {
-	qiniuConf := config.GetQiniu()
+	qiniuConf := config2.GetQiniu()
 	qiniuConf.MimeType = fileConfig["mime_type"].([]string)
 	qiniuConf.MaxSize = int64(fileConfig["max_size"].(int))
 

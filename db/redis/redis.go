@@ -2,9 +2,9 @@ package redis
 
 import (
 	"encoding/json"
+	"github.com/erDong01/micro-kit/cache/uitl"
 	"github.com/erDong01/micro-kit/db/redis/check"
 	"github.com/erDong01/micro-kit/db/redis/drive"
-	"github.com/erDong01/micro-kit/internal/cache/uitl"
 	"github.com/go-redis/redis/v7"
 )
 

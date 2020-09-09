@@ -1,8 +1,8 @@
 package upload
 
 import (
+	"github.com/erDong01/micro-kit/upload/qiniu"
 	"log"
-	"github.com/erDong01/micro-kit/internal/upload/qiniu"
 	"testing"
 )
 

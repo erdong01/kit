@@ -1,8 +1,8 @@
 package core
 
 import (
-	"github.com/erDong01/micro-kit/internal/cache/I"
-	"github.com/erDong01/micro-kit/internal/config"
+	"github.com/erDong01/micro-kit/cache/I"
+	config2 "github.com/erDong01/micro-kit/config"
 	"github.com/go-redis/redis/v7"
 	"gorm.io/gorm"
 	"sync"
@@ -18,7 +18,7 @@ type Core struct {
 	Db          *gorm.DB
 	Transaction *gorm.DB
 	Redis       *redis.Client
-	Config      *config.Config
+	Config      *config2.Config
 	Cache       *I.ICache
 	Info        info
 	opts        []Option

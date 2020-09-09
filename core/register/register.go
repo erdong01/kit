@@ -1,11 +1,11 @@
 package register
 
 import (
+	"github.com/erDong01/micro-kit/cache/impl"
+	config2 "github.com/erDong01/micro-kit/config"
 	"github.com/erDong01/micro-kit/core"
 	"github.com/erDong01/micro-kit/db/mysql"
 	"github.com/erDong01/micro-kit/db/redis/drive"
-	"github.com/erDong01/micro-kit/internal/cache/impl"
-	"github.com/erDong01/micro-kit/internal/config"
 )
 
 // 全局初始化
@@ -22,7 +22,7 @@ type Register struct {
 
 //注册 配置
 func (r *Register) ConfigRegister() *Register {
-	config.Init("config")
+	config2.Init("config")
 	return r
 }
 

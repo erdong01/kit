@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	config2 "github.com/erDong01/micro-kit/config"
 	"github.com/gin-gonic/gin"
-	"github.com/erDong01/micro-kit/internal/config"
 	"strconv"
 	"strings"
 	"time"
@@ -22,8 +22,8 @@ type Claims struct {
 
 // 生产token
 func GenerateToken(user User) (string, error) {
-	jwtCnf := config.GetJwtCnf()
-	config.New().Get(&jwtCnf, "jwt")
+	jwtCnf := config2.GetJwtCnf()
+	config2.New().Get(&jwtCnf, "jwt")
 	var nowTime time.Time
 	nowTime = time.Now()
 	a := time.Duration(jwtCnf.Expire) * time.Hour
@@ -47,7 +47,7 @@ func GenerateToken(user User) (string, error) {
 
 // 验证token
 func ValidateToken(signedToken string) (claims Claims, err error) {
-	jwtCnf := config.GetJwtCnf()
+	jwtCnf := config2.GetJwtCnf()
 	jwt.ParseWithClaims(signedToken, &claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

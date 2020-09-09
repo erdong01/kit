@@ -1,10 +1,10 @@
 package cache
 
 import (
+	"github.com/erDong01/micro-kit/cache/I"
+	"github.com/erDong01/micro-kit/cache/config"
+	"github.com/erDong01/micro-kit/cache/uitl"
 	"github.com/erDong01/micro-kit/db/redis"
-	"github.com/erDong01/micro-kit/internal/cache/I"
-	"github.com/erDong01/micro-kit/internal/cache/config"
-	"github.com/erDong01/micro-kit/internal/cache/uitl"
 )
 
 const (

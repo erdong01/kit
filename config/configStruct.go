@@ -1,6 +1,6 @@
 package config
 
-import "github.com/erDong01/micro-kit/internal/upload/qiniu"
+import "github.com/erDong01/micro-kit/upload/qiniu"
 
 type Core struct {
 }

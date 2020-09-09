@@ -2,7 +2,7 @@ package drive
 
 import (
 	"fmt"
-	"github.com/erDong01/micro-kit/internal/config"
+	config2 "github.com/erDong01/micro-kit/config"
 	"github.com/go-redis/redis/v7"
 )
 
@@ -12,8 +12,8 @@ func err_handler(err error) {
 }
 func New() *redis.Client {
 	var Redis *redis.Client
-	redisConfig := config.GetRedisConfig()
-	config.New().Get(&redisConfig, "redis")
+	redisConfig := config2.GetRedisConfig()
+	config2.New().Get(&redisConfig, "redis")
 	Redis = redis.NewClient(&redis.Options{
 		Addr:     redisConfig.Addr,
 		Password: redisConfig.Password,

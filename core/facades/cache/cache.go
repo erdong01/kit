@@ -1,8 +1,8 @@
 package cache
 
 import (
+	"github.com/erDong01/micro-kit/cache/I"
 	"github.com/erDong01/micro-kit/core"
-	"github.com/erDong01/micro-kit/internal/cache/I"
 )
 
 func New() *I.ICache {

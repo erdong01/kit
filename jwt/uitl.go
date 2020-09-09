@@ -4,8 +4,8 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	config2 "github.com/erDong01/micro-kit/config"
 	"io"
-	"github.com/erDong01/micro-kit/internal/config"
 )
 
 // 哈希加密
@@ -21,8 +21,8 @@ func Sha1Encode(data string) string {
 
 // 生成签名
 func secret() jwt.Keyfunc {
-	jwtCnf := config.GetJwtCnf()
-	config.New().Get(&jwtCnf, "jwt")
+	jwtCnf := config2.GetJwtCnf()
+	config2.New().Get(&jwtCnf, "jwt")
 	return func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])

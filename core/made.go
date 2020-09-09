@@ -1,10 +1,10 @@
 package core
 
 import (
+	config2 "github.com/erDong01/micro-kit/config"
 	drive2 "github.com/erDong01/micro-kit/db/mysql/drive"
 	"github.com/erDong01/micro-kit/db/redis/drive"
-	"github.com/erDong01/micro-kit/internal/config"
-	"github.com/erDong01/micro-kit/internal/http"
+	"github.com/erDong01/micro-kit/http"
 	"github.com/gin-gonic/gin"
 	rds "github.com/go-redis/redis/v7"
 	"github.com/jinzhu/gorm"
@@ -124,7 +124,7 @@ func RedisRegister() Option {
 
 func ConfigRegister() Option {
 	return func(c *Core) {
-		config.Init("config")
+		config2.Init("config")
 	}
 }
 
