@@ -1,8 +1,8 @@
 package mysql
 
 import (
+	"github.com/erDong01/micro-kit/core"
 	"github.com/jinzhu/gorm"
-	"github.com/erDong01/micro-kit/internal/core"
 )
 
 func Db() *gorm.DB {

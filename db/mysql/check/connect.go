@@ -1,8 +1,8 @@
 package check
 
 import (
-	"github.com/jinzhu/gorm"
-	"github.com/erDong01/micro-kit/internal/core"
+	"github.com/erDong01/micro-kit/core"
+	"gorm.io/gorm"
 )
 
 func Connect() *gorm.DB {

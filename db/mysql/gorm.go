@@ -1,9 +1,9 @@
 package mysql
 
 import (
-	"github.com/jinzhu/gorm"
-	"github.com/erDong01/micro-kit/internal/db/mysql/check"
-	"github.com/erDong01/micro-kit/internal/db/mysql/drive"
+	"github.com/erDong01/micro-kit/db/mysql/check"
+	"github.com/erDong01/micro-kit/db/mysql/drive"
+	"gorm.io/gorm"
 )
 
 // New 初始化数据库ORM
@@ -16,6 +16,3 @@ func New() *gorm.DB {
 	db = drive.New()
 	return db
 }
-
-
-

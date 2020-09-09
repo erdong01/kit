@@ -1,7 +1,7 @@
 package register
 
 import (
-	"github.com/erDong01/micro-kit/internal/core"
+	"github.com/erDong01/micro-kit/core"
 )
 
 type cmdCore struct {

@@ -2,7 +2,7 @@ package register
 
 import (
 	"fmt"
-	"github.com/erDong01/micro-kit/internal/core"
+	"github.com/erDong01/micro-kit/core"
 	"testing"
 )
 

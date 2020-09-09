@@ -53,5 +53,7 @@ require (
 	google.golang.org/grpc v1.27.0
 	gopkg.in/go-playground/validator.v9 v9.30.0 // indirect
 	gopkg.in/yaml.v2 v2.2.5 // indirect
+	gorm.io/driver/mysql v1.0.1 // indirect
+	gorm.io/gorm v1.20.0 // indirect
 	sigs.k8s.io/yaml v1.1.0 // indirect
 )

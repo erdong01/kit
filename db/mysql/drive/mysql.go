@@ -1,12 +1,13 @@
 package drive
 
 import (
-	_ "github.com/go-sql-driver/mysql" // 引入mysql驱动
-
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/erDong01/micro-kit/internal/config"
 	"github.com/erDong01/micro-kit/internal/log"
+	_ "github.com/go-sql-driver/mysql" // 引入mysql驱动
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"time"
 )
 
 // New 初始化数据库
@@ -16,15 +17,20 @@ func New() *gorm.DB {
 		log.Fatal(err)
 	}
 
-	db, err := gorm.Open("mysql", DSN(mysqlCnf))
-	fmt.Println(mysqlCnf)
+	db, err := gorm.Open(mysql.New(mysql.Config{
+		DriverName: "my_mysql_driver",
+		DSN:        DSN(mysqlCnf),
+	}), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	db.DB().SetMaxIdleConns(mysqlCnf.MaxIdleConn)
-	db.DB().SetMaxOpenConns(mysqlCnf.MaxOpenConn)
-	db.LogMode(true)
+	mySqlDB, err := db.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	mySqlDB.SetMaxIdleConns(mysqlCnf.MaxIdleConn)
+	mySqlDB.SetMaxOpenConns(mysqlCnf.MaxOpenConn)
+	mySqlDB.SetConnMaxLifetime(time.Hour)
 	return db
 }
 
