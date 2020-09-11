@@ -18,7 +18,7 @@ func New() *gorm.DB {
 	}
 
 	db, err := gorm.Open(mysql.New(mysql.Config{
-		DriverName: "my_mysql_driver",
+		DriverName: "mysql",
 		DSN:        DSN(mysqlCnf),
 	}), &gorm.Config{})
 	if err != nil {
