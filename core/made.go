@@ -7,7 +7,7 @@ import (
 	"github.com/erDong01/micro-kit/http"
 	"github.com/gin-gonic/gin"
 	rds "github.com/go-redis/redis/v7"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // ICore 服务核心接口
