@@ -8,7 +8,6 @@ import (
 
 func err_handler(err error) {
 	fmt.Printf("err_handler, error:%s\n", err.Error())
-	panic(err.Error())
 }
 func New() *redis.Client {
 	var Redis *redis.Client
