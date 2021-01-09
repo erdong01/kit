@@ -23,6 +23,7 @@ type Register struct {
 //注册 配置
 func (r *Register) ConfigRegister() *Register {
 	config2.Init("config")
+	core.New().Config = config2.New()
 	return r
 }
 
