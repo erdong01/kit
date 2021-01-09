@@ -8,3 +8,4 @@ desktop.ini
 test
 build/log
 build/binary/*
+*.log
