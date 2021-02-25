@@ -31,7 +31,7 @@ type JwtCnf struct {
 
 func GetJwtCnf() *JwtCnf {
 	return &JwtCnf{
-		Secret: "Y1HH999gmSmGvVddzmhGhThiOEBQBPbj",
+		Secret: "",
 		Issuer: "",
 		Expire: 10,
 		Ttl:    36000,
@@ -52,11 +52,11 @@ type MySQL struct {
 
 func GetMySQL() *MySQL {
 	return &MySQL{
-		Host:        "101.132.145.239",
-		Port:        33057,
-		User:        "api.rxt",
-		Password:    "a18@990Wll0C3",
-		Database:    "api.517rxt.com",
+		Host:        "127.0.0.1",
+		Port:        3306,
+		User:        "root",
+		Password:    "",
+		Database:    "",
 		Parameters:  "false",
 		MaxIdleConn: 40,
 		MaxOpenConn: 100,
@@ -67,13 +67,13 @@ func GetMySQL() *MySQL {
 // GetQiniu 获取七牛云配置
 func GetQiniu() qiniu.Config {
 	return qiniu.Config{
-		DomainDefault: "api-statics.renxuetang.com",
-		DomainHTTPS:   "api-statics.renxuetang.com",
-		AccessKey:     "X8rnYilA5bdpOeJl1w1vaLx9J7AmfaXGYBaMSKqB",
-		SecretKey:     "Dd8KGXY_hcVhq_6x8PFfPbJOB-ugyyn1paiTEYNh",
-		Bucket:        "api-renxuetang-com",
-		Access:        "public",
-		CachePath:     "rxedu_test/cache/",
+		DomainDefault: "",
+		DomainHTTPS:   "",
+		AccessKey:     "",
+		SecretKey:     "",
+		Bucket:        "",
+		Access:        "",
+		CachePath:     "",
 	}
 }
 // mysql数据库配置
@@ -83,6 +83,6 @@ type Etcd struct {
 
 func GetEtcd() *Etcd {
 	return &Etcd{
-		Addr: []string{"192.168.123.52:2379"},
+		Addr: []string{"127.0.0.1:2379"},
 	}
 }

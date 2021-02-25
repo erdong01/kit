@@ -23,7 +23,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0 // indirect
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
 	github.com/jinzhu/gorm v1.9.12
-	github.com/jinzhu/now v1.1.1 // indirect
 	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
@@ -53,7 +52,7 @@ require (
 	google.golang.org/grpc v1.27.0
 	gopkg.in/go-playground/validator.v9 v9.30.0 // indirect
 	gopkg.in/yaml.v2 v2.2.5 // indirect
-	gorm.io/driver/mysql v1.0.1 // indirect
-	gorm.io/gorm v1.20.0 // indirect
+	gorm.io/driver/mysql v1.0.1
+	gorm.io/gorm v1.20.0
 	sigs.k8s.io/yaml v1.1.0 // indirect
 )
