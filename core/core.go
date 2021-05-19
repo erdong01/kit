@@ -4,6 +4,7 @@ import (
 	"github.com/erDong01/micro-kit/cache/I"
 	config2 "github.com/erDong01/micro-kit/config"
 	"github.com/go-redis/redis/v7"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"sync"
 )
@@ -23,6 +24,7 @@ type Core struct {
 	Info        info
 	opts        []Option
 	once        sync.Once
+	mongo       *mongo.Client
 }
 
 var (

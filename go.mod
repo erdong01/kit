@@ -17,7 +17,6 @@ require (
 	github.com/go-redis/redis/v7 v7.0.0-beta.5
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/groupcache v0.0.0-20191002201903-404acd9df4cc // indirect
-	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0 // indirect
@@ -34,7 +33,7 @@ require (
 	github.com/olivere/elastic v6.2.27+incompatible
 	github.com/onsi/ginkgo v1.10.3 // indirect
 	github.com/onsi/gomega v1.7.1 // indirect
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.1.0 // indirect
 	github.com/prometheus/procfs v0.0.5 // indirect
 	github.com/qiniu/api.v7/v7 v7.4.1
@@ -44,6 +43,7 @@ require (
 	github.com/tebeka/strftime v0.1.3 // indirect
 	go.etcd.io/bbolt v1.3.3 // indirect
 	go.etcd.io/etcd v3.3.20+incompatible // indirect
+	go.mongodb.org/mongo-driver v1.5.2 // indirect
 	go.uber.org/zap v1.12.0 // indirect
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect
 	golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5 // indirect
@@ -51,7 +51,6 @@ require (
 	google.golang.org/genproto v0.0.0-20200204235621-fb4a7afc5178 // indirect
 	google.golang.org/grpc v1.27.0
 	gopkg.in/go-playground/validator.v9 v9.30.0 // indirect
-	gopkg.in/yaml.v2 v2.2.5 // indirect
 	gorm.io/driver/mysql v1.0.1
 	gorm.io/gorm v1.20.0
 	sigs.k8s.io/yaml v1.1.0 // indirect
