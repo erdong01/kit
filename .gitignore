@@ -9,3 +9,4 @@ test
 build/log
 build/binary/*
 *.log
+go.sum
