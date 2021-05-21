@@ -2,7 +2,7 @@ package drive
 
 import (
 	"fmt"
-	config2 "github.com/erDong01/micro-kit/config"
+	"github.com/erDong01/micro-kit/config"
 	"github.com/erDong01/micro-kit/log"
 	_ "github.com/go-sql-driver/mysql" // 引入mysql驱动
 	"gorm.io/driver/mysql"
@@ -12,8 +12,8 @@ import (
 
 // New 初始化数据库
 func New() *gorm.DB {
-	mysqlCnf := config2.GetMySQL()
-	if err := config2.New().Get(&mysqlCnf, "mysql"); err != nil {
+	mysqlCnf := config.GetMySQL()
+	if err := config.New().Get(&mysqlCnf, "mysql"); err != nil {
 		log.Fatal(err)
 	}
 
@@ -35,7 +35,7 @@ func New() *gorm.DB {
 }
 
 // DSN 数据库连接串
-func DSN(c *config2.MySQL) string {
+func DSN(c *config.MySQL) string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?%s&charset=utf8&parseTime=true",
 		c.User, c.Password, c.Host, c.Port, c.Database, c.Parameters)
 }

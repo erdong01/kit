@@ -24,7 +24,7 @@ type Core struct {
 	Info        info
 	opts        []Option
 	once        sync.Once
-	mongo       *mongo.Client
+	Mongo       *mongo.Client
 }
 
 var (
@@ -38,6 +38,12 @@ func New() *Core {
 	})
 	return c
 
+}
+
+func Set(a interface{}, b interface{}) {
+	once.Do(func() {
+		a = b
+	})
 }
 
 func Close() {

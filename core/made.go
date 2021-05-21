@@ -1,12 +1,14 @@
 package core
 
 import (
-	config2 "github.com/erDong01/micro-kit/config"
-	drive2 "github.com/erDong01/micro-kit/db/mysql/drive"
-	"github.com/erDong01/micro-kit/db/redis/drive"
+	"github.com/erDong01/micro-kit/config"
+	gongDbDrive "github.com/erDong01/micro-kit/db/mongoDb/drive"
+	mysqlDrive "github.com/erDong01/micro-kit/db/mysql/drive"
+	redisDrive "github.com/erDong01/micro-kit/db/redis/drive"
 	"github.com/erDong01/micro-kit/http"
 	"github.com/gin-gonic/gin"
 	rds "github.com/go-redis/redis/v7"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 )
 
@@ -60,6 +62,12 @@ func (c *Core) GetRedis() *rds.Client {
 	return c.Redis
 }
 
+// MongoRegister 注册Mongo
+func (c *Core) MongoRegister() *mongo.Client {
+	c.Mongo = gongDbDrive.Init()
+	return c.Mongo
+}
+
 // Option 返回匿名函数 供初始化执行时
 type Option func(*Core)
 
@@ -111,20 +119,20 @@ func Engine(route func(g *gin.Engine) *gin.Engine) Option {
 // DbRegister 设置数据库
 func DbRegister() Option {
 	return func(c *Core) {
-		c.Db = drive2.New()
+		c.Db = mysqlDrive.New()
 	}
 }
 
 // RedisRegister 设置Redis
 func RedisRegister() Option {
 	return func(c *Core) {
-		c.Redis = drive.New()
+		c.Redis = redisDrive.New()
 	}
 }
 
 func ConfigRegister() Option {
 	return func(c *Core) {
-		config2.Init("config")
+		config.Init("config")
 	}
 }
 

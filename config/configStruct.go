@@ -38,7 +38,7 @@ func GetJwtCnf() *JwtCnf {
 	}
 }
 
-// mysql数据库配置
+// MySQL mysql数据库配置
 type MySQL struct {
 	Host        string
 	Port        int
@@ -63,6 +63,17 @@ func GetMySQL() *MySQL {
 	}
 }
 
+type Mongo struct {
+	Host []string
+	Uri  string
+}
+
+// GetMongo
+func GetMongo() Mongo {
+	return Mongo{
+		Uri: "mongodb://192.168.2.76:27017",
+	}
+}
 
 // GetQiniu 获取七牛云配置
 func GetQiniu() qiniu.Config {
@@ -76,6 +87,7 @@ func GetQiniu() qiniu.Config {
 		CachePath:     "",
 	}
 }
+
 // mysql数据库配置
 type Etcd struct {
 	Addr []string
