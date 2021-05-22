@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/erDong01/micro-kit/db/mongoDB/dbo"
+	"github.com/erDong01/micro-kit/db/mongoDB/drive"
 	"reflect"
 )
 
@@ -17,6 +19,10 @@ type User struct {
 var test *Test
 
 func main() {
+	drive.Init()
+	dbo.Init("mongodb://111.229.20.134:27017")
+
+
 	test = &Test{}
 	sysConfig := reflect.ValueOf(test).Elem()
 	//sysType := reflect.TypeOf(test).Elem()

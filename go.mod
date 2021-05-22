@@ -21,14 +21,11 @@ require (
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0 // indirect
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
-	github.com/jinzhu/gorm v1.9.12
 	github.com/json-iterator/go v1.1.8 // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lestrrat/go-envload v0.0.0-20180220120943-6ed08b54a570 // indirect
 	github.com/lestrrat/go-file-rotatelogs v0.0.0-20180223000712-d3151e2a480f
 	github.com/lestrrat/go-strftime v0.0.0-20180220042222-ba3bf9c1d042 // indirect
-	github.com/lib/pq v1.2.0 // indirect
 	github.com/mailru/easyjson v0.7.0 // indirect
 	github.com/olivere/elastic v6.2.27+incompatible
 	github.com/onsi/ginkgo v1.10.3 // indirect
@@ -43,9 +40,8 @@ require (
 	github.com/tebeka/strftime v0.1.3 // indirect
 	go.etcd.io/bbolt v1.3.3 // indirect
 	go.etcd.io/etcd v3.3.20+incompatible // indirect
-	go.mongodb.org/mongo-driver v1.5.2 // indirect
+	go.mongodb.org/mongo-driver v1.5.2
 	go.uber.org/zap v1.12.0 // indirect
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect
 	golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/genproto v0.0.0-20200204235621-fb4a7afc5178 // indirect
