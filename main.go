@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/erDong01/micro-kit/db/mongoDB/dbo"
-	"github.com/erDong01/micro-kit/db/mongoDB/drive"
 	"reflect"
+	"time"
 )
 
 type Test struct {
@@ -19,10 +18,27 @@ type User struct {
 var test *Test
 
 func main() {
-	drive.Init()
-	dbo.Init("mongodb://111.229.20.134:27017")
+	dbo.Init("mongodb://127.0.0.1:27017")
+	go func() {
+		for i := 0; i < 10; i++ {
+			u := User{
+				Age:  i,
+				Name: "test",
+			}
+			dbo.MgoClient.TestDB.Insert("user", &u)
+		}
+	}()
+	go func() {
+		for i := 0; i < 10; i++ {
+			u := User{
+				Age:  i,
+				Name: "test",
+			}
+			dbo.MgoClient.MasterDB.Insert("user", &u)
+		}
 
-
+	}()
+	time.Sleep(time.Second * 5)
 	test = &Test{}
 	sysConfig := reflect.ValueOf(test).Elem()
 	//sysType := reflect.TypeOf(test).Elem()
@@ -37,10 +53,10 @@ func main() {
 	user := reflect.ValueOf(&User{})
 	flag := sysConfig.FieldByName("Age") == reflect.Value{}
 	if flag {
-		fmt.Println(flag)
+		//fmt.Println(flag)
 		user.Elem().FieldByName("Name").SetString("testset")
 		sysConfig.Field(1).Set(user)
-		fmt.Println(sysConfig.FieldByIndex([]int{1})) //12
+		//fmt.Println(sysConfig.FieldByIndex([]int{1})) //12
 	}
-	fmt.Println(test.User)
+	//fmt.Println(test.User)
 }

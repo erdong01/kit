@@ -24,8 +24,8 @@ type ICore interface {
 }
 
 // Init 启动其他服务
-func (c *Core) Init() {
-	c.once.Do(func() {
+func (*Core) Init() {
+	New().once.Do(func() {
 		for _, o := range c.opts {
 			o(c)
 		}
@@ -33,38 +33,38 @@ func (c *Core) Init() {
 }
 
 // GetEnv 获取当前环境
-func (c *Core) GetEnv() string {
-	return c.Info.env
+func (*Core) GetEnv() string {
+	return New().Info.env
 }
 
 // GetName 获取当前服务名称
-func (c *Core) GetName() string {
-	return c.Info.Name
+func (*Core) GetName() string {
+	return New().Info.Name
 }
 
 // GetVersion 获取当前版本号
-func (c *Core) GetVersion() string {
-	return c.Info.version
+func (*Core) GetVersion() string {
+	return New().Info.version
 }
 
 // GetDb 获取当前数据库实例
-func (c *Core) GetDb() *gorm.DB {
-	return c.Db
+func (*Core) GetDb() *gorm.DB {
+	return New().Db
 }
 
 // GetDb 获取当前数据库实例
-func (c *Core) GetPort() int {
-	return c.Info.port
+func (*Core) GetPort() int {
+	return New().Info.port
 }
 
 // GetRedis 获取当前Redis实例
-func (c *Core) GetRedis() *rds.Client {
-	return c.Redis
+func (*Core) GetRedis() *rds.Client {
+	return New().Redis
 }
 
 // MongoRegister 注册Mongo
-func (c *Core) MongoRegister() *mongo.Client {
-	c.Mongo = gongDbDrive.Init()
+func (*Core) MongoRegister() *mongo.Client {
+	New().Mongo = gongDbDrive.Init()
 	return c.Mongo
 }
 
@@ -84,28 +84,28 @@ func Make(opts ...Option) ICore {
 // Env 设置环境变量
 func Env(env string) Option {
 	return func(c *Core) {
-		c.Info.env = env
+		New().Info.env = env
 	}
 }
 
 // Name 设置项目名称
 func Name(name string) Option {
 	return func(c *Core) {
-		c.Info.Name = name
+		New().Info.Name = name
 	}
 }
 
 // Port 设置端口号
 func Port(port int) Option {
 	return func(c *Core) {
-		c.Info.port = port
+		New().Info.port = port
 	}
 }
 
 // Version 设置项目版本
 func Version(version string) Option {
 	return func(c *Core) {
-		c.Info.version = version
+		New().Info.version = version
 	}
 }
 
@@ -119,14 +119,14 @@ func Engine(route func(g *gin.Engine) *gin.Engine) Option {
 // DbRegister 设置数据库
 func DbRegister() Option {
 	return func(c *Core) {
-		c.Db = mysqlDrive.New()
+		New().Db = mysqlDrive.New()
 	}
 }
 
 // RedisRegister 设置Redis
 func RedisRegister() Option {
 	return func(c *Core) {
-		c.Redis = redisDrive.New()
+		New().Redis = redisDrive.New()
 	}
 }
 
@@ -143,5 +143,5 @@ func GetEngine() *gin.Engine {
 
 // GetEngine 获取当前gin引擎
 func SetPort(port int) {
-	c.Info.port = port
+	New().Info.port = port
 }

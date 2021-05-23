@@ -40,9 +40,9 @@ func New() *Core {
 
 }
 
-func Set(a interface{}, b interface{}) {
+func Set(newCore *Core) {
 	once.Do(func() {
-		a = b
+		c = newCore
 	})
 }
 

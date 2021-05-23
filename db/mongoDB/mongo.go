@@ -4,6 +4,7 @@ import (
 	"github.com/erDong01/micro-kit/core"
 	"go.mongodb.org/mongo-driver/mongo"
 	"reflect"
+	"strings"
 )
 
 type Database struct {
@@ -13,7 +14,6 @@ type Database struct {
 func SetDatabase(cs interface{}, db interface{}) {
 	csValue := reflect.ValueOf(cs)
 	csType := reflect.TypeOf(cs)
-	client := core.New().Mongo
 	if csType.Kind() == reflect.Ptr {
 		csType = csType.Elem()
 		csValue = csValue.Elem()
@@ -22,12 +22,13 @@ func SetDatabase(cs interface{}, db interface{}) {
 		t := csType.Field(i)
 		if t.Type.String() == "*mongo.Database" {
 			csValue.FieldByName(t.Name).
-				Set(reflect.ValueOf(client.Database(t.Name)))
+				Set(reflect.ValueOf(core.New().MongoRegister().Database(t.Name)))
 		}
-		if t.Type.String() == "*dbo.Database" {
-			dbValue := reflect.ValueOf(db)
-			dbValue.Elem().Field(0).Set(reflect.ValueOf(client.Database(t.Name)))
-			csValue.FieldByName(t.Name).Set(dbValue)
+		if strings.Contains(t.Type.String(), "Database") {
+			dbValueJ := reflect.ValueOf(db).Elem()
+			dbValue := reflect.New(dbValueJ.Type()).Elem()
+			dbValue.Field(0).Set(reflect.ValueOf(core.New().MongoRegister().Database(t.Name)))
+			csValue.FieldByName(t.Name).Set(dbValue.Addr())
 		}
 	}
 }
