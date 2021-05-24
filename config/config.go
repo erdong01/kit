@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/spf13/viper"
 	"reflect"
 )
@@ -120,15 +121,24 @@ func (c rxViper) AllSettings() map[string]interface{} {
 }
 
 // 配置文件初始化读取
-func Init(file string,configType string) {
-	openFile(file,configType)
+func Init(file string) {
+	openFile(file)
 }
 
 // 打开配置文件
-func openFile(configFile string,configType string) (err error) {
+func openFile(configFile string) (err error) {
 	viper.SetConfigName(configFile)
-	viper.SetConfigType(configType)
-	viper.AddConfigPath("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("configs")
 	err = viper.ReadInConfig() // Find and read the config file
+	return
+}
+
+func SetConfigFile(file string) {
+	viper.SetConfigFile(file)
+	err := viper.ReadInConfig() // 查找并读取配置文件
+	if err != nil {             // 处理读取配置文件的错误
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
 	return
 }

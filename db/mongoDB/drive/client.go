@@ -9,10 +9,14 @@ import (
 	"time"
 )
 
-func Init() *mongo.Client {
+func Init(Uri ...string) *mongo.Client {
 	mongoConf := config.GetMongo()
-	if err := config.New().Get(&mongoConf, "mongo"); err != nil {
-		log.Fatal(err)
+	if len(Uri) == 0 {
+		if err := config.New().Get(&mongoConf, "mongo"); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		mongoConf.Uri = Uri[0]
 	}
 	options.Client().ApplyURI(mongoConf.Uri)
 	return Connect(options.Client().ApplyURI(mongoConf.Uri))

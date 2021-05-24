@@ -19,7 +19,7 @@ redis:
   db: 0
 jwt:
   secret: Y1HH999gmSmGvVddzmhGhThiOEBQBPbj
-  issuer: http://student-2c-api.517rxt.test/v1/auth/login
+  issuer: 127.0.0.1
   expire: 10
 cache:
   drive: redis
