@@ -120,14 +120,14 @@ func (c rxViper) AllSettings() map[string]interface{} {
 }
 
 // 配置文件初始化读取
-func Init(file string) {
-	openFile(file)
+func Init(file string,configType string) {
+	openFile(file,configType)
 }
 
 // 打开配置文件
-func openFile(configFile string) (err error) {
+func openFile(configFile string,configType string) (err error) {
 	viper.SetConfigName(configFile)
-	viper.SetConfigType("yaml")
+	viper.SetConfigType(configType)
 	viper.AddConfigPath("config")
 	err = viper.ReadInConfig() // Find and read the config file
 	return

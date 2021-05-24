@@ -62,6 +62,13 @@ func (*Core) GetRedis() *rds.Client {
 	return New().Redis
 }
 
+// ConfigRegister 注册 配置
+func (r *Core) ConfigRegister(configFile string, configType string) *config.Config {
+	config.Init(configFile, configType)
+	New().Config = config.New()
+	return New().Config
+}
+
 // MongoRegister 注册Mongo
 func (*Core) MongoRegister() *mongo.Client {
 	New().Mongo = gongDbDrive.Init()
@@ -132,7 +139,7 @@ func RedisRegister() Option {
 
 func ConfigRegister() Option {
 	return func(c *Core) {
-		config.Init("config")
+		config.Init("config", "yaml")
 	}
 }
 

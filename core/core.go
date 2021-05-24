@@ -2,7 +2,7 @@ package core
 
 import (
 	"github.com/erDong01/micro-kit/cache/I"
-	config2 "github.com/erDong01/micro-kit/config"
+	"github.com/erDong01/micro-kit/config"
 	"github.com/go-redis/redis/v7"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
@@ -19,7 +19,7 @@ type Core struct {
 	Db          *gorm.DB
 	Transaction *gorm.DB
 	Redis       *redis.Client
-	Config      *config2.Config
+	Config      *config.Config
 	Cache       *I.ICache
 	Info        info
 	opts        []Option
