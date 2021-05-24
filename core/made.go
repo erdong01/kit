@@ -23,6 +23,7 @@ type ICore interface {
 	GetPort() int
 	ConfigRegister() *config.Config
 	SetConfigFile(file string) *config.Config
+	MongoRegister(Uri ...string) *mongo.Client
 }
 
 // Init 启动其他服务
@@ -79,8 +80,8 @@ func (*Core) SetConfigFile(file string) *config.Config {
 }
 
 // MongoRegister 注册Mongo
-func (*Core) MongoRegister() *mongo.Client {
-	New().Mongo = gongDbDrive.Init()
+func (*Core) MongoRegister(Uri ...string) *mongo.Client {
+	New().Mongo = gongDbDrive.Init(Uri...)
 	return c.Mongo
 }
 
