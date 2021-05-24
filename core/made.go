@@ -21,6 +21,7 @@ type ICore interface {
 	GetDb() *gorm.DB
 	GetRedis() *rds.Client
 	GetPort() int
+	ConfigRegister(configFile string, configType string) *config.Config
 }
 
 // Init 启动其他服务
@@ -63,7 +64,7 @@ func (*Core) GetRedis() *rds.Client {
 }
 
 // ConfigRegister 注册 配置
-func (r *Core) ConfigRegister(configFile string, configType string) *config.Config {
+func (*Core) ConfigRegister(configFile string, configType string) *config.Config {
 	config.Init(configFile, configType)
 	New().Config = config.New()
 	return New().Config
