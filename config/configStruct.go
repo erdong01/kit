@@ -71,7 +71,7 @@ type Mongo struct {
 // GetMongo
 func GetMongo() Mongo {
 	return Mongo{
-		Uri: "mongodb://111.229.20.134:27017",
+		Uri: "mongodb://127.0.0.1:27017",
 	}
 }
 
