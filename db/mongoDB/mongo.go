@@ -18,16 +18,17 @@ func SetDatabase(cs interface{}, db interface{}) {
 		csType = csType.Elem()
 		csValue = csValue.Elem()
 	}
+	client := core.New().Mongo
 	for i := 0; i < csType.NumField(); i++ {
 		t := csType.Field(i)
 		if t.Type.String() == "*mongo.Database" {
 			csValue.FieldByName(t.Name).
-				Set(reflect.ValueOf(core.New().MongoRegister().Database(t.Name)))
+				Set(reflect.ValueOf(client.Database(t.Name)))
 		}
 		if strings.Contains(t.Type.String(), "Database") {
 			dbValueJ := reflect.ValueOf(db).Elem()
 			dbValue := reflect.New(dbValueJ.Type()).Elem()
-			dbValue.Field(0).Set(reflect.ValueOf(core.New().MongoRegister().Database(t.Name)))
+			dbValue.Field(0).Set(reflect.ValueOf(client.Database(t.Name)))
 			csValue.FieldByName(t.Name).Set(dbValue.Addr())
 		}
 	}
