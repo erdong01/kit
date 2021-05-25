@@ -26,13 +26,13 @@ func SetDatabase(cs interface{}, db interface{}) {
 			dbName = t.Name
 		}
 		if t.Type.String() == "*mongo.Database" {
-			csValue.FieldByName(dbName).
+			csValue.FieldByName(t.Name).
 				Set(reflect.ValueOf(client.Database(dbName)))
 		} else if strings.Contains(t.Type.String(), "Database") {
 			dbValueJ := reflect.ValueOf(db).Elem()
 			dbValue := reflect.New(dbValueJ.Type()).Elem()
 			dbValue.Field(0).Set(reflect.ValueOf(client.Database(dbName)))
-			csValue.FieldByName(dbName).Set(dbValue.Addr())
+			csValue.FieldByName(t.Name).Set(dbValue.Addr())
 		}
 	}
 }
