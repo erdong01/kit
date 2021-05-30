@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"time"
 )
@@ -26,20 +27,15 @@ type CS struct {
 
 var CMap map[string]*CS
 
-func Tcp() {
-
+type ServerSocket struct {
+	IPv4        string
+	Port        int
+	Zone        string
+	TCPListener *net.TCPListener
 }
-func main() {
-	CMap = make(map[string]*CS)
-	listen, err := net.ListenTCP("tcp", &net.TCPAddr{net.ParseIP("0.0.0.0"), 8001, ""})
-	if err != nil {
-		fmt.Println("监听端口失败：", err.Error())
-		return
-	}
-	fmt.Println("已初始化连接，等待客户端连接...")
-	go PushGRT()
-	TcpServer(listen)
-	select {}
+
+func connen() {
+
 }
 
 func Udp() {
@@ -61,7 +57,26 @@ func PushGRT() {
 	}
 }
 
-func TcpServer(listen *net.TCPListener) {
+func (this *ServerSocket) StartTcpServer(listen *net.TCPListener) error {
+
+	CMap = make(map[string]*CS)
+	var zone string
+	if this.Zone != "" {
+		zone = this.Zone
+	}
+	var ipv4 string
+	if this.IPv4 != "" {
+		ipv4 = "127.0.0.1"
+	}
+	listen, err := net.ListenTCP("tcp", &net.TCPAddr{net.ParseIP(ipv4), this.Port, zone})
+	if err != nil {
+		log.Fatalf("%v", err)
+		return err
+	}
+	this.TCPListener = listen
+	fmt.Println("已初始化连接，等待客户端连接...")
+	go PushGRT()
+
 	for {
 		conn, err := listen.AcceptTCP()
 		if err != nil {
@@ -71,6 +86,7 @@ func TcpServer(listen *net.TCPListener) {
 		fmt.Println("客户端连接来自")
 		go Handler(conn)
 	}
+	return err
 }
 func Handler(conn net.Conn) {
 	defer conn.Close()
@@ -79,7 +95,7 @@ func Handler(conn net.Conn) {
 	var C *CS
 	for {
 		conn.Read(data)
-		fmt.Println(data,"111111")
+		fmt.Println(data, "111111")
 		fmt.Println("客户端发来数据：", string(data))
 		if data[0] == Req_REGISTER {
 			conn.Write([]byte{Res_REGISTER, '#', 'o', 'k'})
