@@ -106,6 +106,12 @@ func (this *ServerSocket) Stop() {
 func (this *ServerSocket) CloseClient(tcpConn *net.TCPConn) error {
 	return tcpConn.Close()
 }
+func (this *ServerSocket) DelClient(client *ServerSocketClient) bool {
+	this.ClientLock.Lock()
+	delete(this.ClientList, client.ClientId)
+	this.ClientLock.Unlock()
+	return true
+}
 
 func (this *ServerSocket) AssignClientId() uint32 {
 	return atomic.AddUint32(&this.IdSeed, 1)
