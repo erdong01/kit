@@ -5,18 +5,20 @@ package main
 
 import (
 	"fmt"
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/rpc"
 	"net"
 )
 
 var (
 	Req_REGISTER byte = 1 // 1 --- c register cid
-	Res_REGISTER byte   = 2 // 2 --- s response
+	Res_REGISTER byte = 2 // 2 --- s response
 
 	Req_HEARTBEAT byte = 3 // 3 --- s send heartbeat req
 	Res_HEARTBEAT byte = 4 // 4 --- c send heartbeat res
 
-	Req  byte = 5 // 5 --- cs send data
-	Res  byte = 6 // 6 --- cs send ack
+	Req byte = 5 // 5 --- cs send data
+	Res byte = 6 // 6 --- cs send ack
 )
 
 var Dch chan bool
@@ -38,7 +40,7 @@ func main() {
 	defer conn.Close()
 	go Handler(conn)
 	select {
-	case <- Dch:
+	case <-Dch:
 		fmt.Println("关闭连接")
 	}
 }
@@ -46,18 +48,24 @@ func main() {
 func Handler(conn *net.TCPConn) {
 	// 直到register ok
 	data := make([]byte, 128)
+	head := rpc3.RpcHead{Code: 100, ActorName: "user"}
+	byteD := rpc.Marshal(head, "test")
 	for {
-		conn.Write([]byte{Req_REGISTER, '#', '2'})
+		i, err := conn.Write(byteD)
+		fmt.Println(i, err, 1111)
+		conn.Write(data)
+
 		conn.Read(data)
-		//		fmt.Println(string(data))
-		if data[0] == Res_REGISTER {
+		p, h := rpc.Unmarshal(data)
+		if h.Code == 200 {
+			fmt.Println("握手成功", p)
 			break
 		}
 	}
 	//	fmt.Println("i'm register")
-	go RHandler(conn)
-	go WHandler(conn)
-	go Work()
+	//go RHandler(conn)
+	//go WHandler(conn)
+	//go Work()
 }
 
 func RHandler(conn *net.TCPConn) {
@@ -65,20 +73,20 @@ func RHandler(conn *net.TCPConn) {
 	for {
 		// 心跳包,回复ack
 		data := make([]byte, 128)
-		i,_ := conn.Read(data)
+		i, _ := conn.Read(data)
 		if i == 0 {
 			Dch <- true
 			return
 		}
 		if data[0] == Req_HEARTBEAT {
 			fmt.Println("recv ht pack")
-			conn.Write([]byte{Res_REGISTER,'#','h'})
+
 			fmt.Println("send ht pack ack")
 		} else if data[0] == Req {
 			fmt.Println("recv data pack")
-			fmt.Printf("%v\n",string(data[2:]))
+			fmt.Printf("%v\n", string(data[2:]))
 			Rch <- data[2:]
-			conn.Write([]byte{Res,'#'})
+			conn.Write([]byte{Res, '#'})
 		}
 	}
 }
@@ -86,7 +94,7 @@ func RHandler(conn *net.TCPConn) {
 func WHandler(conn net.Conn) {
 	for {
 		select {
-		case msg := <- Wch:
+		case msg := <-Wch:
 			fmt.Println((msg[0]))
 			fmt.Println("send data after: " + string(msg[1:]))
 			conn.Write(msg)
@@ -98,9 +106,9 @@ func WHandler(conn net.Conn) {
 func Work() {
 	for {
 		select {
-		case msg := <- Rch:
+		case msg := <-Rch:
 			fmt.Println("work recv " + string(msg))
-			Wch <- []byte{Req,'#','x','x','x','x','x'}
+			Wch <- []byte{Req, '#', 'x', 'x', 'x', 'x', 'x'}
 		}
 	}
 }

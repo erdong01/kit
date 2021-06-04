@@ -2,6 +2,8 @@ package network
 
 import (
 	"fmt"
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/rpc"
 	"log"
 	"net"
 	"sync"
@@ -13,7 +15,7 @@ type ServerSocket struct {
 	Socket
 	TCPListener *net.TCPListener
 	IdSeed      uint32
-	ClientList  map[uint32]ServerSocketClient
+	ClientList  map[uint32]*ServerSocketClient
 	ClientLock  *sync.RWMutex
 }
 
@@ -58,7 +60,7 @@ func PushGRT() {
 func (this *ServerSocket) Init() {
 
 	this.ClientLock = &sync.RWMutex{}
-	this.ClientList = make(map[uint32]ServerSocketClient)
+	this.ClientList = make(map[uint32]*ServerSocketClient)
 }
 
 func (this *ServerSocket) StartTcpServer() error {
@@ -84,14 +86,12 @@ func (this *ServerSocket) StartTcpServer() error {
 	fmt.Println("已初始化连接，等待客户端连接...")
 	go PushGRT()
 	for {
-		fmt.Println(11)
 		conn, err := listen.AcceptTCP()
-		fmt.Println(22)
 		if err != nil {
 			fmt.Println("接受客户端连接异常：", err.Error())
 			continue
 		}
-		fmt.Println("客户端连接来自")
+		fmt.Println("客户端连接来自", conn.RemoteAddr().String())
 
 		this.AddClient(conn, conn.RemoteAddr().String())
 		go Handler(conn)
@@ -122,35 +122,39 @@ func (this *ServerSocket) AddClient(tcpConn *net.TCPConn, addr string) bool {
 	socketClient.ClientId = this.AssignClientId()
 	socketClient.IP = addr
 	this.ClientLock.Lock()
-	this.ClientList[socketClient.ClientId] = socketClient
+	this.ClientList[socketClient.ClientId] = &socketClient
 	this.ClientLock.Unlock()
 	return true
 }
 
+func (this *ServerSocket) GetClientById(id uint32) *ServerSocketClient {
+	this.ClientLock.RLock()
+	client, exist := this.ClientList[id]
+	this.ClientLock.RUnlock()
+	if exist == true {
+		return client
+	}
+	return nil
+}
+
 func Handler(conn net.Conn) {
+	head := rpc3.RpcHead{Code: 200, Msg: "ok"}
+	byteD := rpc.Marshal(head, "test")
 	defer conn.Close()
-	data := make([]byte, 128)
-	var uid string
+	data2 := make([]byte, 128)
 	var C *CS
 	for {
-		conn.Read(data)
-		fmt.Println(data, "111111")
-		fmt.Println("客户端发来数据：", string(data))
-		if data[0] == Req_REGISTER {
-			conn.Write([]byte{Res_REGISTER, '#', 'o', 'k'})
-			uid = string(data[2:])
-			C = NewCs(uid)
-			CMap[uid] = C
-			break
-		} else {
-			conn.Write([]byte{Res_REGISTER, '#', 'e', 'r'})
-		}
+		conn.Read(data2)
+		C = NewCs(conn.LocalAddr().String())
+		CMap[conn.LocalAddr().String()] = C
+		p, h := rpc.Unmarshal(data2)
+		fmt.Println("222222", p, h.ActorName)
+		conn.Write(byteD)
+		break
 	}
-	go WHandler(conn, C)
-
-	go RHandler(conn, C)
-
-	go Work(C)
+	//go WHandler(conn, C)
+	//go RHandler(conn, C)
+	//go Work(C)
 	select {
 	case <-C.Dch:
 		fmt.Println("close handler goroutine")
@@ -164,7 +168,7 @@ func WHandler(conn net.Conn, C *CS) {
 		case d := <-C.Wch:
 			fmt.Println("d:", string(d))
 			i, er := conn.Write(d)
-			fmt.Println(i, er)
+			fmt.Println(i, er, "cccc")
 		case <-ticker.C:
 			if _, ok := CMap[C.u]; !ok {
 				fmt.Println("conn die,close WHandler")
@@ -175,7 +179,6 @@ func WHandler(conn net.Conn, C *CS) {
 }
 
 func RHandler(conn net.Conn, C *CS) {
-
 	for {
 		data := make([]byte, 128)
 		err := conn.SetReadDeadline(time.Now().Add(10 * time.Second))
