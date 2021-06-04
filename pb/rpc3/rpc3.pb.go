@@ -20,6 +20,118 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+//服务器类型
+type SERVICE int32
+
+const (
+	SERVICE_NONE          SERVICE = 0
+	SERVICE_CLIENT        SERVICE = 1
+	SERVICE_GATESERVER    SERVICE = 2 //网关,转发服务
+	SERVICE_ACCOUNTSERVER SERVICE = 3 //账号
+	SERVICE_WORLDSERVER   SERVICE = 4 //世界
+	SERVICE_ZONESERVER    SERVICE = 5 //地图
+	SERVICE_WORLDDBSERVER SERVICE = 6 //db
+)
+
+// Enum value maps for SERVICE.
+var (
+	SERVICE_name = map[int32]string{
+		0: "NONE",
+		1: "CLIENT",
+		2: "GATESERVER",
+		3: "ACCOUNTSERVER",
+		4: "WORLDSERVER",
+		5: "ZONESERVER",
+		6: "WORLDDBSERVER",
+	}
+	SERVICE_value = map[string]int32{
+		"NONE":          0,
+		"CLIENT":        1,
+		"GATESERVER":    2,
+		"ACCOUNTSERVER": 3,
+		"WORLDSERVER":   4,
+		"ZONESERVER":    5,
+		"WORLDDBSERVER": 6,
+	}
+)
+
+func (x SERVICE) Enum() *SERVICE {
+	p := new(SERVICE)
+	*p = x
+	return p
+}
+
+func (x SERVICE) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SERVICE) Descriptor() protoreflect.EnumDescriptor {
+	return file_rpc3_proto_enumTypes[0].Descriptor()
+}
+
+func (SERVICE) Type() protoreflect.EnumType {
+	return &file_rpc3_proto_enumTypes[0]
+}
+
+func (x SERVICE) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SERVICE.Descriptor instead.
+func (SERVICE) EnumDescriptor() ([]byte, []int) {
+	return file_rpc3_proto_rawDescGZIP(), []int{0}
+}
+
+//发送标志
+type SEND int32
+
+const (
+	SEND_POINT      SEND = 0 //指定集群id
+	SEND_BALANCE    SEND = 1 //负载
+	SEND_BOARD_CAST SEND = 2 //广播
+)
+
+// Enum value maps for SEND.
+var (
+	SEND_name = map[int32]string{
+		0: "POINT",
+		1: "BALANCE",
+		2: "BOARD_CAST",
+	}
+	SEND_value = map[string]int32{
+		"POINT":      0,
+		"BALANCE":    1,
+		"BOARD_CAST": 2,
+	}
+)
+
+func (x SEND) Enum() *SEND {
+	p := new(SEND)
+	*p = x
+	return p
+}
+
+func (x SEND) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SEND) Descriptor() protoreflect.EnumDescriptor {
+	return file_rpc3_proto_enumTypes[1].Descriptor()
+}
+
+func (SEND) Type() protoreflect.EnumType {
+	return &file_rpc3_proto_enumTypes[1]
+}
+
+func (x SEND) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SEND.Descriptor instead.
+func (SEND) EnumDescriptor() ([]byte, []int) {
+	return file_rpc3_proto_rawDescGZIP(), []int{1}
+}
+
 type RpcHead struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -242,6 +354,86 @@ func (x *Packet) GetBuff() []byte {
 	return nil
 }
 
+//集群信息
+type ClusterInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Type     SERVICE `protobuf:"varint,1,opt,name=Type,proto3,enum=rpc.SERVICE" json:"Type,omitempty"`
+	Ip       string  `protobuf:"bytes,2,opt,name=Ip,proto3" json:"Ip,omitempty"`
+	Port     int32   `protobuf:"varint,3,opt,name=Port,proto3" json:"Port,omitempty"`
+	Weight   int32   `protobuf:"varint,4,opt,name=Weight,proto3" json:"Weight,omitempty"`
+	SocketId uint32  `protobuf:"varint,5,opt,name=SocketId,proto3" json:"SocketId,omitempty"`
+}
+
+func (x *ClusterInfo) Reset() {
+	*x = ClusterInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_rpc3_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ClusterInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClusterInfo) ProtoMessage() {}
+
+func (x *ClusterInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc3_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClusterInfo.ProtoReflect.Descriptor instead.
+func (*ClusterInfo) Descriptor() ([]byte, []int) {
+	return file_rpc3_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ClusterInfo) GetType() SERVICE {
+	if x != nil {
+		return x.Type
+	}
+	return SERVICE_NONE
+}
+
+func (x *ClusterInfo) GetIp() string {
+	if x != nil {
+		return x.Ip
+	}
+	return ""
+}
+
+func (x *ClusterInfo) GetPort() int32 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *ClusterInfo) GetWeight() int32 {
+	if x != nil {
+		return x.Weight
+	}
+	return 0
+}
+
+func (x *ClusterInfo) GetSocketId() uint32 {
+	if x != nil {
+		return x.SocketId
+	}
+	return 0
+}
+
 var File_rpc3_proto protoreflect.FileDescriptor
 
 var file_rpc3_proto_rawDesc = []byte{
@@ -267,8 +459,27 @@ var file_rpc3_proto_rawDesc = []byte{
 	0x74, 0x12, 0x0e, 0x0a, 0x02, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x02, 0x49,
 	0x64, 0x12, 0x14, 0x0a, 0x05, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
 	0x52, 0x05, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x12, 0x0a, 0x04, 0x42, 0x75, 0x66, 0x66, 0x18,
-	0x03, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x42, 0x75, 0x66, 0x66, 0x42, 0x09, 0x5a, 0x07, 0x2e,
-	0x2e, 0x2f, 0x72, 0x70, 0x63, 0x33, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x03, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x42, 0x75, 0x66, 0x66, 0x22, 0x87, 0x01, 0x0a, 0x0b,
+	0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x20, 0x0a, 0x04, 0x54,
+	0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x0c, 0x2e, 0x72, 0x70, 0x63, 0x2e,
+	0x53, 0x45, 0x52, 0x56, 0x49, 0x43, 0x45, 0x52, 0x04, 0x54, 0x79, 0x70, 0x65, 0x12, 0x0e, 0x0a,
+	0x02, 0x49, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x49, 0x70, 0x12, 0x12, 0x0a,
+	0x04, 0x50, 0x6f, 0x72, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x50, 0x6f, 0x72,
+	0x74, 0x12, 0x16, 0x0a, 0x06, 0x57, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x06, 0x57, 0x65, 0x69, 0x67, 0x68, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x53, 0x6f, 0x63,
+	0x6b, 0x65, 0x74, 0x49, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x53, 0x6f, 0x63,
+	0x6b, 0x65, 0x74, 0x49, 0x64, 0x2a, 0x76, 0x0a, 0x07, 0x53, 0x45, 0x52, 0x56, 0x49, 0x43, 0x45,
+	0x12, 0x08, 0x0a, 0x04, 0x4e, 0x4f, 0x4e, 0x45, 0x10, 0x00, 0x12, 0x0a, 0x0a, 0x06, 0x43, 0x4c,
+	0x49, 0x45, 0x4e, 0x54, 0x10, 0x01, 0x12, 0x0e, 0x0a, 0x0a, 0x47, 0x41, 0x54, 0x45, 0x53, 0x45,
+	0x52, 0x56, 0x45, 0x52, 0x10, 0x02, 0x12, 0x11, 0x0a, 0x0d, 0x41, 0x43, 0x43, 0x4f, 0x55, 0x4e,
+	0x54, 0x53, 0x45, 0x52, 0x56, 0x45, 0x52, 0x10, 0x03, 0x12, 0x0f, 0x0a, 0x0b, 0x57, 0x4f, 0x52,
+	0x4c, 0x44, 0x53, 0x45, 0x52, 0x56, 0x45, 0x52, 0x10, 0x04, 0x12, 0x0e, 0x0a, 0x0a, 0x5a, 0x4f,
+	0x4e, 0x45, 0x53, 0x45, 0x52, 0x56, 0x45, 0x52, 0x10, 0x05, 0x12, 0x11, 0x0a, 0x0d, 0x57, 0x4f,
+	0x52, 0x4c, 0x44, 0x44, 0x42, 0x53, 0x45, 0x52, 0x56, 0x45, 0x52, 0x10, 0x06, 0x2a, 0x2e, 0x0a,
+	0x04, 0x53, 0x45, 0x4e, 0x44, 0x12, 0x09, 0x0a, 0x05, 0x50, 0x4f, 0x49, 0x4e, 0x54, 0x10, 0x00,
+	0x12, 0x0b, 0x0a, 0x07, 0x42, 0x41, 0x4c, 0x41, 0x4e, 0x43, 0x45, 0x10, 0x01, 0x12, 0x0e, 0x0a,
+	0x0a, 0x42, 0x4f, 0x41, 0x52, 0x44, 0x5f, 0x43, 0x41, 0x53, 0x54, 0x10, 0x02, 0x42, 0x09, 0x5a,
+	0x07, 0x2e, 0x2e, 0x2f, 0x72, 0x70, 0x63, 0x33, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -283,19 +494,24 @@ func file_rpc3_proto_rawDescGZIP() []byte {
 	return file_rpc3_proto_rawDescData
 }
 
-var file_rpc3_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_rpc3_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_rpc3_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_rpc3_proto_goTypes = []interface{}{
-	(*RpcHead)(nil),   // 0: rpc.RpcHead
-	(*RpcPacket)(nil), // 1: rpc.RpcPacket
-	(*Packet)(nil),    // 2: rpc.Packet
+	(SERVICE)(0),        // 0: rpc.SERVICE
+	(SEND)(0),           // 1: rpc.SEND
+	(*RpcHead)(nil),     // 2: rpc.RpcHead
+	(*RpcPacket)(nil),   // 3: rpc.RpcPacket
+	(*Packet)(nil),      // 4: rpc.Packet
+	(*ClusterInfo)(nil), // 5: rpc.ClusterInfo
 }
 var file_rpc3_proto_depIdxs = []int32{
-	0, // 0: rpc.RpcPacket.RpcHead:type_name -> rpc.RpcHead
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	2, // 0: rpc.RpcPacket.RpcHead:type_name -> rpc.RpcHead
+	0, // 1: rpc.ClusterInfo.Type:type_name -> rpc.SERVICE
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_rpc3_proto_init() }
@@ -340,19 +556,32 @@ func file_rpc3_proto_init() {
 				return nil
 			}
 		}
+		file_rpc3_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ClusterInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_rpc3_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   3,
+			NumEnums:      2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_rpc3_proto_goTypes,
 		DependencyIndexes: file_rpc3_proto_depIdxs,
+		EnumInfos:         file_rpc3_proto_enumTypes,
 		MessageInfos:      file_rpc3_proto_msgTypes,
 	}.Build()
 	File_rpc3_proto = out.File

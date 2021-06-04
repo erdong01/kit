@@ -29,7 +29,7 @@ func main() {
 	Dch = make(chan bool)
 	Rch = make(chan []byte)
 	Wch = make(chan []byte)
-	addr, err := net.ResolveTCPAddr("tcp", "192.168.2.128:8001")
+	addr, err := net.ResolveTCPAddr("tcp", "192.168.2.129:8001")
 	conn, err := net.DialTCP("tcp", nil, addr)
 	//	conn, err := net.Dial("tcp", "127.0.0.1:6666")
 	if err != nil {

@@ -11,7 +11,6 @@ type ServerSocketClient struct {
 	Socket
 	ServerSocket *ServerSocket
 	SendChan     chan []byte //对外缓冲队列
-	ClientId     uint32
 }
 
 func (this *ServerSocketClient) Init(ip string, port int) bool {
@@ -45,7 +44,7 @@ func (this *ServerSocketClient) Run() bool {
 			return false
 		}
 		if n > 0 {
-			if !this.PacketParser.Read(buff[:n]) {
+			if !this.packetParser.Read(buff[:n]) {
 				return false
 			}
 		}
@@ -79,7 +78,7 @@ func (this *ServerSocketClient) Send(buff []byte) int {
 	if this.Conn == nil {
 		return 0
 	}
-	n, err := this.Conn.Write(this.PacketParser.Write(buff))
+	n, err := this.Conn.Write(this.packetParser.Write(buff))
 	if err != nil {
 		log.Error(err)
 	}

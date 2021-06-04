@@ -2,6 +2,7 @@ package tools
 
 import (
 	"encoding/binary"
+	"hash/crc32"
 	"math"
 	"os"
 	"reflect"
@@ -147,4 +148,8 @@ func GetClassName(param interface{}) string {
 		sType = sType[index+1:]
 	}
 	return sType
+}
+
+func ToHash(str string) uint32 {
+	return crc32.ChecksumIEEE([]byte(str))
 }
