@@ -2,12 +2,18 @@ package cluster
 
 import (
 	"fmt"
+	"github.com/erDong01/micro-kit/cluster/etcdv3"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/tools"
 	"strings"
 )
 
+const (
+	ETCD_DIR = "server/"
+)
+
 type (
+	Service      etcdv3.Service
 	ClusterInfo  rpc3.ClusterInfo
 	IClusterInfo interface {
 		Id() uint32
@@ -32,4 +38,15 @@ func (this *ClusterInfo) String() string {
 
 func (this *ClusterInfo) Id() uint32 {
 	return tools.ToHash(this.IpString())
+}
+
+func getRpcChannel(head rpc3.RpcHead) string {
+	return fmt.Sprintf("%s/%s/%d", ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
+}
+
+func getRpcTopicChannel(head rpc3.RpcHead) string {
+	return fmt.Sprintf("%s/%s", ETCD_DIR, strings.ToLower(head.DestServerType.String()))
+}
+func getRpcCallChannel(head rpc3.RpcHead) string {
+	return fmt.Sprintf("%s/%s/call/%d", ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
 }

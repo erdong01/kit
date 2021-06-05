@@ -5,8 +5,12 @@ package rpc;
 option go_package = "../rpc3";
 
 message RpcHead{
-  int64 Id = 1;//token
-  uint32 SocketId = 2;
+  int64  Id = 1;//token
+  uint32  SocketId = 2;
+  uint32  SrcClusterId = 3;//源集群id
+  uint32  ClusterId = 4;//目标集群id
+  SERVICE  DestServerType = 5;//目标集群
+  SEND SendType = 6;
   string ActorName = 7;
   string Reply = 8;//call sessionid
   int32 Code = 9;

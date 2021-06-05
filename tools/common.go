@@ -3,6 +3,7 @@ package tools
 import (
 	"encoding/binary"
 	"hash/crc32"
+	"log"
 	"math"
 	"os"
 	"reflect"
@@ -152,4 +153,10 @@ func GetClassName(param interface{}) string {
 
 func ToHash(str string) uint32 {
 	return crc32.ChecksumIEEE([]byte(str))
+}
+
+func Assert(x bool, y string) {
+	if bool(x) == false {
+		log.Printf("\nFatal :{%s}", y)
+	}
 }

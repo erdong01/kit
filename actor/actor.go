@@ -21,7 +21,7 @@ type (
 	Actor struct {
 		CallChan  chan CallIO //rpc chan
 		ActorChan chan int    //use for states
-		Id        int64
+		id        int64
 		CallMap   map[string]*CallFunc
 		pTimer    *time.Ticker //定时器
 		TimerCall func()       //定时器触发函数
@@ -53,17 +53,17 @@ type (
 		RegisterCall(funcName string, call interface{})
 		SendMsg(head rpc3.RpcHead, funcName string, params ...interface{})
 		Send(head rpc3.RpcHead, buff []byte)
-		PacketFunc(packet rpc3.Packet) bool//回调函数
-		RegisterTimer(duration time.Duration, fun interface{})//注册定时器,时间为纳秒 1000 * 1000 * 1000
+		PacketFunc(packet rpc3.Packet) bool                    //回调函数
+		RegisterTimer(duration time.Duration, fun interface{}) //注册定时器,时间为纳秒 1000 * 1000 * 1000
 		GetId() int64
-		GetRpcHead(ctx context.Context) rpc3.RpcHead//rpc is safe
+		GetRpcHead(ctx context.Context) rpc3.RpcHead //rpc is safe
 	}
 )
 
 func (this *Actor) Init(chanNum int) {
 	this.CallChan = make(chan CallIO, chanNum)
 	this.ActorChan = make(chan int, 1)
-	this.Id = AssignActorId()
+	this.id = AssignActorId()
 	this.CallMap = make(map[string]*CallFunc)
 	this.pTimer = time.NewTicker(1<<63 - 1)
 	this.mTrace.Init()
@@ -77,7 +77,7 @@ func (this *Actor) RegisterTimer(duration time.Duration, fun interface{}) {
 }
 
 func (this *Actor) clear() {
-	this.Id = 0
+	this.id = 0
 	this.bStart = false
 	if this.pTimer != nil {
 		this.pTimer.Stop()
@@ -162,7 +162,7 @@ func AssignActorId() int64 {
 	return int64(IdSeed)
 }
 func (this *Actor) GetId() int64 {
-	return this.Id
+	return this.id
 }
 
 func (this *Actor) GetRpcHead(ctx context.Context) rpc3.RpcHead {
