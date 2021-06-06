@@ -59,9 +59,38 @@ type (
 	}
 )
 
-func (this *Cluster) Init(num int, info *ClusterInfo, Endpoints []string, natUrl string) {
+func (this *Cluster) Init(num int, info *ClusterInfo, Endpoints []string, natsUrl string) {
 	this.Actor.Init(num)
+	this.RegisterClusterCall()
+	for i := 0; i < MAX_CLUSTER_NUM; i++ {
+		this.clusterLocker[i] = &sync.RWMutex{}
+		this.clusterMap[i] = make(HashClusterMap)
+		this.hashRing[i] = tools.NewHashRing()
+	}
+	this.clusterInfoMap = make(map[uint32]*ClusterInfo)
+	this.packetFuncList = vector.NewVector()
+	//conn, err := setupNatsConn(
+	//	natsUrl,
+	//	this.dieChan,
+	//)
+	//if err != nil {
+	//	log.Fatal("nats connect error!!!!")
+	//}
+	//this.conn = conn
+	//this.conn.Subscribe(getChannel(*info), func(msg *nats.Msg) {
+	//	this.HandlePacket(rpc3.Packet{Buff: msg.Data})
+	//})
+	//
+	//this.conn.Subscribe(getTopicChannel(*info), func(msg *nats.Msg) {
+	//	this.HandlePacket(rpc3.Packet{Buff: msg.Data})
+	//})
+	//
+	//this.conn.Subscribe(getCallChannel(*info), func(msg *nats.Msg) {
+	//	this.HandlePacket(rpc3.Packet{Buff: msg.Data, Reply: msg.Reply})
+	//})
 
+	rpc.GCall = reflect.ValueOf(this.call)
+	this.Actor.Start()
 }
 
 func (this *Cluster) RegisterClusterCall() {
@@ -188,4 +217,20 @@ func (this *Cluster) RandomCluster(head rpc3.RpcHead) rpc3.RpcHead {
 		head.SocketId = pCluster.SocketId
 	}
 	return head
+}
+
+//params[0]:rpc.RpcHead
+//params[1]:error
+func (this *Cluster) call(parmas ...interface{}) {
+	head := *parmas[0].(*rpc3.RpcHead)
+	reply := head.Reply
+	head.Reply = ""
+	head.ClusterId = head.SrcClusterId
+	if parmas[1] == nil {
+		parmas[1] = ""
+	} else {
+		parmas[1] = parmas[1].(error).Error()
+	}
+	buff := rpc.Marshal(head, "", parmas[1:]...)
+	this.conn.Publish(reply, buff)
 }

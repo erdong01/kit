@@ -1,6 +1,6 @@
 package maps
 
-import "gonet/base/containers"
+import "github.com/erDong01/micro-kit/core/containers"
 
 func assertIteratorImplementation() {
 	var _ containers.ReverseIteratorWithKey = (*Iterator)(nil)

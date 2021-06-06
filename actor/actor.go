@@ -123,6 +123,7 @@ func (this *Actor) call(io CallIO) {
 	head := io.RpcHead
 	funcName := rpcPacket.FuncName
 	pFunc := this.FindCall(funcName)
+
 	if pFunc != nil {
 		f := pFunc.FuncVal
 		k := pFunc.FuncType
@@ -136,6 +137,7 @@ func (this *Actor) call(io CallIO) {
 			this.Trace(funcName)
 			ret := f.Call(in)
 			this.Trace("")
+			fmt.Println(ret)
 			if ret != nil && head.Reply != "" {
 				ret = append([]reflect.Value{reflect.ValueOf(&head)}, ret...)
 				rpc.GCall.Call(ret)
@@ -149,6 +151,7 @@ func (this *Actor) call(io CallIO) {
 func (this *Actor) Trace(funcName string) {
 	this.mTrace.funcName = funcName
 }
+
 func (this *Actor) FindCall(funcName string) *CallFunc {
 	funcName = strings.ToLower(funcName)
 	fun, exist := this.CallMap[funcName]
@@ -178,7 +181,7 @@ func (this *Actor) PacketFunc(packet rpc3.Packet) bool {
 		this.Send(head, packet.Buff)
 		return true
 	}
-
+	fmt.Println("222333444444444444")
 	return false
 }
 func (this *Actor) RegisterCall(funcName string, call interface{}) {

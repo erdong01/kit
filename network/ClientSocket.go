@@ -71,7 +71,6 @@ func (this *ClientSocket) Send(head rpc3.RpcHead, buff []byte) int {
 			wrong.TraceCode(err)
 		}
 	}()
-
 	if this.Conn == nil {
 		return 0
 	}

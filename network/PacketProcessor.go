@@ -37,7 +37,7 @@ func NewPacketParser(conf PacketConfig) PacketParser {
 		p.PacketFunc = conf.Func
 	} else {
 		p.PacketFunc = func(buff []byte) {
-
+			fmt.Println("sfdjsaf")
 		}
 	}
 	return p
@@ -49,6 +49,7 @@ func (this *PacketParser) readLen(buff []byte) (bool, int) {
 	}
 	bufMsgLen := buff[:this.PacketLen]
 	var msgLen int
+
 	switch this.PacketLen {
 	case PACKET_LEN_BYTE:
 		msgLen = int(bufMsgLen[0])
@@ -64,6 +65,7 @@ func (this *PacketParser) readLen(buff []byte) (bool, int) {
 		} else {
 			msgLen = int(binary.BigEndian.Uint32(bufMsgLen))
 		}
+
 	}
 	if msgLen+this.PacketLen <= nLen {
 		return true, msgLen + this.PacketLen
@@ -79,9 +81,11 @@ ParsePacket:
 	nBufferSize := len(buff[nCurSize:])
 	bFindFlag := false
 	bFindFlag, nPacketSize = this.readLen(buff[nCurSize:])
+
 	if bFindFlag {
 		if nBufferSize == nPacketSize {
-
+			this.PacketFunc(buff[nCurSize+this.PacketLen : nCurSize+nPacketSize])
+			nCurSize += nPacketSize
 		} else if nBufferSize > nPacketSize {
 			this.PacketFunc(buff[nCurSize+this.PacketLen : nCurSize+nPacketSize])
 			nCurSize += nPacketSize
@@ -99,6 +103,7 @@ ParsePacket:
 
 func (this *PacketParser) Write(dat []byte) []byte {
 	msgLen := len(dat)
+
 	if msgLen+this.PacketLen > tools.MAX_PACKET {
 		fmt.Println("write over base.MAX_PACKET")
 	}

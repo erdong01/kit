@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"net"
@@ -24,12 +25,15 @@ var (
 var Dch chan bool
 var Rch chan []byte
 var Wch chan []byte
+var (
+	CLIENT *network.ClientSocket
+)
 
 func main() {
 	Dch = make(chan bool)
 	Rch = make(chan []byte)
 	Wch = make(chan []byte)
-	addr, err := net.ResolveTCPAddr("tcp", "192.168.2.129:8001")
+	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:8001")
 	conn, err := net.DialTCP("tcp", nil, addr)
 	//	conn, err := net.Dial("tcp", "127.0.0.1:6666")
 	if err != nil {
@@ -38,7 +42,11 @@ func main() {
 	}
 	fmt.Println("已连接服务器")
 	defer conn.Close()
+	CLIENT = new(network.ClientSocket)
+	CLIENT.Init("127.0.0.1", 8001)
+	CLIENT.Start()
 	go Handler(conn)
+
 	select {
 	case <-Dch:
 		fmt.Println("关闭连接")
@@ -48,24 +56,29 @@ func main() {
 func Handler(conn *net.TCPConn) {
 	// 直到register ok
 	data := make([]byte, 128)
-	head := rpc3.RpcHead{Code: 100, ActorName: "user"}
-	byteD := rpc.Marshal(head, "test")
-	for {
-		i, err := conn.Write(byteD)
-		fmt.Println(i, err, 1111)
-		conn.Write(data)
+	head := rpc3.RpcHead{Code: 100, ActorName: "Account"}
 
-		conn.Read(data)
-		p, h := rpc.Unmarshal(data)
-		if h.Code == 200 {
-			fmt.Println("握手成功", p)
-			break
-		}
+	byteD := rpc.Marshal(head, "Account_Login", "test", 2, 4, 9)
+	p, h := rpc.Unmarshal(data)
+
+	//for {
+	i, err := conn.Write(byteD)
+	fmt.Println(i, err, 1111)
+	//conn.Write(data)
+
+	//conn.Read(data)
+
+	if h.Code == 200 {
+		fmt.Println("握手成功", p)
+		//break
 	}
+	//}
 	//	fmt.Println("i'm register")
 	//go RHandler(conn)
 	//go WHandler(conn)
 	//go Work()
+
+	CLIENT.Send(head, byteD)
 }
 
 func RHandler(conn *net.TCPConn) {

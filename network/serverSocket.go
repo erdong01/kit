@@ -17,6 +17,7 @@ type ServerSocket struct {
 	IdSeed      uint32
 	ClientList  map[uint32]*ServerSocketClient
 	ClientLock  *sync.RWMutex
+	clientCount int
 }
 
 var (
@@ -57,36 +58,48 @@ func PushGRT() {
 		}
 	}
 }
-func (this *ServerSocket) Init() {
-
+func (this *ServerSocket) Init(ip string, port int) bool {
+	this.Socket.Init(ip, port)
 	this.ClientLock = &sync.RWMutex{}
 	this.ClientList = make(map[uint32]*ServerSocketClient)
+
+	this.IP = ip
+	this.Port = port
+	return true
 }
 
 func (this *ServerSocket) StartTcpServer() error {
+
 	CMap = make(map[string]*CS)
 	var zone string
 	if this.Zone != "" {
 		zone = this.Zone
 	}
-	var IP string
-	if this.IP != "" {
+	var IP string = this.IP
+	if IP == "" {
 		IP = "127.0.0.1"
 	}
-	var port int
-	if this.Port == 0 {
+	var port int = this.Port
+	if port == 0 {
 		port = 8001
 	}
-	listen, err := net.ListenTCP("tcp", &net.TCPAddr{net.ParseIP(IP), port, zone})
+	listen, err := net.ListenTCP("tcp4", &net.TCPAddr{net.ParseIP(IP), port, zone})
 	if err != nil {
-		log.Fatalf("%v", err)
+		log.Fatalf("创建链接失败:%v", err)
 		return err
 	}
 	this.TCPListener = listen
 	fmt.Println("已初始化连接，等待客户端连接...")
-	go PushGRT()
+	go this.Run()
+	//go PushGRT()
+
+	return err
+}
+
+func (this *ServerSocket) Run() {
+
 	for {
-		conn, err := listen.AcceptTCP()
+		conn, err := this.TCPListener.AcceptTCP()
 		if err != nil {
 			fmt.Println("接受客户端连接异常：", err.Error())
 			continue
@@ -94,9 +107,8 @@ func (this *ServerSocket) StartTcpServer() error {
 		fmt.Println("客户端连接来自", conn.RemoteAddr().String())
 
 		this.AddClient(conn, conn.RemoteAddr().String())
-		go Handler(conn)
+		//go Handler(conn)
 	}
-	return err
 }
 
 func (this *ServerSocket) Stop() {
@@ -108,7 +120,7 @@ func (this *ServerSocket) CloseClient(tcpConn *net.TCPConn) error {
 }
 func (this *ServerSocket) DelClient(client *ServerSocketClient) bool {
 	this.ClientLock.Lock()
-	delete(this.ClientList, client.ClientId)
+	delete(this.ClientList, client.clientId)
 	this.ClientLock.Unlock()
 	return true
 }
@@ -119,11 +131,18 @@ func (this *ServerSocket) AssignClientId() uint32 {
 
 func (this *ServerSocket) AddClient(tcpConn *net.TCPConn, addr string) bool {
 	var socketClient ServerSocketClient
-	socketClient.ClientId = this.AssignClientId()
+	socketClient.Init("", 0)
+	socketClient.ServerSocket = this
+	socketClient.ReceiveBufferSize = this.ReceiveBufferSize
+	socketClient.clientId = this.AssignClientId()
+	socketClient.SetTcpConn(tcpConn)
+	socketClient.SetMaxPacketLen(this.GetMaxPacketLen())
 	socketClient.IP = addr
 	this.ClientLock.Lock()
-	this.ClientList[socketClient.ClientId] = &socketClient
+	this.ClientList[socketClient.clientId] = &socketClient
 	this.ClientLock.Unlock()
+	socketClient.Start()
+	this.clientCount++
 	return true
 }
 
