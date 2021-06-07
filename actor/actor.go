@@ -127,6 +127,7 @@ func (this *Actor) call(io CallIO) {
 	if pFunc != nil {
 		f := pFunc.FuncVal
 		k := pFunc.FuncType
+
 		rpcPacket.RpcHead.SocketId = io.SocketId
 		params := rpc.UnmarshalBody(rpcPacket, k)
 		if len(params) >= 1 {
@@ -181,7 +182,6 @@ func (this *Actor) PacketFunc(packet rpc3.Packet) bool {
 		this.Send(head, packet.Buff)
 		return true
 	}
-	fmt.Println("222333444444444444")
 	return false
 }
 func (this *Actor) RegisterCall(funcName string, call interface{}) {

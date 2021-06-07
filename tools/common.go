@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -160,3 +161,35 @@ func Assert(x bool, y string) {
 		log.Printf("\nFatal :{%s}", y)
 	}
 }
+
+
+//-----------string strconv type-------------//
+func Int(str string) int{
+	n, _ := strconv.Atoi(str)
+	return n
+}
+
+func Int64(str string) int64{
+	n, _ := strconv.ParseInt(str, 0, 64)
+	return n
+}
+
+func Float32(str string) float32{
+	n, _ := strconv.ParseFloat(str, 32)
+	return float32(n)
+}
+
+func Float64(str string) float64{
+	n, _ := strconv.ParseFloat(str, 64)
+	return n
+}
+
+func Bool(str string) bool{
+	n, _ := strconv.ParseBool(str)
+	return n
+}
+
+func Time(str string) int64 {
+	return GetDBTime(str).Unix()
+}
+//--------------------------------------------//

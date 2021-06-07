@@ -2,29 +2,47 @@ package network
 
 import (
 	"fmt"
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/tools"
+	"github.com/erDong01/micro-kit/wrong"
 	log "github.com/sirupsen/logrus"
+	"hash/crc32"
 	"io"
 	"net"
 )
 
+var (
+	DISCONNECTINT = crc32.ChecksumIEEE([]byte("DISCONNECT"))
+)
+
+type IServerSocketClient interface {
+	ISocket
+}
+
 type ServerSocketClient struct {
 	Socket
 	ServerSocket *ServerSocket
-	SendChan     chan []byte //对外缓冲队列
+	sendChan     chan []byte //对外缓冲队列
 }
 
 func (this *ServerSocketClient) Init(ip string, port int) bool {
-	this.SendChan = make(chan []byte, MAX_SEND_CHAN)
+	this.sendChan = make(chan []byte, MAX_SEND_CHAN)
 	this.Socket.Init(ip, port)
 	return true
 }
 
 func (this *ServerSocketClient) Start() bool {
+	if this.state != SSF_SHUT_DOWN {
+		return false
+	}
+	if this.ServerSocket == nil {
+		return false
+	}
 	if this.PacketFuncList.Len() == 0 {
 		this.PacketFuncList = this.ServerSocket.PacketFuncList
 	}
+	this.state = SSF_CONNECT
 	this.Conn.(*net.TCPConn).SetNoDelay(true)
-
 	go this.Run()
 	go this.SendLoop()
 	return true
@@ -64,26 +82,44 @@ func (this *ServerSocketClient) Run() bool {
 func (this *ServerSocketClient) SendLoop() bool {
 	for {
 		select {
-		case buff := <-this.SendChan:
+		case buff := <-this.sendChan:
 			if buff == nil {
 				return false
 			} else {
-				this.Send(buff)
+				this.DoSend(buff)
 			}
 		}
 	}
 	return true
 }
-func (this *ServerSocketClient) Send(buff []byte) int {
+func (this *ServerSocketClient) DoSend(buff []byte) int {
 	if this.Conn == nil {
 		return 0
 	}
+
 	n, err := this.Conn.Write(this.packetParser.Write(buff))
-	if err != nil {
-		log.Error(err)
-	}
+	handleError(err)
 	if n > 0 {
 		return n
+	}
+
+	return 0
+}
+func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
+	defer func() {
+		if err := recover(); err != nil {
+			wrong.TraceCode(err)
+		}
+	}()
+	if this.connectType == CLIENT_CONNECT { //对外链接send不阻塞
+		select {
+		case this.sendChan <- buff:
+		default: //网络太卡,tcp send缓存满了并且发送队列也满了
+			this.OnNetFail()
+		}
+	} else {
+		return this.DoSend(buff)
+
 	}
 	return 0
 }
@@ -91,4 +127,19 @@ func (this *ServerSocketClient) Send(buff []byte) int {
 func (this *ServerSocketClient) Close() {
 	this.Conn.Close()
 	this.ServerSocket.DelClient(this)
+}
+
+func (this *ServerSocketClient) OnNetFail() {
+	this.Stop()
+	if this.connectType == CLIENT_CONNECT {
+		stream := tools.NewBitStream(make([]byte, 32), 32)
+		stream.WriteInt(int(DISCONNECTINT), 32)
+		stream.WriteInt(int(this.clientId), 32)
+		this.HandlePacket(stream.GetBuffer())
+	} else {
+		this.CallMsg("DISCONNECT", this.clientId)
+	}
+	if this.ServerSocket != nil {
+		this.ServerSocket.DelClient(this)
+	}
 }

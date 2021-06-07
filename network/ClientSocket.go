@@ -98,10 +98,8 @@ func (this *ClientSocket) Connect() bool {
 	if err1 != nil {
 		return false
 	}
-
 	this.state = SSF_CONNECT
 	this.SetTcpConn(ln)
-	fmt.Printf("连接成功，请输入信息！\n")
 	this.CallMsg("COMMON_RegisterRequest")
 	return true
 }
@@ -131,6 +129,9 @@ func (this *ClientSocket) Run() bool {
 			handleError(err)
 			this.OnNetFail(0)
 		}
+
+		p, h := rpc.Unmarshal(buff[:n])
+		fmt.Println(p, h.Code)
 		if n > 0 {
 			this.packetParser.Read(buff[:n])
 		}
