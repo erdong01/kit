@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/cluster/common"
-	"github.com/erDong01/micro-kit/cluster/etcdv3"
 	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
@@ -30,7 +29,7 @@ type (
 	//集群服务器
 	Cluster struct {
 		actor.Actor
-		*etcdv3.Service //集群注册
+		*Service //集群注册
 		clusterMap      [MAX_CLUSTER_NUM]HashClusterMap
 		clusterLocker   [MAX_CLUSTER_NUM]*sync.RWMutex
 		hashRing        [MAX_CLUSTER_NUM]*tools.HashRing //hash一致性

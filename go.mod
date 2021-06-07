@@ -3,7 +3,7 @@ module github.com/erDong01/micro-kit
 go 1.14
 
 require (
-	github.com/coreos/etcd v3.3.25+incompatible // indirect
+	github.com/coreos/etcd v3.3.25+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fastly/go-utils v0.0.0-20180712184237-d95a45783239 // indirect
 	github.com/fortytw2/leaktest v1.3.0 // indirect
