@@ -74,7 +74,7 @@ func (this *ServerSocket) Start() bool {
 	if port == 0 {
 		port = 8001
 	}
-	listen, err := net.ListenTCP("tcp4", &net.TCPAddr{net.ParseIP(IP), port, zone})
+	listen, err := net.ListenTCP("tcp", &net.TCPAddr{net.ParseIP(IP), port, zone})
 	if err != nil {
 		log.Fatalf("创建链接失败:%v", err)
 		return false
