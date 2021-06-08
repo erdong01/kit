@@ -6,7 +6,6 @@ import (
 	"net"
 	"sync"
 	"sync/atomic"
-	"time"
 )
 
 var SocketServer *ServerSocket
@@ -29,26 +28,6 @@ type ServerSocket struct {
 	ClientList  map[uint32]*ServerSocketClient
 	ClientLock  *sync.RWMutex
 	clientCount int
-}
-
-func (this *ServerSocket) HeartbeatCheck() {
-	for {
-		time.Sleep(60 * time.Second)
-		fmt.Println("开始心跳接触")
-		for _, client := range this.ClientList {
-			n := client.DoSend([]byte{'#', '1'})
-			if n == 0 {
-				n = client.DoSend([]byte{'#', '1'})
-				if n > 0 {
-					continue
-				}
-				this.DelClient(client)
-			}
-		}
-		fmt.Println(this.ClientList)
-		fmt.Println("结束心跳接触")
-
-	}
 }
 
 func (this *ServerSocket) Init(ip string, port int) bool {
@@ -82,8 +61,6 @@ func (this *ServerSocket) Start() bool {
 	this.TCPListener = listen
 	fmt.Println("已初始化连接，等待客户端连接...")
 	go this.Run()
-	//go PushGRT()
-	go this.HeartbeatCheck()
 	return true
 }
 
@@ -92,11 +69,10 @@ func (this *ServerSocket) Run() bool {
 		conn, err := this.TCPListener.AcceptTCP()
 		if err != nil {
 			fmt.Println("接受客户端连接异常：", err.Error())
-			return false
+			continue
 		}
 		fmt.Println("客户端连接:", conn.RemoteAddr().String())
 		this.AddClient(conn, conn.RemoteAddr().String(), 1)
-		//go Handler(conn)
 	}
 }
 

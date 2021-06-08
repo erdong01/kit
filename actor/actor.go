@@ -138,7 +138,6 @@ func (this *Actor) call(io CallIO) {
 			this.Trace(funcName)
 			ret := f.Call(in)
 			this.Trace("")
-			fmt.Println(ret)
 			if ret != nil && head.Reply != "" {
 				ret = append([]reflect.Value{reflect.ValueOf(&head)}, ret...)
 				rpc.GCall.Call(ret)
