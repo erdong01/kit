@@ -70,25 +70,25 @@ func (this *Cluster) Init(num int, info *common.ClusterInfo, Endpoints []string,
 	}
 	this.clusterInfoMap = make(map[uint32]*common.ClusterInfo)
 	this.packetFuncList = vector.NewVector()
-	conn, err := SetupNatsConn(
-		natsUrl,
-		this.dieChan,
-	)
-	if err != nil {
-		log.Fatal("nats connect error!!!!")
-	}
-	this.conn = conn
-	this.conn.Subscribe(GetChannel(*info), func(msg *nats.Msg) {
-		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
-	})
-
-	this.conn.Subscribe(GetTopicChannel(*info), func(msg *nats.Msg) {
-		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
-	})
-
-	this.conn.Subscribe(GetCallChannel(*info), func(msg *nats.Msg) {
-		this.HandlePacket(rpc3.Packet{Buff: msg.Data, Reply: msg.Reply})
-	})
+	//conn, err := SetupNatsConn(
+	//	natsUrl,
+	//	this.dieChan,
+	//)
+	//if err != nil {
+	//	log.Fatal("nats connect error!!!!")
+	//}
+	//this.conn = conn
+	//this.conn.Subscribe(GetChannel(*info), func(msg *nats.Msg) {
+	//	this.HandlePacket(rpc3.Packet{Buff: msg.Data})
+	//})
+	//
+	//this.conn.Subscribe(GetTopicChannel(*info), func(msg *nats.Msg) {
+	//	this.HandlePacket(rpc3.Packet{Buff: msg.Data})
+	//})
+	//
+	//this.conn.Subscribe(GetCallChannel(*info), func(msg *nats.Msg) {
+	//	this.HandlePacket(rpc3.Packet{Buff: msg.Data, Reply: msg.Reply})
+	//})
 	rpc.GCall = reflect.ValueOf(this.call)
 	this.Actor.Start()
 }

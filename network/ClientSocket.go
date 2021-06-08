@@ -28,6 +28,7 @@ func handleError(err error) {
 	}
 	log.Printf("错误：%s\n", err.Error())
 }
+
 func (this *ClientSocket) Init(ip string, port int) bool {
 	if this.Port == port || this.IP == ip {
 		return false
