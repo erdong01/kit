@@ -74,7 +74,7 @@ func (this *ServerSocketClient) Run() bool {
 			break
 		}
 	}
-	this.ServerSocket.TCPListener.Close()
+	this.Close()
 	fmt.Printf("%s关闭连接", this.IP)
 	return true
 }
@@ -125,8 +125,10 @@ func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
 }
 
 func (this *ServerSocketClient) Close() {
-	this.Conn.Close()
-	this.ServerSocket.DelClient(this)
+	this.Socket.Close()
+	if this.ServerSocket != nil {
+		this.ServerSocket.DelClient(this)
+	}
 }
 
 func (this *ServerSocketClient) OnNetFail() {
