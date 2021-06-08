@@ -92,7 +92,7 @@ func (this *ServerSocket) Run() bool {
 		conn, err := this.TCPListener.AcceptTCP()
 		if err != nil {
 			fmt.Println("接受客户端连接异常：", err.Error())
-			continue
+			return false
 		}
 		fmt.Println("客户端连接:", conn.RemoteAddr().String())
 		this.AddClient(conn, conn.RemoteAddr().String(), 1)
