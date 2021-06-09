@@ -127,7 +127,6 @@ func (this *Actor) call(io CallIO) {
 	if pFunc != nil {
 		f := pFunc.FuncVal
 		k := pFunc.FuncType
-
 		rpcPacket.RpcHead.SocketId = io.SocketId
 		params := rpc.UnmarshalBody(rpcPacket, k)
 		if len(params) >= 1 {
@@ -203,7 +202,6 @@ func (this *Actor) Send(head rpc3.RpcHead, buff []byte) {
 			log.Print(err)
 		}
 	}()
-
 	var io CallIO
 	io.RpcHead = head
 	io.Buff = buff

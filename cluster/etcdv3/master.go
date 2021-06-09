@@ -3,6 +3,7 @@ package etcdv3
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/cluster/common"
@@ -29,6 +30,7 @@ func (this *Master) Init(info common.IClusterInfo, Endpoints []string, pActor ac
 	this.client = etcdClient
 	this.BindActor(pActor)
 	this.Start()
+	this.IClusterInfo = info
 }
 func (this *Master) Start() {
 	go this.Run()
@@ -61,6 +63,7 @@ func NodeToService(val []byte) *common.ClusterInfo {
 }
 
 func (this *Master) Run() {
+	fmt.Println(this.String())
 	wch := this.client.Watch(context.Background(), ETCD_DIR+this.String(), clientv3.WithPrefix(), clientv3.WithPrevKV())
 	for v := range wch {
 		for _, v1 := range v.Events {

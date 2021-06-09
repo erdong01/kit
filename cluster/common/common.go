@@ -33,3 +33,7 @@ func (this *ClusterInfo) String() string {
 func (this *ClusterInfo) Id() uint32 {
 	return tools.ToHash(this.IpString())
 }
+
+func (this *ClusterInfo) ServiceType() rpc3.SERVICE {
+	return this.Type
+}

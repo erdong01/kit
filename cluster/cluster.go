@@ -29,15 +29,16 @@ type (
 	//集群服务器
 	Cluster struct {
 		actor.Actor
-		*Service //集群注册
-		clusterMap      [MAX_CLUSTER_NUM]HashClusterMap
-		clusterLocker   [MAX_CLUSTER_NUM]*sync.RWMutex
-		hashRing        [MAX_CLUSTER_NUM]*tools.HashRing //hash一致性
-		conn            *nats.Conn
-		dieChan         chan bool
-		clusterInfoMap  map[uint32]*common.ClusterInfo
-		packetFuncList  *vector.Vector //call back
-		callBackMap     sync.Map
+		*Service       //集群注册
+		master         *Master
+		clusterMap     [MAX_CLUSTER_NUM]HashClusterMap
+		clusterLocker  [MAX_CLUSTER_NUM]*sync.RWMutex
+		hashRing       [MAX_CLUSTER_NUM]*tools.HashRing //hash一致性
+		conn           *nats.Conn
+		dieChan        chan bool
+		clusterInfoMap map[uint32]*common.ClusterInfo
+		packetFuncList *vector.Vector //call back
+		callBackMap    sync.Map
 	}
 
 	ICluster interface {
@@ -60,6 +61,10 @@ type (
 	}
 )
 
+func (this *EmptyClusterInfo) String() string {
+	return ""
+}
+
 func (this *Cluster) Init(num int, info *common.ClusterInfo, Endpoints []string, natsUrl string) {
 	this.Actor.Init(num)
 	this.RegisterClusterCall()
@@ -68,27 +73,29 @@ func (this *Cluster) Init(num int, info *common.ClusterInfo, Endpoints []string,
 		this.clusterMap[i] = make(HashClusterMap)
 		this.hashRing[i] = tools.NewHashRing()
 	}
+	this.Service = NewService(info, Endpoints)
+	this.master = NewMaster(&EmptyClusterInfo{}, Endpoints, &this.Actor)
 	this.clusterInfoMap = make(map[uint32]*common.ClusterInfo)
 	this.packetFuncList = vector.NewVector()
-	//conn, err := SetupNatsConn(
-	//	natsUrl,
-	//	this.dieChan,
-	//)
-	//if err != nil {
-	//	log.Fatal("nats connect error!!!!")
-	//}
-	//this.conn = conn
-	//this.conn.Subscribe(GetChannel(*info), func(msg *nats.Msg) {
-	//	this.HandlePacket(rpc3.Packet{Buff: msg.Data})
-	//})
-	//
-	//this.conn.Subscribe(GetTopicChannel(*info), func(msg *nats.Msg) {
-	//	this.HandlePacket(rpc3.Packet{Buff: msg.Data})
-	//})
-	//
-	//this.conn.Subscribe(GetCallChannel(*info), func(msg *nats.Msg) {
-	//	this.HandlePacket(rpc3.Packet{Buff: msg.Data, Reply: msg.Reply})
-	//})
+	conn, err := SetupNatsConn(
+		natsUrl,
+		this.dieChan,
+	)
+	if err != nil {
+		log.Fatal("nats connect error!!!!", err)
+	}
+	this.conn = conn
+	this.conn.Subscribe(GetChannel(*info), func(msg *nats.Msg) {
+		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
+	})
+
+	this.conn.Subscribe(GetTopicChannel(*info), func(msg *nats.Msg) {
+		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
+	})
+
+	this.conn.Subscribe(GetCallChannel(*info), func(msg *nats.Msg) {
+		this.HandlePacket(rpc3.Packet{Buff: msg.Data, Reply: msg.Reply})
+	})
 	rpc.GCall = reflect.ValueOf(this.call)
 	this.Actor.Start()
 }

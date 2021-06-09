@@ -19,7 +19,7 @@ func main() {
 	Dch = make(chan bool)
 	//	conn, err := net.Dial("tcp", "127.0.0.1:6666")
 	CLIENT = new(network.ClientSocket)
-	CLIENT.Init("192.168.2.129", 8001)
+	CLIENT.Init("192.168.2.177", 8001)
 	CLIENT.Start()
 	go Handler()
 	select {
