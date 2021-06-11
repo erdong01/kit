@@ -1,6 +1,7 @@
 package message
 
 import (
+	"fmt"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/tools"
 	"google.golang.org/protobuf/proto"
@@ -38,7 +39,7 @@ func BuildPacketHead(id int64, destservertype rpc3.SERVICE) *Ipacket {
 }
 
 func GetMessageName(packet proto.Message) string {
-	messageName:=proto.MessageName(packet)
+	messageName := proto.MessageName(packet)
 	sType := strings.ToLower(string(messageName))
 	index := strings.Index(sType, ".")
 	if index != -1 {
@@ -49,6 +50,7 @@ func GetMessageName(packet proto.Message) string {
 
 func Encode(packet proto.Message) []byte {
 	packetId := tools.GetMessageCode1(GetMessageName(packet))
+	fmt.Println(packetId)
 	buff, _ := proto.Marshal(packet)
 	data := append(tools.IntToBytes(int(packetId)), buff...)
 	return data

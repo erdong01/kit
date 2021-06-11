@@ -34,7 +34,7 @@ var (
 )
 
 func (this *ServerMgr) Init() bool {
-	UserNetIP := "192.168.2.177"
+	UserNetIP := "192.168.2.231"
 	port := 31700
 	EtcdEndpoints := []string{"192.168.2.129:2379"}
 	Nats_Cluster := "192.168.2.129:4222"

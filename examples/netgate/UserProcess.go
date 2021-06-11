@@ -2,6 +2,7 @@ package netgate
 
 import (
 	"context"
+	"fmt"
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/examples/message"
 	"github.com/erDong01/micro-kit/network"
@@ -90,7 +91,9 @@ func (this *UserPrcoess) PacketFunc(packet1 rpc3.Packet) bool {
 	socketid := packet1.Id
 	packetId, data := message.Decode(buff)
 	packet := message.GetPakcet(packetId)
+	fmt.Println(packet1, packet)
 	if packet == nil {
+		fmt.Println(packetId, network.DISCONNECTINT)
 		//客户端主动断开
 		if packetId == network.DISCONNECTINT {
 			stream := tools.NewBitStream(buff, len(buff))
@@ -102,7 +105,7 @@ func (this *UserPrcoess) PacketFunc(packet1 rpc3.Packet) bool {
 		this.delKey(socketid)
 		return true
 	}
-
+	fmt.Println(1111)
 	//获取配置的路由地址
 	destServerType := packet.(message.Packet).GetPacketHead().DestServerType
 	err := message.UnmarshalText(packet, data)
@@ -167,6 +170,7 @@ func (this *UserPrcoess) Init(num int) {
 	})
 
 	this.RegisterCall("C_A_LoginRequest", func(ctx context.Context, packet *message.C_A_LoginRequest) {
+		fmt.Println("进入C_A_LoginRequest方法")
 		head := this.GetRpcHead(ctx)
 		dh, bEx := this.m_KeyMap[head.SocketId]
 		if bEx {
