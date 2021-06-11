@@ -1,8 +1,8 @@
 package wrong
 
 import (
+	"errors"
 	"fmt"
-	"github.com/pkg/errors"
 	"net/http"
 	"testing"
 )

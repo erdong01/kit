@@ -5,9 +5,9 @@ import (
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/tools"
 	"github.com/erDong01/micro-kit/wrong"
-	log "github.com/sirupsen/logrus"
 	"hash/crc32"
 	"io"
+	"log"
 	"net"
 )
 
@@ -53,7 +53,7 @@ func (this *ServerSocketClient) Run() bool {
 	loop := func() bool {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Error(err)
+				log.Println(err)
 			}
 		}()
 		n, err := this.Conn.Read(buff)

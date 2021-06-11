@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/erDong01/micro-kit/tools"
-	log "github.com/sirupsen/logrus"
+	"log"
 )
 
 const (
@@ -94,7 +94,7 @@ ParsePacket:
 	} else if nBufferSize < this.MaxPacketLen {
 		this.MaxPacketBuffer = buff[nCurSize:]
 	} else {
-		log.Warning("超出最大包限制，丢弃该包")
+		log.Println("超出最大包限制，丢弃该包")
 		return false
 	}
 

@@ -1,9 +1,9 @@
 package restful
 
 import (
-	"github.com/erDong01/micro-kit/log"
 	"github.com/erDong01/micro-kit/wrong"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
@@ -12,7 +12,7 @@ func Exception(c *gin.Context, err error) {
 	errStruct := err.(*wrong.Err)
 	s := errStruct.Format()
 	errStruct.Trace = s
-	log.Error(s)
+	log.Println(s)
 	c.AbortWithStatusJSON(http.StatusExpectationFailed, errStruct)
 }
 

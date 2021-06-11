@@ -1,7 +1,5 @@
 package config
 
-import "github.com/erDong01/micro-kit/upload/qiniu"
-
 type Core struct {
 }
 
@@ -72,19 +70,6 @@ type Mongo struct {
 func GetMongo() Mongo {
 	return Mongo{
 		Uri: "mongodb://127.0.0.1:27017",
-	}
-}
-
-// GetQiniu 获取七牛云配置
-func GetQiniu() qiniu.Config {
-	return qiniu.Config{
-		DomainDefault: "",
-		DomainHTTPS:   "",
-		AccessKey:     "",
-		SecretKey:     "",
-		Bucket:        "",
-		Access:        "",
-		CachePath:     "",
 	}
 }
 

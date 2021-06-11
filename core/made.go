@@ -7,7 +7,7 @@ import (
 	redisDrive "github.com/erDong01/micro-kit/db/redis/drive"
 	"github.com/erDong01/micro-kit/http"
 	"github.com/gin-gonic/gin"
-	rds "github.com/go-redis/redis/v7"
+	rds "github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 )

@@ -2,7 +2,7 @@ package message
 
 import (
 	"github.com/erDong01/micro-kit/tools"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"hash/crc32"
 	"strings"
 )
@@ -14,7 +14,7 @@ var (
 )
 
 func GetMessageName(packet proto.Message) string {
-	sType := strings.ToLower(proto.MessageName(packet))
+	sType := strings.ToLower(string(proto.MessageName(packet)))
 	index := strings.Index(sType, ".")
 	if index != -1 {
 		sType = sType[index+1:]

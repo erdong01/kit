@@ -161,7 +161,9 @@ func Assert(x bool, y string) {
 		log.Printf("\nFatal :{%s}", y)
 	}
 }
-
+func ToLower(name string) string{
+	return strings.ToLower(name)
+}
 
 //-----------string strconv type-------------//
 func Int(str string) int{
@@ -193,3 +195,4 @@ func Time(str string) int64 {
 	return GetDBTime(str).Unix()
 }
 //--------------------------------------------//
+

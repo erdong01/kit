@@ -1,9 +1,8 @@
 package core
 
 import (
-	"github.com/erDong01/micro-kit/cache/I"
 	"github.com/erDong01/micro-kit/config"
-	"github.com/go-redis/redis/v7"
+	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"sync"
@@ -20,7 +19,6 @@ type Core struct {
 	Transaction *gorm.DB
 	Redis       *redis.Client
 	Config      *config.Config
-	Cache       *I.ICache
 	Info        info
 	opts        []Option
 	once        sync.Once

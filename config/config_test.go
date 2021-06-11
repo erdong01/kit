@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/shopspring/decimal"
 	"reflect"
 	"testing"
 )
@@ -16,8 +15,4 @@ func TestGet(t *testing.T) {
 		fmt.Println("tseete")
 	}
 
-}
-func TestBig(t *testing.T) {
-	test :=decimal.NewFromFloat(1.1).Div(decimal.NewFromFloat(3)).Round(2)
-	fmt.Print(test)
 }

@@ -147,3 +147,45 @@ func NewBitStream(buf []byte, nLen int) *BitStream {
 	bitstream.BuildPacketStream(buf, nLen)
 	return &bitstream
 }
+func (this *BitStream) ReadInt(bitCount int) int {
+	var ret int
+	buf := this.ReadBits(bitCount)
+	ret = BytesToInt(buf)
+	if bitCount == Bit32 {
+		return int(ret)
+	} else {
+		ret &= (1 << uint32(bitCount)) - 1
+	}
+
+	return int(ret)
+}
+
+func (this *BitStream) ReadBits(bitCount int) []byte {
+	if bitCount == 0 {
+		return []byte{}
+	}
+
+	if this.tailFlag {
+		this.error = true
+		Assert(false, "Out of range read")
+		return []byte{}
+	}
+
+	if (bitCount & 0x7) != 0 {
+		bitCount = (bitCount & ^0x7) + 8
+	}
+
+	for bitCount+this.bitNum > this.maxReadBitNum {
+		if !this.resize() {
+			this.error = true
+			Assert(false, "Out of range read")
+			return []byte{}
+		}
+	}
+
+	byteCount := (bitCount + 7) >> 3
+	bitNum := this.bitNum >> 3
+	stPtr := this.dataPtr[bitNum : bitNum+byteCount]
+	this.bitNum += bitCount
+	return stPtr
+}

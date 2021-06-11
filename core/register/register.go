@@ -1,7 +1,6 @@
 package register
 
 import (
-	"github.com/erDong01/micro-kit/cache/impl"
 	"github.com/erDong01/micro-kit/config"
 	"github.com/erDong01/micro-kit/core"
 	gongDbDrive "github.com/erDong01/micro-kit/db/mongoDB/drive"
@@ -14,7 +13,6 @@ func GlobalInit() *Register {
 	return new(Register).ConfigRegister().
 		RedisRegister().
 		DbRegister().
-		FacadeCacheRegister().
 		SetPort(5001)
 }
 
@@ -37,12 +35,6 @@ func (r *Register) DbRegister() *Register {
 // MongoRegister 注册Mongo
 func (r *Register) MongoRegister() *Register {
 	core.New().Mongo = gongDbDrive.Init()
-	return r
-}
-
-// FacadeCacheRegister 注册 缓存中心
-func (r *Register) FacadeCacheRegister() *Register {
-	core.New().Cache = impl.New()
 	return r
 }
 

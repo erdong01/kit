@@ -3,10 +3,10 @@ package drive
 import (
 	"fmt"
 	"github.com/erDong01/micro-kit/config"
-	"github.com/erDong01/micro-kit/log"
 	_ "github.com/go-sql-driver/mysql" // 引入mysql驱动
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"log"
 	"time"
 )
 

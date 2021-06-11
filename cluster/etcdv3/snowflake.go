@@ -3,8 +3,8 @@ package etcdv3
 import (
 	"context"
 	"fmt"
-	"github.com/coreos/etcd/clientv3"
 	"github.com/erDong01/micro-kit/tools"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"log"
 	"time"
 )
