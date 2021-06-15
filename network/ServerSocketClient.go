@@ -98,6 +98,7 @@ func (this *ServerSocketClient) DoSend(buff []byte) int {
 	}
 
 	n, err := this.Conn.Write(this.packetParser.Write(buff))
+
 	handleError(err)
 	if n > 0 {
 		return n
@@ -111,6 +112,7 @@ func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
 			wrong.TraceCode(err)
 		}
 	}()
+
 	if this.connectType == CLIENT_CONNECT { //对外链接send不阻塞
 		select {
 		case this.sendChan <- buff:

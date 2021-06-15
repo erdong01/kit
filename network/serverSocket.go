@@ -2,6 +2,8 @@ package network
 
 import (
 	"fmt"
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/rpc"
 	"log"
 	"net"
 	"sync"
@@ -83,6 +85,21 @@ func (this *ServerSocket) Stop() bool {
 	this.shuttingDown = true
 	this.state = SSF_SHUT_DOWN
 	return true
+}
+
+func (this *ServerSocket) Send(head rpc3.RpcHead, buff []byte) int {
+	client := this.GetClientById(head.SocketId)
+	if client != nil {
+		client.Send(head, buff)
+	}
+	return 0
+}
+
+func (this *ServerSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+	client := this.GetClientById(head.SocketId)
+	if client != nil {
+		client.Send(head, rpc.Marshal(head, funcName, params...))
+	}
 }
 
 func (this *ServerSocket) Close() {

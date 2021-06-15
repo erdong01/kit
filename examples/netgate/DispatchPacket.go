@@ -3,6 +3,7 @@ package netgate
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
 	"github.com/erDong01/micro-kit/examples/message"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
@@ -18,6 +19,7 @@ var (
 )
 
 func SendToClient(socketId uint32, packet proto.Message) {
+	fmt.Println(packet)
 	SERVER.GetServer().Send(rpc3.RpcHead{SocketId: socketId}, message.Encode(packet))
 }
 
@@ -27,7 +29,6 @@ func DispatchPacket(packet rpc3.Packet) bool {
 			wrong.TraceCode(err)
 		}
 	}()
-
 	rpcPacket, head := rpc.Unmarshal(packet.Buff)
 	switch head.DestServerType {
 	case rpc3.SERVICE_GATESERVER:

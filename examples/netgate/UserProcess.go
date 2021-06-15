@@ -91,9 +91,7 @@ func (this *UserPrcoess) PacketFunc(packet1 rpc3.Packet) bool {
 	socketid := packet1.Id
 	packetId, data := message.Decode(buff)
 	packet := message.GetPakcet(packetId)
-	fmt.Println(packet1, packet)
 	if packet == nil {
-		fmt.Println(packetId, network.DISCONNECTINT)
 		//客户端主动断开
 		if packetId == network.DISCONNECTINT {
 			stream := tools.NewBitStream(buff, len(buff))
@@ -105,10 +103,10 @@ func (this *UserPrcoess) PacketFunc(packet1 rpc3.Packet) bool {
 		this.delKey(socketid)
 		return true
 	}
-	fmt.Println(1111)
 	//获取配置的路由地址
 	destServerType := packet.(message.Packet).GetPacketHead().DestServerType
 	err := message.UnmarshalText(packet, data)
+
 	if err != nil {
 		log.Printf("包解析错误2  socket=%d", socketid)
 		return true
@@ -122,6 +120,7 @@ func (this *UserPrcoess) PacketFunc(packet1 rpc3.Packet) bool {
 	}
 
 	packetName := message.GetMessageName(packet)
+
 	head := rpc3.RpcHead{Id: packetHead.Id, SrcClusterId: SERVER.GetCluster().Id()}
 	if packetName == C_A_LoginRequest {
 		head.ClusterId = socketid
@@ -139,7 +138,6 @@ func (this *UserPrcoess) PacketFunc(packet1 rpc3.Packet) bool {
 	} else {
 		this.Actor.PacketFunc(rpc3.Packet{Id: socketid, Buff: rpc.Marshal(head, packetName, packet)})
 	}
-
 	return true
 }
 
@@ -172,14 +170,15 @@ func (this *UserPrcoess) Init(num int) {
 	this.RegisterCall("C_A_LoginRequest", func(ctx context.Context, packet *message.C_A_LoginRequest) {
 		fmt.Println("进入C_A_LoginRequest方法")
 		head := this.GetRpcHead(ctx)
-		dh, bEx := this.m_KeyMap[head.SocketId]
+		_, bEx := this.m_KeyMap[head.SocketId]
 		if bEx {
-			if dh.ShareKey() == packet.GetKey() {
-				this.delKey(head.SocketId)
-				this.SwtichSendToAccount(head.SocketId, tools.ToLower("C_A_LoginRequest"), head, rpc.Marshal(head, tools.ToLower("C_A_LoginRequest"), packet))
-			} else {
-				log.Println("client key cheat", dh.ShareKey(), packet.GetKey())
-			}
+			//if dh.ShareKey() == packet.GetKey() {
+
+			this.delKey(head.SocketId)
+			this.SwtichSendToAccount(head.SocketId, tools.ToLower("C_A_LoginRequest"), head, rpc.Marshal(head, tools.ToLower("C_A_LoginRequest"), packet))
+			//} else {
+			//	log.Println("client key cheat", dh.ShareKey(), packet.GetKey())
+			//}
 		}
 	})
 

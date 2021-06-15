@@ -1,7 +1,6 @@
 package message
 
 import (
-	"fmt"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/tools"
 	"google.golang.org/protobuf/proto"
@@ -50,7 +49,6 @@ func GetMessageName(packet proto.Message) string {
 
 func Encode(packet proto.Message) []byte {
 	packetId := tools.GetMessageCode1(GetMessageName(packet))
-	fmt.Println(packetId)
 	buff, _ := proto.Marshal(packet)
 	data := append(tools.IntToBytes(int(packetId)), buff...)
 	return data

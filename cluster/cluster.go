@@ -3,6 +3,7 @@ package cluster
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/cluster/common"
 	"github.com/erDong01/micro-kit/network"
@@ -85,15 +86,19 @@ func (this *Cluster) Init(num int, info *common.ClusterInfo, Endpoints []string,
 		log.Fatal("nats connect error!!!!", err)
 	}
 	this.conn = conn
+	fmt.Println(GetChannel(*info))
 	this.conn.Subscribe(GetChannel(*info), func(msg *nats.Msg) {
+		fmt.Println("11111")
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
 	})
-
+	fmt.Println(GetTopicChannel(*info))
 	this.conn.Subscribe(GetTopicChannel(*info), func(msg *nats.Msg) {
+		fmt.Println("2222")
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
 	})
-
+	fmt.Println(GetCallChannel(*info))
 	this.conn.Subscribe(GetCallChannel(*info), func(msg *nats.Msg) {
+		fmt.Println("3333")
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data, Reply: msg.Reply})
 	})
 	rpc.GCall = reflect.ValueOf(this.call)
@@ -176,10 +181,13 @@ func (this *Cluster) SendMsg(head rpc3.RpcHead, funcName string, params ...inter
 }
 
 func (this *Cluster) Send(head rpc3.RpcHead, buff []byte) {
+
 	switch head.SendType {
 	case rpc3.SEND_BALANCE:
 		_, head.ClusterId = this.hashRing[head.DestServerType].Get64(head.Id)
-		this.conn.Publish(GetRpcChannel(head), buff)
+		fmt.Println(GetRpcChannel(head), "5646", head.SendType)
+		err := this.conn.Publish(GetRpcChannel(head), buff)
+		fmt.Println(err)
 	case rpc3.SEND_POINT:
 		this.conn.Publish(GetRpcChannel(head), buff)
 	default:

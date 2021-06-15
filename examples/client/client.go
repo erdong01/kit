@@ -35,8 +35,8 @@ func main() {
 	PACKET.Client = CLIENT
 
 	CLIENT.Start()
-
-	PACKET.LoginGame()
+	PACKET.LoginGate()
+	PACKET.LoginAccount()
 
 	//go Handler()
 	select {

@@ -3,6 +3,7 @@ package netgate
 import (
 	"github.com/erDong01/micro-kit/cluster"
 	"github.com/erDong01/micro-kit/cluster/common"
+	"github.com/erDong01/micro-kit/examples/message"
 	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/tools"
@@ -43,6 +44,7 @@ func (this *ServerMgr) Init() bool {
 	this.service.SetMaxPacketLen(tools.MAX_CLIENT_PACKET)
 	this.service.SetConnectType(network.CLIENT_CONNECT)
 	packet := new(UserPrcoess)
+	packet.Init(1000)
 	this.service.BindPacketFunc(packet.PacketFunc)
 	this.service.Start()
 	var packet1 EventProcess
@@ -53,6 +55,8 @@ func (this *ServerMgr) Init() bool {
 	//初始玩家管理
 	this.playerMgr = new(PlayerManager)
 	this.playerMgr.Init(1000)
+
+	message.Init()
 	return true
 
 }
