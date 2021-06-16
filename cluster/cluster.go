@@ -88,17 +88,14 @@ func (this *Cluster) Init(num int, info *common.ClusterInfo, Endpoints []string,
 	this.conn = conn
 	fmt.Println(GetChannel(*info))
 	this.conn.Subscribe(GetChannel(*info), func(msg *nats.Msg) {
-		fmt.Println("11111")
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
 	})
 	fmt.Println(GetTopicChannel(*info))
 	this.conn.Subscribe(GetTopicChannel(*info), func(msg *nats.Msg) {
-		fmt.Println("2222")
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
 	})
 	fmt.Println(GetCallChannel(*info))
 	this.conn.Subscribe(GetCallChannel(*info), func(msg *nats.Msg) {
-		fmt.Println("3333")
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data, Reply: msg.Reply})
 	})
 	rpc.GCall = reflect.ValueOf(this.call)
@@ -184,7 +181,9 @@ func (this *Cluster) Send(head rpc3.RpcHead, buff []byte) {
 
 	switch head.SendType {
 	case rpc3.SEND_BALANCE:
+		fmt.Println(head.Id)
 		_, head.ClusterId = this.hashRing[head.DestServerType].Get64(head.Id)
+		fmt.Println(head.ClusterId, GetRpcChannel(head))
 		err := this.conn.Publish(GetRpcChannel(head), buff)
 		fmt.Println(err)
 	case rpc3.SEND_POINT:

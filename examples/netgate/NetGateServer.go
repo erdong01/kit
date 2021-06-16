@@ -37,7 +37,7 @@ var (
 func (this *ServerMgr) Init() bool {
 	UserNetIP := "192.168.2.231"
 	port := 31700
-	EtcdEndpoints := []string{"192.168.2.129:2379"}
+	etcdEndpoints := []string{"192.168.2.129:2379"}
 	Nats_Cluster := "192.168.2.129:4222"
 	this.service = new(network.ServerSocket)
 	this.service.Init(UserNetIP, port)
@@ -49,7 +49,7 @@ func (this *ServerMgr) Init() bool {
 	this.service.Start()
 	var packet1 EventProcess
 	this.cluster = new(cluster.Cluster)
-	this.cluster.Init(1000, &common.ClusterInfo{Type: rpc3.SERVICE_GATESERVER, Ip: UserNetIP, Port: int32(port)}, EtcdEndpoints, Nats_Cluster)
+	this.cluster.Init(1000, &common.ClusterInfo{Type: rpc3.SERVICE_GATESERVER, Ip: UserNetIP, Port: int32(port)}, etcdEndpoints, Nats_Cluster)
 	this.cluster.BindPacketFunc(packet1.PacketFunc)
 	this.cluster.BindPacketFunc(DispatchPacket)
 	//初始玩家管理
