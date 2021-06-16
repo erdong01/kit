@@ -185,7 +185,6 @@ func (this *Cluster) Send(head rpc3.RpcHead, buff []byte) {
 	switch head.SendType {
 	case rpc3.SEND_BALANCE:
 		_, head.ClusterId = this.hashRing[head.DestServerType].Get64(head.Id)
-		fmt.Println(GetRpcChannel(head), "5646", head.SendType)
 		err := this.conn.Publish(GetRpcChannel(head), buff)
 		fmt.Println(err)
 	case rpc3.SEND_POINT:
