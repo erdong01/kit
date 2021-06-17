@@ -3,6 +3,7 @@ package actor
 import (
 	"context"
 	"fmt"
+	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"log"
@@ -87,6 +88,11 @@ func (this *Actor) clear() {
 
 func (this *Actor) Stop() {
 	this.ActorChan <- 1
+}
+
+func (this *Actor) ClientSocket(ctx context.Context) *network.ServerSocketClient {
+	rpcHead := ctx.Value("rpcHead").(rpc3.RpcHead)
+	return network.SocketServer.GetClientById(rpcHead.SocketId)
 }
 
 func (this *Actor) Start() {
@@ -224,5 +230,4 @@ func (this *traceInfo) Init() {
 }
 func (this *traceInfo) ToString() string {
 	return fmt.Sprintf("trace go file[%s] call[%s]\n", this.fileName, this.funcName)
-
 }
