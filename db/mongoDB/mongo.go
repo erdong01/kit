@@ -11,7 +11,7 @@ type Database struct {
 	*mongo.Database
 }
 
-func SetDatabase(cs interface{}, db interface{}) {
+func SetDatabase(cs interface{}, db interface{}, databaseArr ...string) {
 	csValue := reflect.ValueOf(cs)
 	csType := reflect.TypeOf(cs)
 	if csType.Kind() == reflect.Ptr {
@@ -24,6 +24,17 @@ func SetDatabase(cs interface{}, db interface{}) {
 		dbName := t.Tag.Get("db")
 		if dbName == "" {
 			dbName = t.Name
+		}
+		if len(databaseArr) > 0 {
+			dbName = ""
+			for _, databaseName := range databaseArr {
+				if databaseName == dbName {
+					dbName = databaseName
+				}
+			}
+			if dbName == "" {
+				continue
+			}
 		}
 		if t.Type.String() == "*mongo.Database" {
 			csValue.FieldByName(t.Name).
