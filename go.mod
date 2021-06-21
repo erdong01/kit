@@ -9,7 +9,7 @@ require (
 	github.com/nats-io/nats-server/v2 v2.2.6 // indirect
 	github.com/nats-io/nats.go v1.11.0
 	github.com/spf13/viper v1.6.1
-	go.etcd.io/etcd/client/v3 v3.5.0-rc.1
+	go.etcd.io/etcd/client/v3 v3.5.0
 	go.mongodb.org/mongo-driver v1.5.2
 	google.golang.org/grpc v1.38.0
 	google.golang.org/protobuf v1.26.0
