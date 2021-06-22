@@ -75,7 +75,7 @@ func (this *ServerSocketClient) Run() bool {
 		}
 	}
 	this.Close()
-	fmt.Printf("%s关闭连接", this.IP)
+	fmt.Printf("%s关闭连接 \n", this.IP)
 	return true
 }
 

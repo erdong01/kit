@@ -4,7 +4,6 @@ import (
 	"github.com/erDong01/micro-kit/config"
 	"github.com/go-redis/redis/v8"
 	"go.etcd.io/etcd/client/v3"
-	"go.etcd.io/etcd/client/v3/concurrency"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"sync"
@@ -26,7 +25,6 @@ type Core struct {
 	once        sync.Once
 	Mongo       *mongo.Client
 	Etcd        *clientv3.Client
-	EtcdMutex   *concurrency.Mutex
 }
 
 var (
