@@ -177,7 +177,6 @@ func (this *Socket) CallMsg(funcName string, params ...interface{}) {
 
 func (this *Socket) HandlePacket(buff []byte) {
 	packet := rpc3.Packet{Id: this.clientId, Buff: buff}
-
 	for _, v := range this.PacketFuncList.Values() {
 		if v.(PacketFunc)(packet) {
 			break

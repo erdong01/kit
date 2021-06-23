@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package game;
+
+option go_package = "../game";
+
+
+
+message RpcHead{
+  int64  Id = 1;
+  uint32  SocketId = 2;
+  uint32  SrcClusterId = 3;//源集群id
+  uint32  ClusterId = 4;//目标集群id
+  SERVICE  DestServerType = 5;//目标集群
+  SEND SendType = 6;
+  string ActorName = 7;
+  string Reply = 8;//call sessionid
+  int32 Code = 9;
+  string Msg = 10;
+  string Token = 11;
+}
+
+message RpcPacket{
+  string FuncName = 1;
+  int32 ArgLen = 2;
+  RpcHead RpcHead = 3;
+}
+
+//原始包
+message Packet{
+  uint32 Id = 1;//socketid
+  string Reply = 2;//call sessionid
+  bytes Buff = 3;//buff
+}
+
+//集群信息
+message ClusterInfo{
+  SERVICE Type = 1;
+  string Ip = 2;
+  int32 Port = 3;
+  int32 Weight = 4;
+  uint32 SocketId = 5;
+}
+
+//服务器类型
+enum SERVICE{
+  NONE = 0;
+  CLIENT = 1;
+  GATESERVER = 2;//网关,转发服务
+  ACCOUNTSERVER = 3;//账号
+  WORLDSERVER = 4;//世界
+  ZONESERVER = 5;//地图
+  WORLDDBSERVER = 6;//db
+};
+
+//发送标志
+enum SEND{
+  POINT = 0;//指定集群id
+  BALANCE = 1;//负载
+  BOARD_CAST = 2;//广播
+};
