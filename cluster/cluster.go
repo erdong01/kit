@@ -177,6 +177,15 @@ func (this *Cluster) SendMsg(head rpc3.RpcHead, funcName string, params ...inter
 	this.Send(head, buff)
 }
 
+func (this *Cluster) GetBalanceServer(head rpc3.RpcHead) *common.ClusterInfo {
+	_, head.ClusterId = this.hashRing[head.DestServerType].Get64(head.Id)
+	client, bEx := this.clusterMap[head.DestServerType][head.ClusterId]
+	if bEx {
+		return client
+	}
+	return nil
+}
+
 func (this *Cluster) Send(head rpc3.RpcHead, buff []byte) {
 	switch head.SendType {
 	case rpc3.SEND_BALANCE:
