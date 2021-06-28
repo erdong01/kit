@@ -119,7 +119,7 @@ func (this *Socket) Disconnect(bool) bool {
 func (this *Socket) GetState() int {
 	return this.state
 }
-func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
 }
 
 func (this *Socket) Send(rpc3.RpcHead, []byte) int {
