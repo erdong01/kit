@@ -45,7 +45,9 @@ func (this *ServerSocketClient) Start() bool {
 	this.state = SSF_CONNECT
 	this.Conn.(*net.TCPConn).SetNoDelay(true)
 	go this.Run()
-	go this.SendLoop()
+	if this.connectType == CLIENT_CONNECT {
+		go this.SendLoop()
+	}
 	return true
 }
 
@@ -62,8 +64,14 @@ func (this *ServerSocketClient) Run() bool {
 			fmt.Printf("远程链接：%s已经关闭！\n", this.Conn.RemoteAddr().String())
 			return false
 		}
+		if err != nil {
+			handleError(err)
+			this.OnNetFail()
+			return false
+		}
 		if n > 0 {
-			if !this.packetParser.Read(buff[:n]) {
+			if !this.packetParser.Read(buff[:n]) && this.connectType == CLIENT_CONNECT {
+				this.OnNetFail()
 				return false
 			}
 		}
