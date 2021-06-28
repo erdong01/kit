@@ -95,11 +95,12 @@ func (this *ServerSocket) Send(head rpc3.RpcHead, buff []byte) int {
 	return 0
 }
 
-func (this *ServerSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+func (this *ServerSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
 	client := this.GetClientById(head.SocketId)
 	if client != nil {
-		client.Send(head, rpc.Marshal(head, funcName, params...))
+		return client.Send(head, rpc.Marshal(head, funcName, params...))
 	}
+	return 0
 }
 
 func (this *ServerSocket) Close() {

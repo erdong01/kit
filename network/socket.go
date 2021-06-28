@@ -59,7 +59,7 @@ type (
 		OnNetFail(int)
 		Clear()
 		Close()
-		SendMsg(rpc3.RpcHead, string, ...interface{})
+		SendMsg(rpc3.RpcHead, string, ...interface{}) int
 		Send(rpc3.RpcHead, []byte) int
 		CallMsg(string, ...interface{}) //回调消息处理
 
