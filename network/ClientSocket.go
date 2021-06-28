@@ -61,9 +61,9 @@ func (this *ClientSocket) Stop() bool {
 	return true
 }
 
-func (this *ClientSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+func (this *ClientSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
 	buff := rpc.Marshal(head, funcName, params...)
-	this.Send(head, buff)
+	return this.Send(head, buff)
 }
 
 func (this *ClientSocket) Send(head rpc3.RpcHead, buff []byte) int {
