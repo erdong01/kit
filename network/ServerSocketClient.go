@@ -3,6 +3,7 @@ package network
 import (
 	"fmt"
 	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools"
 	"github.com/erDong01/micro-kit/wrong"
 	"hash/crc32"
@@ -106,6 +107,12 @@ func (this *ServerSocketClient) DoSend(buff []byte) int {
 
 	return 0
 }
+
+func (this *ServerSocketClient) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
+	buff := rpc.Marshal(head, funcName, params...)
+	return this.Send(head, buff)
+}
+
 func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
 	defer func() {
 		if err := recover(); err != nil {
