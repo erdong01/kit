@@ -120,6 +120,7 @@ func (this *Socket) GetState() int {
 	return this.state
 }
 func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
+	return 0
 }
 
 func (this *Socket) Send(rpc3.RpcHead, []byte) int {
