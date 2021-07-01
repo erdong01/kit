@@ -171,6 +171,7 @@ func (this *UserPrcoess) Init(num int) {
 		fmt.Println("进入C_A_LoginRequest方法")
 		head := this.GetRpcHead(ctx)
 		_, bEx := this.m_KeyMap[head.SocketId]
+		fmt.Println(head.SocketId)
 		if bEx {
 			//if dh.ShareKey() == packet.GetKey() {
 

@@ -3,7 +3,6 @@ package cluster
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/cluster/common"
 	"github.com/erDong01/micro-kit/network"
@@ -86,15 +85,12 @@ func (this *Cluster) Init(num int, info *common.ClusterInfo, Endpoints []string,
 		log.Fatal("nats connect error!!!!", err)
 	}
 	this.conn = conn
-	fmt.Println(GetChannel(*info))
 	this.conn.Subscribe(GetChannel(*info), func(msg *nats.Msg) {
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
 	})
-	fmt.Println(GetTopicChannel(*info))
 	this.conn.Subscribe(GetTopicChannel(*info), func(msg *nats.Msg) {
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
 	})
-	fmt.Println(GetCallChannel(*info))
 	this.conn.Subscribe(GetCallChannel(*info), func(msg *nats.Msg) {
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data, Reply: msg.Reply})
 	})

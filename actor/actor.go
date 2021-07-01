@@ -179,9 +179,7 @@ func (this *Actor) GetRpcHead(ctx context.Context) rpc3.RpcHead {
 }
 
 func (this *Actor) PacketFunc(packet rpc3.Packet) bool {
-	fmt.Println("1111111")
 	rpcPacket, head := rpc.UnmarshalHead(packet.Buff)
-	fmt.Println(rpcPacket, head)
 	if this.FindCall(rpcPacket.FuncName) != nil {
 		head.SocketId = packet.Id
 		head.Reply = packet.Reply
