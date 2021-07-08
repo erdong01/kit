@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/nats-io/nats.go"
 	"log"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -24,6 +25,37 @@ func init() {
 	}
 }
 
+type A struct {
+	Aa map[string]reflect.Value
+}
+type F func()
+
+func (this *A) Set(s string, i interface{}) {
+	this.Aa[s] = reflect.ValueOf(i)
+}
+func (this *A) Get(s string, i interface{}) {
+	v := this.Aa[s]
+	reflect.ValueOf(i).Elem().Set(v)
+}
+
+type Data struct {
+	D string
+}
+
+func TestM(t *testing.T) {
+	a := A{
+
+	}
+	a.Aa = make(map[string]reflect.Value)
+	//d := Data{
+	//	D: "111",
+	//}
+	a.Set("test", "d")
+	//fmt.Println(a)
+	var e string
+	a.Get("test", &e)
+	fmt.Println(e)
+}
 func TestNats(t *testing.T) {
 
 	startServer(subj, "s1")
