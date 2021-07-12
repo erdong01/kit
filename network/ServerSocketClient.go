@@ -6,6 +6,7 @@ import (
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools"
 	"github.com/erDong01/micro-kit/wrong"
+	"google.golang.org/protobuf/proto"
 	"hash/crc32"
 	"io"
 	"log"
@@ -114,6 +115,11 @@ func (this *ServerSocketClient) DoSend(buff []byte) int {
 	}
 
 	return 0
+}
+
+func (this *ServerSocketClient) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) {
+	buff := rpc.MarshalPacket(head, funcName, packet)
+	this.Send(rpc3.RpcHead{}, buff)
 }
 
 func (this *ServerSocketClient) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {

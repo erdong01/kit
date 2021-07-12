@@ -2,6 +2,7 @@ package cache
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"sync/atomic"
 	"unsafe"
@@ -83,6 +84,7 @@ func (this segment) set(key []byte, value interface{}, hashVal int64, expireSeco
 		if hdr.valCap >= hdr.valLen {
 			atomic.AddInt64(&this.totalTime, int64(hdr.accessTime)-int64(originAccessTime))
 		}
+		fmt.Println(matchedPtr)
 	} else {
 		hdr.slotId = slotId
 		hdr.hash16 = hash16
@@ -106,6 +108,7 @@ func (this segment) set(key []byte, value interface{}, hashVal int64, expireSeco
 	atomic.AddInt64(&this.totalTime, int64(now))
 	atomic.AddInt64(&this.totalCount, 1)
 	this.vacuumLen -= entryLen
+
 	return
 }
 
