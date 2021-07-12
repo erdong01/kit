@@ -27,24 +27,32 @@ func Unmarshal(buff []byte) (*rpc3.RpcPacket, rpc3.RpcHead) {
 	return rpcPacket, *(*rpc3.RpcHead)(rpcPacket.RpcHead)
 }
 
-
 //rpc Unmarshal
 //pFuncType for RegisterCall func
-func UnmarshalBody(rpcPacket *rpc3.RpcPacket, pFuncType reflect.Type) []interface{}{
+func UnmarshalBody(rpcPacket *rpc3.RpcPacket, pFuncType reflect.Type) []interface{} {
 	nCurLen := pFuncType.NumIn()
 	params := make([]interface{}, nCurLen)
-	buf := bytes.NewBuffer(rpcPacket.RpcBody)
-	dec := gob.NewDecoder(buf)
-	for i := 0; i < nCurLen; i++{
-		if i == 0{
+	var dec *gob.Decoder
+	if rpcPacket.ArgLen > 0 {
+		buf := bytes.NewBuffer(rpcPacket.RpcBody)
+		dec = gob.NewDecoder(buf)
+	}
+	for i := 0; i < nCurLen; i++ {
+		if i == 0 {
 			params[0] = context.WithValue(context.Background(), "rpcHead", *(*rpc3.RpcHead)(rpcPacket.RpcHead))
 			continue
 		}
-		val := reflect.New(pFuncType.In(i))
-		if i < int(rpcPacket.ArgLen + 1) {
+		if i < int(rpcPacket.ArgLen+1) {
+			val := reflect.New(pFuncType.In(i))
 			dec.DecodeValue(val)
+			params[i] = val.Elem().Interface()
 		}
-		params[i] = val.Elem().Interface()
+		if rpcPacket.ArgLen == 0 {
+			val := reflect.New(pFuncType.In(i).Elem())
+			m := val.Interface().(proto.Message)
+			proto.Unmarshal(rpcPacket.RpcBody, m)
+			params[i] = m
+		}
 	}
 	return params
 }
