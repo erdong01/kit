@@ -6,6 +6,7 @@ import (
 	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erDong01/micro-kit/tools/mpsc"
 	"log"
 	"reflect"
 	"runtime"
@@ -18,16 +19,23 @@ var (
 	IdSeed int64
 )
 
+const (
+	DESDORY_EVENT = iota
+)
+
 type (
 	Actor struct {
 		CallChan  chan CallIO //rpc chan
-		ActorChan chan int    //use for states
+		acotrChan chan int    //use for states
 		id        int64
 		CallMap   map[string]*CallFunc
 		pTimer    *time.Ticker //定时器
 		TimerCall func()       //定时器触发函数
 		bStart    bool
 		mTrace    traceInfo //trace func
+		mailBox   *mpsc.Queue
+		mailIn    int32
+		mailChan  chan bool
 	}
 	CallIO struct {
 		rpc3.RpcHead
@@ -62,11 +70,14 @@ type (
 )
 
 func (this *Actor) Init(chanNum int) {
+	this.mailChan = make(chan bool)
 	this.CallChan = make(chan CallIO, chanNum)
-	this.ActorChan = make(chan int, 1)
+	this.acotrChan = make(chan int, 1)
 	this.id = AssignActorId()
 	this.CallMap = make(map[string]*CallFunc)
 	this.pTimer = time.NewTicker(1<<63 - 1)
+	this.TimerCall = nil
+	this.mailBox = mpsc.New()
 	this.mTrace.Init()
 }
 
@@ -87,7 +98,7 @@ func (this *Actor) clear() {
 }
 
 func (this *Actor) Stop() {
-	this.ActorChan <- 1
+	this.acotrChan <- 1
 }
 
 func (this *Actor) ClientSocket(ctx context.Context) *network.ServerSocketClient {
@@ -118,10 +129,27 @@ func (this *Actor) loop() bool {
 		}
 	}()
 	select {
-	case io := <-this.CallChan:
-		this.call(io)
+	case <-this.CallChan:
+		this.consume()
+	case msg := <-this.acotrChan:
+		if msg == DESDORY_EVENT {
+			return false
+		}
+	case <-this.pTimer.C:
+		if this.TimerCall != nil {
+			this.Trace("timer")
+			this.TimerCall()
+			this.Trace("")
+		}
 	}
 	return true
+}
+
+func (this *Actor) consume() {
+	for data := this.mailBox.Pop(); data != nil; data = this.mailBox.Pop() {
+		this.call(data.(CallIO))
+	}
+	atomic.StoreInt32(&this.mailIn, 0)
 }
 
 func (this *Actor) call(io CallIO) {
@@ -129,7 +157,6 @@ func (this *Actor) call(io CallIO) {
 	head := io.RpcHead
 	funcName := rpcPacket.FuncName
 	pFunc := this.FindCall(funcName)
-
 	if pFunc != nil {
 		f := pFunc.FuncVal
 		k := pFunc.FuncType
@@ -214,7 +241,10 @@ func (this *Actor) Send(head rpc3.RpcHead, buff []byte) {
 	var io CallIO
 	io.RpcHead = head
 	io.Buff = buff
-	this.CallChan <- io
+	this.mailBox.Push(io)
+	if atomic.CompareAndSwapInt32(&this.mailIn, 0, 1) {
+		this.mailChan <- true
+	}
 }
 func (this *traceInfo) Init() {
 	_, file, _, bOk := runtime.Caller(2)
