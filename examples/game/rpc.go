@@ -1,6 +1,6 @@
 package game
 
-import "github.com/golang/protobuf/proto"
+import "google.golang.org/protobuf/proto"
 
 func Marshal() {
 	proto.Marshal(&ConnectReq{})
