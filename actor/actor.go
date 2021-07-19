@@ -98,7 +98,7 @@ func (this *Actor) clear() {
 }
 
 func (this *Actor) Stop() {
-	this.acotrChan <- 1
+	this.acotrChan <- DESDORY_EVENT
 }
 
 func (this *Actor) ClientSocket(ctx context.Context) *network.ServerSocketClient {
@@ -129,7 +129,7 @@ func (this *Actor) loop() bool {
 		}
 	}()
 	select {
-	case <-this.CallChan:
+	case <-this.mailChan:
 		this.consume()
 	case msg := <-this.acotrChan:
 		if msg == DESDORY_EVENT {
