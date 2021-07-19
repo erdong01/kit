@@ -62,6 +62,7 @@ func (this *ServerSocket) Start() bool {
 	}
 	this.TCPListener = listen
 	fmt.Println("已初始化连接，等待客户端连接...")
+	this.state = SSF_ACCEPT
 	go this.Run()
 	return true
 }
@@ -74,7 +75,7 @@ func (this *ServerSocket) Run() bool {
 			continue
 		}
 		fmt.Println("客户端连接:", conn.RemoteAddr().String())
-		this.AddClient(conn, conn.RemoteAddr().String(), 1)
+		this.handleConn(conn, conn.RemoteAddr().String())
 	}
 }
 
@@ -118,21 +119,27 @@ func (this *ServerSocket) AssignClientId() uint32 {
 	return atomic.AddUint32(&this.IdSeed, 1)
 }
 
-func (this *ServerSocket) AddClient(tcpConn *net.TCPConn, addr string, connectType int) bool {
-	var socketClient ServerSocketClient
-	socketClient.Init("", 0)
-	socketClient.ServerSocket = this
-	socketClient.ReceiveBufferSize = this.ReceiveBufferSize
-	socketClient.clientId = this.AssignClientId()
-	socketClient.SetTcpConn(tcpConn)
-	socketClient.SetMaxPacketLen(this.GetMaxPacketLen())
-	socketClient.IP = addr
-	this.ClientLock.Lock()
-	this.ClientList[socketClient.clientId] = &socketClient
-	this.ClientLock.Unlock()
-	socketClient.Start()
-	this.clientCount++
-	return true
+func (this *ServerSocket) AddClient(tcpConn *net.TCPConn, addr string, connectType int) *ServerSocketClient {
+	socketClient := this.LoadClient()
+	if socketClient != nil {
+		socketClient.Init("", 0)
+		socketClient.ServerSocket = this
+		socketClient.ReceiveBufferSize = this.ReceiveBufferSize
+		socketClient.SetMaxPacketLen(this.GetMaxPacketLen())
+		socketClient.clientId = this.AssignClientId()
+		socketClient.IP = addr
+		socketClient.SetConnectType(connectType)
+		socketClient.SetTcpConn(tcpConn)
+		this.ClientLock.Lock()
+		this.ClientList[socketClient.clientId] = socketClient
+		this.ClientLock.Unlock()
+		socketClient.Start()
+		this.clientCount++
+		return socketClient
+	} else {
+		log.Printf("%s", "无法创建客户端连接对象")
+	}
+	return nil
 }
 
 func (this *ServerSocket) GetClientById(id uint32) *ServerSocketClient {
@@ -168,4 +175,15 @@ func (this *ServerSocket) Disconnect(bool) bool {
 }
 
 func (this *ServerSocket) OnNetFail(int) {
+}
+
+func (this *ServerSocket) handleConn(tcpConn *net.TCPConn, addr string) bool {
+	if tcpConn == nil {
+		return false
+	}
+	client := this.AddClient(tcpConn, addr, this.connectType)
+	if client == nil {
+		return false
+	}
+	return true
 }

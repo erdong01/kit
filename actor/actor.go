@@ -25,8 +25,7 @@ const (
 
 type (
 	Actor struct {
-		CallChan  chan CallIO //rpc chan
-		acotrChan chan int    //use for states
+		acotrChan chan int //use for states
 		id        int64
 		CallMap   map[string]*CallFunc
 		pTimer    *time.Ticker //定时器
@@ -55,7 +54,7 @@ type (
 		className string
 	}
 	IActor interface {
-		Init(chanNum int)
+		Init()
 		Stop()
 		Start()
 		FindCall(funcName string) *CallFunc
@@ -69,9 +68,9 @@ type (
 	}
 )
 
-func (this *Actor) Init(chanNum int) {
+func (this *Actor) Init() {
 	this.mailChan = make(chan bool)
-	this.CallChan = make(chan CallIO, chanNum)
+
 	this.acotrChan = make(chan int, 1)
 	this.id = AssignActorId()
 	this.CallMap = make(map[string]*CallFunc)

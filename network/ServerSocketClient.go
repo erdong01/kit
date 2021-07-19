@@ -60,6 +60,10 @@ func (this *ServerSocketClient) Run() bool {
 				log.Println(err)
 			}
 		}()
+
+		if this.shuttingDown || this.Conn == nil {
+			return false
+		}
 		n, err := this.Conn.Read(buff)
 		if err == io.EOF {
 			fmt.Printf("远程链接：%s已经关闭！\n", this.Conn.RemoteAddr().String())

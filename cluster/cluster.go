@@ -66,7 +66,7 @@ func (this *EmptyClusterInfo) String() string {
 }
 
 func (this *Cluster) Init(num int, info *common.ClusterInfo, Endpoints []string, natsUrl string) {
-	this.Actor.Init(num)
+	this.Actor.Init()
 	this.RegisterClusterCall()
 	for i := 0; i < MAX_CLUSTER_NUM; i++ {
 		this.clusterLocker[i] = &sync.RWMutex{}
