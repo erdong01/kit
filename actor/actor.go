@@ -7,6 +7,7 @@ import (
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools/mpsc"
+	"github.com/erDong01/micro-kit/wrong"
 	"log"
 	"reflect"
 	"runtime"
@@ -124,7 +125,7 @@ func (this *Actor) run() {
 func (this *Actor) loop() bool {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Print(err)
+			wrong.TraceCode(this.mTrace.ToString(),err)
 		}
 	}()
 	select {
