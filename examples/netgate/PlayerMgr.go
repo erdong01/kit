@@ -107,7 +107,7 @@ func (this *PlayerManager) GetAccountInfo(socketId uint32) *AccountInfo {
 }
 
 func (this *PlayerManager) Init(num int) {
-	this.Actor.Init(num)
+	this.Actor.Init()
 	this.m_SocketMap = make(map[uint32]int64)
 	this.m_AccountMap = make(map[int64]*AccountInfo)
 	this.m_Locker = &sync.RWMutex{}

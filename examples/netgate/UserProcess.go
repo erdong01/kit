@@ -150,7 +150,7 @@ func (this *UserPrcoess) delKey(SocketId uint32) {
 }
 
 func (this *UserPrcoess) Init(num int) {
-	this.Actor.Init(num)
+	this.Actor.Init()
 	this.m_KeyMap = map[uint32]*tools.Dh{}
 	this.RegisterCall("C_G_LogoutRequest", func(ctx context.Context, accountId int, UID int) {
 		log.Printf("logout Socket:%d Account:%d UID:%d ", this.GetRpcHead(ctx).SocketId, accountId, UID)
@@ -167,7 +167,7 @@ func (this *UserPrcoess) Init(num int) {
 		SendToClient(head.SocketId, &message.G_C_LoginResponse{PacketHead: message.BuildPacketHead(0, 0), Key: dh.PubKey()})
 	})
 
-	this.RegisterCall("C_A_LoginRequest", func(ctx context.Context, packet *message.C_A_LoginRequest) {
+	this.RegisterCall("C_A_LoginRequest", func(ctx context.Context, packet *message.C_A_LoginRequest, packet2 *message.C_A_LoginRequest) {
 		fmt.Println("进入C_A_LoginRequest方法")
 		head := this.GetRpcHead(ctx)
 		_, bEx := this.m_KeyMap[head.SocketId]

@@ -27,7 +27,7 @@ var (
 )
 
 func (this *AccountMgr) Init(num int) {
-	this.Actor.Init(1000)
+	this.Actor.Init()
 	this.accountMap = make(map[int64]*Account)
 	this.accountNameMap = make(map[string]*Account)
 	//this.RegisterTimer(1000 * 1000 * 1000, this.Update)//定时器

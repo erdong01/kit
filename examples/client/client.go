@@ -24,7 +24,7 @@ func main() {
 
 	CLIENT = new(network.ClientSocket)
 
-	CLIENT.Init("192.168.2.231", 31700)
+	CLIENT.Init("127.0.0.1", 31700)
 
 	PACKET = new(EventProcess)
 

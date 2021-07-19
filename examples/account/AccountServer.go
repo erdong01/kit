@@ -47,7 +47,7 @@ func (this *ServerMgr) Init() bool {
 	userNetIP := "192.168.2.231"
 	port := 31701
 	etcdEndpoints := []string{"192.168.2.129:2379"}
-	Nats_Cluster := "192.168.2.129:4222"
+	Nats_Cluster := "47.97.219.81:4222"
 	//初始化socket
 	this.service = new(network.ServerSocket)
 	this.service.Init(UserNetIP, port)

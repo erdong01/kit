@@ -119,6 +119,7 @@ func (this *Actor) run() {
 			break
 		}
 	}
+	fmt.Println(11111112222222)
 	this.clear()
 }
 
@@ -153,6 +154,11 @@ func (this *Actor) consume() {
 }
 
 func (this *Actor) call(io CallIO) {
+	defer func() {
+		if err := recover(); err != nil {
+			wrong.TraceCode(this.mTrace.ToString(),err)
+		}
+	}()
 	rpcPacket, _ := rpc.Unmarshal(io.Buff)
 	head := io.RpcHead
 	funcName := rpcPacket.FuncName

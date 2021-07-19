@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	url  = "nats://192.168.2.129:4222"
+	url  = "nats://47.97.219.81:4222"
 	subj = "weather"
 )
 

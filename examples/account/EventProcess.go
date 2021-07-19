@@ -21,7 +21,7 @@ type (
 )
 
 func (this *EventProcess) Init(num int) {
-	this.Actor.Init(num)
+	this.Actor.Init()
 	//创建账号
 	this.RegisterCall("C_A_RegisterRequest", func(ctx context.Context, packet *message.C_A_RegisterRequest) {
 		fmt.Println("创建账号")

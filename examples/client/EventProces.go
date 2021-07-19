@@ -64,7 +64,7 @@ func (this *EventProcess) PacketFunc(packet1 rpc3.Packet) bool {
 	return true
 }
 func (this *EventProcess) Init(num int) {
-	this.Actor.Init(num)
+	this.Actor.Init()
 	this.RegisterCall("W_C_SelectPlayerResponse", func(ctx context.Context, packet *message.W_C_SelectPlayerResponse) {
 		this.AccountId = packet.GetAccountId()
 		nLen := len(packet.GetPlayerData())
@@ -78,7 +78,7 @@ func (this *EventProcess) Init(num int) {
 			this.LoginGame()
 		}
 	})
-
+	this.Actor.Start()
 }
 func (this *EventProcess) LoginGame() {
 	packet1 := &message.C_W_Game_LoginRequset{PacketHead: message.BuildPacketHead(this.AccountId, rpc3.SERVICE_GATESERVER),
