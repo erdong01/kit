@@ -135,6 +135,7 @@ func (this *Actor) call(io CallIO) {
 		k := pFunc.FuncType
 		rpcPacket.RpcHead.SocketId = io.SocketId
 		params := rpc.UnmarshalBody(rpcPacket, k)
+		fmt.Println(params)
 		if len(params) >= 1 {
 			in := make([]reflect.Value, len(params))
 			for i, param := range params {
