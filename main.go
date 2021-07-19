@@ -16,5 +16,4 @@ func main() {
 	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
 	t := <-c
 	fmt.Printf("server【%s】 exit ------- signal:[%v]", t)
-
 }
