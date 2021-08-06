@@ -15,6 +15,7 @@ type info struct {
 	Name    string
 	version string
 }
+
 type Core struct {
 	Db          *gorm.DB
 	Transaction *gorm.DB
@@ -38,6 +39,12 @@ func New() *Core {
 	})
 	return c
 
+}
+
+func Copy() *Core {
+	var core *Core = new(Core)
+	*core = *New()
+	return core
 }
 
 func Set(newCore *Core) {
