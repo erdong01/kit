@@ -56,3 +56,12 @@ func copyNodes(src []Node) (dst []Node) {
 	copy(dst, src)
 	return
 }
+
+func copyNodes(src []Node) (dst []Node){
+	if src == nil{
+		return
+	}
+	dst = make([]Node,len(src))
+	copy(dst,src)
+	return
+}
