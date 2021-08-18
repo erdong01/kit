@@ -7,10 +7,11 @@ require (
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-redis/redis/v8 v8.10.0
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/joeycumines/go-bigbuff v1.15.0 // indirect
+	github.com/joeycumines/go-bigbuff v1.15.0
 	github.com/nats-io/nats-server/v2 v2.2.6 // indirect
 	github.com/nats-io/nats.go v1.11.0
 	github.com/spf13/viper v1.6.1
+	github.com/xlab/treeprint v1.1.0
 	go.etcd.io/etcd/client/v3 v3.5.0
 	go.mongodb.org/mongo-driver v1.5.2
 	google.golang.org/grpc v1.38.0
