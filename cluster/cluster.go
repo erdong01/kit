@@ -47,6 +47,7 @@ type (
 		AddCluster(info *common.ClusterInfo)
 		DelCluster(info *common.ClusterInfo)
 		GetCluster(rpc3.RpcHead) *common.ClusterInfo
+		GetClusters(head rpc3.RpcHead) map[uint32]*common.ClusterInfo
 
 		BindPacketFunc(packetFunc network.PacketFunc)
 		SendMsg(rpc3.RpcHead, string, ...interface{})                    //发送给集群特定服务器
@@ -153,6 +154,13 @@ func (this *Cluster) GetCluster(head rpc3.RpcHead) *common.ClusterInfo {
 		return client
 	}
 	return nil
+}
+
+func (this *Cluster) GetClusters(head rpc3.RpcHead) map[uint32]*common.ClusterInfo {
+	this.clusterLocker[head.DestServerType].RLock()
+	defer this.clusterLocker[head.DestServerType].RUnlock()
+	clusters := this.clusterMap[head.DestServerType]
+	return clusters
 }
 
 func (this *Cluster) BindPacketFunc(callFunc network.PacketFunc) {

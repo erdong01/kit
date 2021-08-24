@@ -3,7 +3,6 @@ package etcdv3
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/cluster/common"
 	"github.com/erDong01/micro-kit/pb/rpc3"
@@ -63,7 +62,6 @@ func NodeToService(val []byte) *common.ClusterInfo {
 }
 
 func (this *Master) Run() {
-	fmt.Println(this.String())
 	wch := this.client.Watch(context.Background(), ETCD_DIR+this.String(), clientv3.WithPrefix(), clientv3.WithPrevKV())
 	for v := range wch {
 		for _, v1 := range v.Events {
