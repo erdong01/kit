@@ -42,7 +42,7 @@ type (
 	}
 
 	ICluster interface {
-		Init(num int, info *common.ClusterInfo, Endpoints []string, natsUrl string)
+		Init(info *common.ClusterInfo, Endpoints []string, natsUrl string)
 		RegisterClusterCall() //注册集群通用回调
 		AddCluster(info *common.ClusterInfo)
 		DelCluster(info *common.ClusterInfo)
@@ -66,7 +66,7 @@ func (this *EmptyClusterInfo) String() string {
 	return ""
 }
 
-func (this *Cluster) Init(num int, info *common.ClusterInfo, Endpoints []string, natsUrl string) {
+func (this *Cluster) Init(info *common.ClusterInfo, Endpoints []string, natsUrl string) {
 	this.Actor.Init()
 	this.RegisterClusterCall()
 	for i := 0; i < MAX_CLUSTER_NUM; i++ {
