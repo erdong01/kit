@@ -49,7 +49,7 @@ func (this *ServerMgr) Init() bool {
 	this.service.Start()
 	var packet1 EventProcess
 	this.cluster = new(cluster.Cluster)
-	this.cluster.Init(1000, &common.ClusterInfo{Type: rpc3.SERVICE_GATESERVER, Ip: UserNetIP, Port: int32(port)}, etcdEndpoints, Nats_Cluster)
+	this.cluster.Init(&common.ClusterInfo{Type: rpc3.SERVICE_GATESERVER, Ip: UserNetIP, Port: int32(port)}, etcdEndpoints, Nats_Cluster)
 	this.cluster.BindPacketFunc(packet1.PacketFunc)
 	this.cluster.BindPacketFunc(DispatchPacket)
 	//初始玩家管理
