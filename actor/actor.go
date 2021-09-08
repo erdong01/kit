@@ -113,7 +113,7 @@ func (this *Actor) Init() {
 	this.mTrace.Init()
 }
 
-func (this *Actor) RegisterTimer(duration time.Duration, fun interface{}, opts ...timer.OpOption) {
+func (this *Actor) RegisterTimer(duration time.Duration, fun func(), opts ...timer.OpOption) {
 	if this.mTimerId == nil {
 		this.mTimerId = new(int64)
 		*this.mTimerId = this.id
