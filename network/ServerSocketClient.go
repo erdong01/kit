@@ -143,6 +143,7 @@ func (this *ServerSocketClient) Run() bool {
 		n, err := this.Conn.Read(buff)
 		if err == io.EOF {
 			fmt.Printf("远程链接：%s已经关闭！\n", this.Conn.RemoteAddr().String())
+			this.OnNetFail()
 			return false
 		}
 		if err != nil {
@@ -151,6 +152,7 @@ func (this *ServerSocketClient) Run() bool {
 			return false
 		}
 		if n > 0 {
+			//熔断
 			if !this.packetParser.Read(buff[:n]) && this.connectType == CLIENT_CONNECT {
 				this.OnNetFail()
 				return false
@@ -165,7 +167,7 @@ func (this *ServerSocketClient) Run() bool {
 		}
 	}
 	this.Close()
-	fmt.Printf("%s关闭连接 \n", this.IP)
+	fmt.Printf("%s关闭连接 \n", this.IP, this.GetId())
 	return true
 }
 
