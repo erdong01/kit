@@ -23,10 +23,9 @@ var (
 )
 
 const (
-	DESDORY_EVENT = iota
-	AsfNull       = iota
-	AsfRun        = iota
-	AsfStop       = iota
+	AsfNull = iota
+	AsfRun  = iota
+	AsfStop = iota
 )
 
 type (
@@ -75,6 +74,10 @@ type (
 		filePath  string
 		className string
 	}
+)
+
+const (
+	DESDORY_EVENT = iota
 )
 
 func AssignActorId() int64 {
