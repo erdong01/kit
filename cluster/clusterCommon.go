@@ -12,9 +12,10 @@ import (
 )
 
 type (
-	Service   etcdv3.Service
-	Master    etcdv3.Master
-	Snowflake etcdv3.Snowflake
+	Service    etcdv3.Service
+	Master     etcdv3.Master
+	Snowflake  etcdv3.Snowflake
+	PlayerRaft etcdv3.PlayerRaft
 )
 
 //NewService 注册服务器
@@ -37,6 +38,24 @@ func NewSnowflake(Endpoints []string) *Snowflake {
 	uuid.Init(Endpoints)
 	return (*Snowflake)(uuid)
 }
+
+func NewPlayerRaft(Endpoints []string) *PlayerRaft {
+	playerRaft := &etcdv3.PlayerRaft{}
+	playerRaft.Init(Endpoints)
+	return (*PlayerRaft)(playerRaft)
+}
+func (this *PlayerRaft) GetPlayer(Id int64) *rpc3.PlayerClusterInfo {
+	return (*etcdv3.PlayerRaft)(this).GetPlayer(Id)
+}
+
+func (this *PlayerRaft) Publish(info *rpc3.PlayerClusterInfo) bool {
+	return (*etcdv3.PlayerRaft)(this).Publish(info)
+}
+
+func (this *PlayerRaft) Lease(leaseId int64) error {
+	return (*etcdv3.PlayerRaft)(this).Lease(leaseId)
+}
+
 func GetRpcChannel(head rpc3.RpcHead) string {
 	return fmt.Sprintf("%s/%s/%d", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
 }
@@ -46,6 +65,18 @@ func GetRpcTopicChannel(head rpc3.RpcHead) string {
 }
 func GetRpcCallChannel(head rpc3.RpcHead) string {
 	return fmt.Sprintf("%s/%s/call/%d", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
+}
+
+func GetChannel(clusterInfo common.ClusterInfo) string {
+	return fmt.Sprintf("%s/%s/%d", etcdv3.ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
+}
+
+func GetTopicChannel(clusterInfo common.ClusterInfo) string {
+	return fmt.Sprintf("%s/%s", etcdv3.ETCD_DIR, clusterInfo.String())
+}
+
+func GetCallChannel(clusterInfo common.ClusterInfo) string {
+	return fmt.Sprintf("%s/%s/call/%d", etcdv3.ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
 }
 
 func SetupNatsConn(connectString string, appDieChan chan bool, options ...nats.Option) (*nats.Conn, error) {
@@ -76,15 +107,4 @@ func SetupNatsConn(connectString string, appDieChan chan bool, options ...nats.O
 		return nil, err
 	}
 	return nc, nil
-}
-func GetChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s/%d", etcdv3.ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
-}
-
-func GetTopicChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s", etcdv3.ETCD_DIR, clusterInfo.String())
-}
-
-func GetCallChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s/call/%d", etcdv3.ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
 }

@@ -49,9 +49,6 @@ func (this *Master) delService(info *common.ClusterInfo) {
 	this.actor.SendMsg(rpc3.RpcHead{}, "Cluster_Del", info)
 }
 
-func (this *Master) InitService(info *common.ClusterInfo) {
-}
-
 func NodeToService(val []byte) *common.ClusterInfo {
 	info := &common.ClusterInfo{}
 	err := json.Unmarshal([]byte(val), info)

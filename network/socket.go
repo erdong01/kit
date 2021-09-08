@@ -5,15 +5,17 @@ import (
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools/vector"
 	"net"
+	"sync/atomic"
 )
 
 const (
-	SSF_ACCEPT    = iota
-	SSF_CONNECT   = iota
-	SSF_SHUT_DOWN = iota //已经关闭
+	SSF_NULL = iota
+	SSF_RUN  = iota
+	SSF_STOP = iota //已经关闭
 )
 const (
-	MAX_SEND_CHAN = 100
+	MAX_SEND_CHAN  = 100
+	HEART_TIME_OUT = 30
 )
 
 const (
@@ -26,7 +28,7 @@ type (
 	HandlePacket func(buff []byte)
 	Socket       struct {
 		IP                string
-		state             int
+		state             int32
 		Port              int
 		Zone              string
 		ReceiveBufferSize int //单次接收缓存
@@ -37,15 +39,14 @@ type (
 
 		Conn net.Conn
 
-		sendTimes    int
-		receiveTimes int
-		shuttingDown bool
-
+		sendTimes      int
+		receiveTimes   int
 		PacketFuncList *vector.Vector
 
 		half         bool
 		halfSize     int
 		packetParser PacketParser
+		heartTime    int
 	}
 
 	ISocket interface {
@@ -64,7 +65,8 @@ type (
 		CallMsg(string, ...interface{}) //回调消息处理
 
 		GetId() uint32
-		GetState() int
+		GetState() int32
+		SetState(int32)
 		SetReceiveBufferSize(int)
 		GetReceiveBufferSize() int
 		SetMaxPacketLen(int)
@@ -79,7 +81,7 @@ type (
 func (this *Socket) Init(string, int) {
 	this.PacketFuncList = vector.NewVector()
 	this.ReceiveBufferSize = 1024
-	this.state = SSF_SHUT_DOWN
+	this.state = SSF_NULL
 	this.connectType = SERVER_CONNECT
 	this.half = false
 	this.halfSize = 0
@@ -90,7 +92,9 @@ func (this *Socket) Start() bool {
 	return true
 }
 func (this *Socket) Stop() bool {
-	this.shuttingDown = true
+	if this.Conn != nil && atomic.CompareAndSwapInt32(&this.state, SSF_RUN, SSF_STOP) {
+		this.Conn.Close()
+	}
 	return true
 }
 func (this *Socket) Run() bool {
@@ -104,6 +108,9 @@ func (this *Socket) Restart() bool {
 func (this *Socket) Connect() bool {
 	return true
 }
+func (this *Socket) Disconnect(bool) bool {
+	return true
+}
 
 func (this *Socket) OnNetFail(int) {
 	this.Stop()
@@ -112,13 +119,14 @@ func (this *Socket) OnNetFail(int) {
 func (this *Socket) GetId() uint32 {
 	return this.clientId
 }
-func (this *Socket) Disconnect(bool) bool {
-	return true
+func (this *Socket) GetState() int32 {
+	return atomic.LoadInt32(&this.state)
 }
 
-func (this *Socket) GetState() int {
-	return this.state
+func (this *Socket) SetState(state int32) {
+	atomic.StoreInt32(&this.state, state)
 }
+
 func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
 	return 0
 }
@@ -128,18 +136,15 @@ func (this *Socket) Send(rpc3.RpcHead, []byte) int {
 }
 
 func (this *Socket) Clear() {
-	this.state = SSF_SHUT_DOWN
+	this.SetState(SSF_NULL)
 	this.Conn = nil
 	this.ReceiveBufferSize = 1024
-	this.shuttingDown = false
 	this.half = false
 	this.halfSize = 0
+	this.heartTime = 0
 }
 
 func (this *Socket) Close() {
-	if this.Conn != nil {
-		this.Conn.Close()
-	}
 	this.Clear()
 }
 

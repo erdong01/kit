@@ -27,6 +27,7 @@ func (this *Snowflake) Key() string {
 func (this *Snowflake) Run() {
 	for {
 	TrySet:
+		//设置key
 		key := this.Key()
 		tx := this.client.Txn(context.Background())
 		leaseResp, err := this.lease.Grant(context.Background(), 60)

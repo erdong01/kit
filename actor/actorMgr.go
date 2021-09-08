@@ -1,6 +1,7 @@
 package actor
 
 import (
+	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/tools"
 	"log"
@@ -15,7 +16,11 @@ type (
 		Init()
 		AddActor(IActor, ...string)
 		GetActor(string) IActor
+		InitActorHandle(ICluster)
 		SendMsg(rpc3.RpcHead, string, ...interface{})
+	}
+	ICluster interface {
+		BindPacketFunc(packetFunc network.PacketFunc)
 	}
 )
 
@@ -46,7 +51,11 @@ func (this *ActorMgr) GetActor(name string) IActor {
 	}
 	return nil
 }
-
+func (this *ActorMgr) InitActorHandle(pCluster ICluster) {
+	for _, v := range this.ActorMap {
+		pCluster.BindPacketFunc(v.PacketFunc)
+	}
+}
 func (this *ActorMgr) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
 	name := strings.ToLower(head.ActorName)
 	pActor, exist := this.ActorMap[name]

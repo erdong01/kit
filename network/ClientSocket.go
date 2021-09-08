@@ -40,8 +40,6 @@ func (this *ClientSocket) Init(ip string, port int) bool {
 }
 
 func (this *ClientSocket) Start() bool {
-
-	this.shuttingDown = false
 	if this.IP == "" {
 		this.IP = "127.0.0.1"
 	}
@@ -49,15 +47,6 @@ func (this *ClientSocket) Start() bool {
 		this.Conn.(*net.TCPConn).SetNoDelay(true)
 		go this.Run()
 	}
-	return true
-}
-
-func (this *ClientSocket) Stop() bool {
-	if this.shuttingDown {
-		return true
-	}
-	this.shuttingDown = true
-	this.Close()
 	return true
 }
 
@@ -87,9 +76,6 @@ func (this *ClientSocket) Restart() bool {
 	return true
 }
 func (this *ClientSocket) Connect() bool {
-	if this.state == SSF_CONNECT {
-		return false
-	}
 	var strRemote = fmt.Sprintf("%s:%d", this.IP, this.Port)
 	tcpAddr, err := net.ResolveTCPAddr("tcp", strRemote)
 	if err != nil {
@@ -99,7 +85,6 @@ func (this *ClientSocket) Connect() bool {
 	if err1 != nil {
 		return false
 	}
-	this.state = SSF_CONNECT
 	this.SetTcpConn(ln)
 	this.CallMsg("COMMON_RegisterRequest")
 	return true
@@ -112,11 +97,13 @@ func (this *ClientSocket) OnNetFail(int) {
 func (this *ClientSocket) Run() bool {
 	var buff = make([]byte, this.ReceiveBufferSize)
 	loop := func() bool {
-		if err := recover(); err != nil {
-			wrong.TraceCode(err)
-		}
+		defer func() {
+			if err := recover(); err != nil {
+				wrong.TraceCode(err)
+			}
+		}()
 
-		if this.shuttingDown || this.Conn == nil {
+		if this.Conn == nil {
 			return false
 		}
 
