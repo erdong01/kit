@@ -13,31 +13,29 @@ const (
 	SSF_RUN  = iota
 	SSF_STOP = iota //已经关闭
 )
-const (
-	MAX_SEND_CHAN  = 100
-	HEART_TIME_OUT = 30
-)
 
 const (
 	CLIENT_CONNECT = iota //对外
 	SERVER_CONNECT = iota //对内
+)
+const (
+	MAX_SEND_CHAN  = 100
+	HEART_TIME_OUT = 30
 )
 
 type (
 	PacketFunc   func(packet rpc3.Packet) bool //回调函数
 	HandlePacket func(buff []byte)
 	Socket       struct {
+		Conn              net.Conn
+		Port              int
 		IP                string
 		state             int32
-		Port              int
-		Zone              string
-		ReceiveBufferSize int //单次接收缓存
 		connectType       int
+		ReceiveBufferSize int //单次接收缓存
 
 		clientId uint32
 		seq      int64
-
-		Conn net.Conn
 
 		sendTimes      int
 		receiveTimes   int
@@ -60,7 +58,7 @@ type (
 		OnNetFail(int)
 		Clear()
 		Close()
-		SendMsg(rpc3.RpcHead, string, ...interface{}) int
+		SendMsg(rpc3.RpcHead, string, ...interface{})
 		Send(rpc3.RpcHead, []byte) int
 		CallMsg(string, ...interface{}) //回调消息处理
 
@@ -78,14 +76,16 @@ type (
 	}
 )
 
-func (this *Socket) Init(string, int) {
+func (this *Socket) Init(string, int) bool {
 	this.PacketFuncList = vector.NewVector()
 	this.ReceiveBufferSize = 1024
-	this.state = SSF_NULL
+	this.SetState(SSF_NULL)
 	this.connectType = SERVER_CONNECT
 	this.half = false
 	this.halfSize = 0
+	this.heartTime = 0
 	this.packetParser = NewPacketParser(PacketConfig{Func: this.HandlePacket})
+	return true
 }
 
 func (this *Socket) Start() bool {
@@ -127,8 +127,7 @@ func (this *Socket) SetState(state int32) {
 	atomic.StoreInt32(&this.state, state)
 }
 
-func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
-	return 0
+func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
 }
 
 func (this *Socket) Send(rpc3.RpcHead, []byte) int {

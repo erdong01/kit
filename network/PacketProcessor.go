@@ -37,7 +37,6 @@ func NewPacketParser(conf PacketConfig) PacketParser {
 		p.PacketFunc = conf.Func
 	} else {
 		p.PacketFunc = func(buff []byte) {
-			fmt.Println("sfdjsaf")
 		}
 	}
 	return p
