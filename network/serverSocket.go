@@ -10,6 +10,8 @@ import (
 	"sync/atomic"
 )
 
+var SocketServer *ServerSocket
+
 type IServerSocket interface {
 	ISocket
 
@@ -50,6 +52,7 @@ func (this *ServerSocket) Init(ip string, port int) bool {
 	this.clientLock = &sync.RWMutex{}
 	this.IP = ip
 	this.Port = port
+	SocketServer = this
 	return true
 }
 
