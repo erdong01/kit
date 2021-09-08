@@ -37,6 +37,12 @@ type ServerSocketClient struct {
 	timerId      *int64
 }
 
+func handleError(err error) {
+	if err == nil {
+		return
+	}
+	log.Printf("错误：%s\n", err.Error())
+}
 func (this *ServerSocketClient) Init(ip string, port int) bool {
 	if this.connectType == CLIENT_CONNECT {
 		this.sendChan = make(chan []byte, MAX_SEND_CHAN)

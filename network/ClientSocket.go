@@ -22,13 +22,6 @@ type (
 	}
 )
 
-func handleError(err error) {
-	if err == nil {
-		return
-	}
-	log.Printf("错误：%s\n", err.Error())
-}
-
 func (this *ClientSocket) Init(ip string, port int) bool {
 	if this.Port == port || this.IP == ip {
 		return false
@@ -36,6 +29,7 @@ func (this *ClientSocket) Init(ip string, port int) bool {
 	this.Socket.Init(ip, port)
 	this.IP = ip
 	this.Port = port
+	fmt.Println(ip, port)
 	return true
 }
 
@@ -77,15 +71,16 @@ func (this *ClientSocket) Restart() bool {
 }
 func (this *ClientSocket) Connect() bool {
 	var strRemote = fmt.Sprintf("%s:%d", this.IP, this.Port)
-	tcpAddr, err := net.ResolveTCPAddr("tcp", strRemote)
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
 	if err != nil {
-		log.Println("%v", err)
+		log.Printf("%v", err)
 	}
-	ln, err1 := net.DialTCP("tcp", nil, tcpAddr)
+	ln, err1 := net.DialTCP("tcp4", nil, tcpAddr)
 	if err1 != nil {
 		return false
 	}
 	this.SetTcpConn(ln)
+	fmt.Printf("连接成功，请输入信息！\n")
 	this.CallMsg("COMMON_RegisterRequest")
 	return true
 }

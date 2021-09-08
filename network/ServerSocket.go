@@ -60,22 +60,23 @@ func (this *ServerSocket) Start() bool {
 	if this.IP == "" {
 		this.IP = "127.0.0.1"
 	}
-	var zone string
-	if this.Zone != "" {
-		zone = this.Zone
+
+	var strRemote = fmt.Sprintf("%s:%d", this.IP, this.Port)
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
+	if err != nil {
+		log.Fatalf("%v", err)
 	}
-	var port = this.Port
-	if port == 0 {
-		port = 8001
-	}
-	listen, err := net.ListenTCP("tcp", &net.TCPAddr{net.ParseIP(this.IP), port, zone})
+	ln, err := net.ListenTCP("tcp4", tcpAddr)
 	if err != nil {
 		log.Fatalf("%v", err)
 		return false
 	}
 
 	fmt.Printf("启动监听，等待链接！\n")
-	this.listen = listen
+
+	this.listen = ln
+	//延迟，监听关闭
+	//defer ln.Close()
 	go this.Run()
 	return true
 }
