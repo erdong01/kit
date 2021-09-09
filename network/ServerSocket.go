@@ -104,6 +104,7 @@ func (this *ServerSocket) AddClient(tcpConn *net.TCPConn, addr string, connectTy
 		socketClient.IP = addr
 		socketClient.SetConnectType(connectType)
 		socketClient.SetTcpConn(tcpConn)
+		socketClient.SetClientClose(this.GetClientClose()) //自己加的
 		this.clientLock.Lock()
 		this.clientList[socketClient.clientId] = socketClient
 		this.clientLock.Unlock()
