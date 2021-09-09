@@ -26,6 +26,7 @@ const (
 type (
 	PacketFunc   func(packet rpc3.Packet) bool //回调函数
 	HandlePacket func(buff []byte)
+	ClientClose  func(id uint32) error
 	Socket       struct {
 		Conn              net.Conn
 		Port              int
@@ -45,6 +46,8 @@ type (
 		halfSize     int
 		packetParser PacketParser
 		heartTime    int
+
+		clientClose ClientClose
 	}
 
 	ISocket interface {
@@ -73,6 +76,9 @@ type (
 		SetConnectType(int)
 		SetTcpConn(net.Conn)
 		HandlePacket([]byte)
+
+		SetClientClose(ClientClose)
+		GetClientClose() ClientClose
 	}
 )
 
@@ -187,4 +193,11 @@ func (this *Socket) HandlePacket(buff []byte) {
 			break
 		}
 	}
+}
+
+func (this *Socket) SetClientClose(c ClientClose) {
+	this.clientClose = c
+}
+func (this *Socket) GetClientClose() ClientClose {
+	return this.clientClose
 }
