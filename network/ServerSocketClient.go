@@ -133,7 +133,7 @@ func (this *ServerSocketClient) Run() bool {
 	defer func() {
 		if err := recover(); err != nil {
 			this.Close()
-			log.Println(err)
+			wrong.TraceCode(err)
 			runtime.Goexit()
 		}
 	}()
