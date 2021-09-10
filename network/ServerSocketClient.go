@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"runtime"
 	"time"
 )
 
@@ -129,6 +130,13 @@ func (this *ServerSocketClient) Close() {
 	}
 }
 func (this *ServerSocketClient) Run() bool {
+	defer func() {
+		if err := recover(); err != nil {
+			this.Close()
+			log.Println(err)
+			runtime.Goexit()
+		}
+	}()
 	var buff = make([]byte, this.ReceiveBufferSize)
 	loop := func() bool {
 		defer func() {
