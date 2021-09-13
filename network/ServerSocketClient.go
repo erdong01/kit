@@ -178,7 +178,7 @@ func (this *ServerSocketClient) Run() bool {
 	if this.Socket.clientClose != nil {
 		this.Socket.clientClose(this.clientId)
 	}
-	fmt.Printf("%s关闭连接 \n", this.IP, ";socketId:", this.GetId())
+	fmt.Printf("%s关闭连接;socketId:%d \n", this.IP, this.GetId())
 	return true
 }
 
