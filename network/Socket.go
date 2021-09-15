@@ -24,9 +24,10 @@ const (
 )
 
 type (
+	ClientClose func(id uint32) error
+
 	PacketFunc   func(packet rpc3.Packet) bool //回调函数
 	HandlePacket func(buff []byte)
-	ClientClose  func(id uint32) error
 	Socket       struct {
 		Conn              net.Conn
 		Port              int
