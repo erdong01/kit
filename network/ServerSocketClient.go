@@ -41,7 +41,7 @@ func handleError(err error) {
 	if err == nil {
 		return
 	}
-	log.Printf("错误：%s\n", err.Error())
+	wrong.TraceCode(err)
 }
 func (this *ServerSocketClient) Init(ip string, port int) bool {
 	if this.connectType == CLIENT_CONNECT {
