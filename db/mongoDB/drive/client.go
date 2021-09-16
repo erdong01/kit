@@ -18,12 +18,11 @@ func Init(Uri ...string) *mongo.Client {
 	} else {
 		mongoConf.Uri = Uri[0]
 	}
-	options.Client().ApplyURI(mongoConf.Uri)
-	return Connect(options.Client().ApplyURI(mongoConf.Uri))
+	return Connect(options.Client().ApplyURI(mongoConf.Uri).SetMaxPoolSize(200))
 }
 
 func Connect(opts ...*options.ClientOptions) *mongo.Client {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
 	client, err := mongo.Connect(ctx, opts...)
 	if err != nil {
 		log.Fatal(err)
