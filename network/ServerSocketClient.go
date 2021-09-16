@@ -201,9 +201,9 @@ func (this *ServerSocketClient) SendLoop() bool {
 	return true
 }
 
-func (this *ServerSocketClient) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) {
+func (this *ServerSocketClient) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) int {
 	buff := rpc.MarshalPacket(head, funcName, packet)
-	this.Send(rpc3.RpcHead{}, buff)
+	return this.Send(rpc3.RpcHead{}, buff)
 }
 
 func (this *ServerSocketClient) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
