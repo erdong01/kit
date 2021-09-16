@@ -20,7 +20,7 @@ func Init(Uri ...string) *mongo.Client {
 	}
 	return Connect(options.Client().ApplyURI(mongoConf.Uri).
 		SetMinPoolSize(10).
-		SetMaxPoolSize(200))
+		SetMaxPoolSize(500))
 }
 
 func Connect(opts ...*options.ClientOptions) *mongo.Client {
