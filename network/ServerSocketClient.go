@@ -98,7 +98,6 @@ func (this *ServerSocketClient) DoSend(buff []byte) int {
 	n, err := this.Conn.Write(this.packetParser.Write(buff))
 
 	handleError(err)
-	fmt.Println("发送成功条数:", n)
 	if n > 0 {
 		return n
 	}
