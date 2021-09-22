@@ -191,6 +191,10 @@ func (this *ServerSocket) handleConn(tcpConn *net.TCPConn, addr string) bool {
 }
 
 func (this *ServerSocket) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) int {
+	client := SocketServer.GetClientById(head.SocketId)
+	if client == nil {
+		return 0
+	}
 	buff := rpc.MarshalPacket(head, funcName, packet)
 	return this.Send(rpc3.RpcHead{}, buff)
 }
