@@ -196,5 +196,5 @@ func (this *ServerSocket) SendPacket(head rpc3.RpcHead, funcName string, packet 
 		return 0
 	}
 	buff := rpc.MarshalPacket(head, funcName, packet)
-	return this.Send(rpc3.RpcHead{}, buff)
+	return client.Send(rpc3.RpcHead{}, buff)
 }
