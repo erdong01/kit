@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
 	"sync"
@@ -187,4 +188,9 @@ func (this *ServerSocket) handleConn(tcpConn *net.TCPConn, addr string) bool {
 		return false
 	}
 	return true
+}
+
+func (this *ServerSocket) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) int {
+	buff := rpc.MarshalPacket(head, funcName, packet)
+	return this.Send(rpc3.RpcHead{}, buff)
 }
