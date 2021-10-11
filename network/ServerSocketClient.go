@@ -11,7 +11,6 @@ import (
 	"hash/crc32"
 	"io"
 	"log"
-	"net"
 	"time"
 )
 
@@ -43,7 +42,15 @@ func handleError(err error) {
 	}
 	wrong.TraceCode(err)
 }
-func (this *ServerSocketClient) Init(ip string, port int) bool {
+func (this *ServerSocketClient) Init(ip string, port int, params ...OpOption) bool {
+	this.Socket.Init(ip, port, params...)
+	return true
+}
+
+func (this *ServerSocketClient) Start() bool {
+	if this.ServerSocket == nil {
+		return false
+	}
 	if this.connectType == CLIENT_CONNECT {
 		this.sendChan = make(chan []byte, MAX_SEND_CHAN)
 		this.timerId = new(int64)
@@ -52,18 +59,9 @@ func (this *ServerSocketClient) Init(ip string, port int) bool {
 			this.Update()
 		})
 	}
-	this.Socket.Init(ip, port)
-	return true
-}
-
-func (this *ServerSocketClient) Start() bool {
-	if this.ServerSocket == nil {
-		return false
-	}
 	if this.PacketFuncList.Len() == 0 {
 		this.PacketFuncList = this.ServerSocket.PacketFuncList
 	}
-	this.Conn.(*net.TCPConn).SetNoDelay(true)
 	go this.Run()
 	if this.connectType == CLIENT_CONNECT {
 		go this.SendLoop()

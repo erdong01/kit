@@ -5,6 +5,7 @@ import (
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/wrong"
+	"github.com/xtaci/kcp-go"
 	"io"
 	"log"
 	"net"
@@ -22,14 +23,13 @@ type (
 	}
 )
 
-func (this *ClientSocket) Init(ip string, port int) bool {
+func (this *ClientSocket) Init(ip string, port int, params ...OpOption) bool {
 	if this.Port == port || this.IP == ip {
 		return false
 	}
-	this.Socket.Init(ip, port)
+	this.Socket.Init(ip, port, params...)
 	this.IP = ip
 	this.Port = port
-	fmt.Println(ip, port)
 	return true
 }
 
@@ -38,7 +38,6 @@ func (this *ClientSocket) Start() bool {
 		this.IP = "127.0.0.1"
 	}
 	if this.Connect() {
-		this.Conn.(*net.TCPConn).SetNoDelay(true)
 		go this.Run()
 	}
 	return true
@@ -71,16 +70,26 @@ func (this *ClientSocket) Restart() bool {
 }
 func (this *ClientSocket) Connect() bool {
 	var strRemote = fmt.Sprintf("%s:%d", this.IP, this.Port)
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
-	if err != nil {
-		log.Printf("%v", err)
+	connectStr := "Tcp"
+	if this.bKcp {
+		ln, err1 := kcp.Dial(strRemote)
+		if err1 != nil {
+			return false
+		}
+		this.SetConn(ln)
+		connectStr = "Kcp"
+	} else {
+		tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
+		if err != nil {
+			log.Printf("%v", err)
+		}
+		ln, err1 := net.DialTCP("tcp4", nil, tcpAddr)
+		if err1 != nil {
+			return false
+		}
+		this.SetConn(ln)
 	}
-	ln, err1 := net.DialTCP("tcp4", nil, tcpAddr)
-	if err1 != nil {
-		return false
-	}
-	this.SetTcpConn(ln)
-	fmt.Printf("连接成功，请输入信息！\n")
+	fmt.Printf("%s 连接成功，请输入信息！\n", connectStr)
 	this.CallMsg("COMMON_RegisterRequest")
 	return true
 }
