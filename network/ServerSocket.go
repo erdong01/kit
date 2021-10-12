@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
-	"github.com/xtaci/kcp-go"
+	"github.com/xtaci/kcp-go/v5"
 	"google.golang.org/protobuf/proto"
 	"log"
 	"net"

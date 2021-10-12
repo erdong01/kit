@@ -14,12 +14,6 @@ import (
 	"time"
 )
 
-const (
-	IDLE_TIMEOUT    = iota
-	CONNECT_TIMEOUT = iota
-	CONNECT_TYPE    = iota
-)
-
 var (
 	DISCONNECTINT = crc32.ChecksumIEEE([]byte("DISCONNECT"))
 	HEART_PACKET  = crc32.ChecksumIEEE([]byte("heardpacket"))
@@ -42,6 +36,7 @@ func handleError(err error) {
 	}
 	wrong.TraceCode(err)
 }
+
 func (this *ServerSocketClient) Init(ip string, port int, params ...OpOption) bool {
 	this.Socket.Init(ip, port, params...)
 	return true
@@ -51,7 +46,6 @@ func (this *ServerSocketClient) Start() bool {
 	if this.ServerSocket == nil {
 		return false
 	}
-
 	if this.connectType == CLIENT_CONNECT {
 		this.sendChan = make(chan []byte, MAX_SEND_CHAN)
 		this.timerId = new(int64)
@@ -69,6 +63,7 @@ func (this *ServerSocketClient) Start() bool {
 	}
 	return true
 }
+
 func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
 	defer func() {
 		if err := recover(); err != nil {
@@ -140,6 +135,7 @@ func (this *ServerSocketClient) Run() bool {
 		if this.Conn == nil {
 			return false
 		}
+
 		n, err := this.Conn.Read(buff)
 		if err == io.EOF {
 			fmt.Printf("远程链接：%s已经关闭！\n", this.Conn.RemoteAddr().String())
