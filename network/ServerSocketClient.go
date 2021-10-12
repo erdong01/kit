@@ -51,6 +51,7 @@ func (this *ServerSocketClient) Start() bool {
 	if this.ServerSocket == nil {
 		return false
 	}
+
 	if this.connectType == CLIENT_CONNECT {
 		this.sendChan = make(chan []byte, MAX_SEND_CHAN)
 		this.timerId = new(int64)
@@ -128,6 +129,7 @@ func (this *ServerSocketClient) Close() {
 }
 func (this *ServerSocketClient) Run() bool {
 	var buff = make([]byte, this.ReceiveBufferSize)
+	this.SetState(SSF_RUN)
 	loop := func() bool {
 		defer func() {
 			if err := recover(); err != nil {
