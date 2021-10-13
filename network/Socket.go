@@ -19,13 +19,12 @@ const (
 	SERVER_CONNECT = iota //对内
 )
 const (
-	MAX_SEND_CHAN  = 1000
+	MAX_SEND_CHAN  = 100
 	HEART_TIME_OUT = 30
 )
 
 type (
-	ClientClose func(id uint32) error //客户关闭回调
-
+	ClientClose  func(id uint32) error         //客户关闭回调
 	PacketFunc   func(packet rpc3.Packet) bool //回调函数
 	HandlePacket func(buff []byte)
 
@@ -56,7 +55,7 @@ type (
 		heartTime    int
 		bKcp         bool
 
-		clientClose ClientClose
+		clientClose ClientClose //客户关闭回调
 	}
 
 	ISocket interface {
@@ -108,8 +107,8 @@ func (this *Socket) Init(ip string, port int, params ...OpOption) bool {
 	op := &Op{}
 	op.applyOpts(params)
 	this.PacketFuncList = vector.NewVector()
-	this.ReceiveBufferSize = 1024
 	this.SetState(SSF_NULL)
+	this.ReceiveBufferSize = 1024
 	this.connectType = SERVER_CONNECT
 	this.half = false
 	this.halfSize = 0
@@ -124,12 +123,14 @@ func (this *Socket) Init(ip string, port int, params ...OpOption) bool {
 func (this *Socket) Start() bool {
 	return true
 }
+
 func (this *Socket) Stop() bool {
 	if this.Conn != nil && atomic.CompareAndSwapInt32(&this.state, SSF_RUN, SSF_STOP) {
 		this.Conn.Close()
 	}
 	return true
 }
+
 func (this *Socket) Run() bool {
 	return true
 }
@@ -141,6 +142,7 @@ func (this *Socket) Restart() bool {
 func (this *Socket) Connect() bool {
 	return true
 }
+
 func (this *Socket) Disconnect(bool) bool {
 	return true
 }
@@ -152,6 +154,7 @@ func (this *Socket) OnNetFail(int) {
 func (this *Socket) GetId() uint32 {
 	return this.clientId
 }
+
 func (this *Socket) GetState() int32 {
 	return atomic.LoadInt32(&this.state)
 }

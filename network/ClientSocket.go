@@ -11,17 +11,15 @@ import (
 	"net"
 )
 
-type (
-	IClientSocket interface {
-		ISocket
-	}
+type IClientSocket interface {
+	ISocket
+}
 
-	ClientSocket struct {
-		Socket
-		maxClients int
-		minClients int
-	}
-)
+type ClientSocket struct {
+	Socket
+	maxClients int
+	minClients int
+}
 
 func (this *ClientSocket) Init(ip string, port int, params ...OpOption) bool {
 	if this.Port == port || this.IP == ip {
@@ -43,9 +41,9 @@ func (this *ClientSocket) Start() bool {
 	return true
 }
 
-func (this *ClientSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
+func (this *ClientSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
 	buff := rpc.Marshal(head, funcName, params...)
-	return this.Send(head, buff)
+	this.Send(head, buff)
 }
 
 func (this *ClientSocket) Send(head rpc3.RpcHead, buff []byte) int {
@@ -93,6 +91,10 @@ func (this *ClientSocket) Connect() bool {
 	this.CallMsg("COMMON_RegisterRequest")
 	return true
 }
+
+func (this *ClientSocket) OnDisconnect() {
+}
+
 func (this *ClientSocket) OnNetFail(int) {
 	this.Stop()
 	this.CallMsg("DISCONNECT", this.clientId)

@@ -157,22 +157,6 @@ func (this *ServerSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...
 	return 0
 }
 
-func (this *ServerSocket) Close() {
-	defer this.listen.Close()
-	defer this.kcpListen.Close()
-	this.Clear()
-}
-func (this *ServerSocket) Run() bool {
-	for {
-		conn, err := this.listen.AcceptTCP()
-		if err != nil {
-			fmt.Println("接受客户端连接异常：", err.Error())
-			continue
-		}
-		fmt.Println("客户端连接:", conn.RemoteAddr().String())
-		this.handleConn(conn, conn.RemoteAddr().String())
-	}
-}
 func (this *ServerSocket) Restart() bool {
 	return true
 }
@@ -180,11 +164,29 @@ func (this *ServerSocket) Restart() bool {
 func (this *ServerSocket) Connect() bool {
 	return true
 }
+
 func (this *ServerSocket) Disconnect(bool) bool {
 	return true
 }
 
 func (this *ServerSocket) OnNetFail(int) {
+}
+
+func (this *ServerSocket) Close() {
+	defer this.listen.Close()
+	defer this.kcpListen.Close()
+	this.Clear()
+}
+
+func (this *ServerSocket) Run() bool {
+	for {
+		conn, err := this.listen.AcceptTCP()
+		if err != nil {
+			continue
+		}
+		fmt.Println("客户端连接:", conn.RemoteAddr().String())
+		this.handleConn(conn, conn.RemoteAddr().String())
+	}
 }
 
 func (this *ServerSocket) RunKcp() bool {

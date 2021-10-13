@@ -13,6 +13,12 @@ import (
 	"time"
 )
 
+const (
+	IDLE_TIMEOUT    = iota
+	CONNECT_TIMEOUT = iota
+	CONNECT_TYPE    = iota
+)
+
 var (
 	DISCONNECTINT = crc32.ChecksumIEEE([]byte("DISCONNECT"))
 	HEART_PACKET  = crc32.ChecksumIEEE([]byte("heardpacket"))
