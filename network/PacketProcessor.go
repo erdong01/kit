@@ -18,7 +18,7 @@ type (
 		PacketLen       int
 		MaxPacketLen    int
 		LittleEndian    bool
-		MaxPacketBuffer []byte //max receive buff
+		MaxPacketBuffer []byte
 		PacketFunc      HandlePacket
 	}
 
@@ -71,7 +71,6 @@ func (this *PacketParser) readLen(buff []byte) (bool, int) {
 	}
 	return false, 0
 }
-
 func (this *PacketParser) Read(dat []byte) bool {
 	buff := append(this.MaxPacketBuffer, dat...)
 	this.MaxPacketBuffer = []byte{}
@@ -83,7 +82,7 @@ ParsePacket:
 	bFindFlag, nPacketSize = this.readLen(buff[nCurSize:])
 
 	if bFindFlag {
-		if nBufferSize == nPacketSize { //完整包
+		if nBufferSize == nPacketSize {
 			this.PacketFunc(buff[nCurSize+this.PacketLen : nCurSize+nPacketSize])
 			nCurSize += nPacketSize
 		} else if nBufferSize > nPacketSize {

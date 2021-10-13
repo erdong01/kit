@@ -213,6 +213,9 @@ func (this *Actor) call(io CallIO) {
 		k := pFunc.FuncType
 		rpcPacket.RpcHead.SocketId = io.SocketId
 		params := rpc.UnmarshalBody(rpcPacket, k)
+		if funcName != "cluster_add" {
+			fmt.Println(funcName, params)
+		}
 		if len(params) >= 1 {
 			in := make([]reflect.Value, len(params))
 			for i, param := range params {

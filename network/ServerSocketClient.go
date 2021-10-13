@@ -10,6 +10,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	"hash/crc32"
 	"io"
+	"log"
+	"net"
 	"time"
 )
 
@@ -41,16 +43,7 @@ func handleError(err error) {
 	}
 	wrong.TraceCode(err)
 }
-
-func (this *ServerSocketClient) Init(ip string, port int, params ...OpOption) bool {
-	this.Socket.Init(ip, port, params...)
-	return true
-}
-
-func (this *ServerSocketClient) Start() bool {
-	if this.ServerSocket == nil {
-		return false
-	}
+func (this *ServerSocketClient) Init(ip string, port int) bool {
 	if this.connectType == CLIENT_CONNECT {
 		this.sendChan = make(chan []byte, MAX_SEND_CHAN)
 		this.timerId = new(int64)
@@ -59,16 +52,24 @@ func (this *ServerSocketClient) Start() bool {
 			this.Update()
 		})
 	}
+	this.Socket.Init(ip, port)
+	return true
+}
+
+func (this *ServerSocketClient) Start() bool {
+	if this.ServerSocket == nil {
+		return false
+	}
 	if this.PacketFuncList.Len() == 0 {
 		this.PacketFuncList = this.ServerSocket.PacketFuncList
 	}
+	this.Conn.(*net.TCPConn).SetNoDelay(true)
 	go this.Run()
 	if this.connectType == CLIENT_CONNECT {
 		go this.SendLoop()
 	}
 	return true
 }
-
 func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
 	defer func() {
 		if err := recover(); err != nil {
@@ -129,18 +130,16 @@ func (this *ServerSocketClient) Close() {
 }
 func (this *ServerSocketClient) Run() bool {
 	var buff = make([]byte, this.ReceiveBufferSize)
-	this.SetState(SSF_RUN)
 	loop := func() bool {
 		defer func() {
 			if err := recover(); err != nil {
-				wrong.TraceCode(err)
+				log.Println(err)
 			}
 		}()
 
 		if this.Conn == nil {
 			return false
 		}
-
 		n, err := this.Conn.Read(buff)
 		if err == io.EOF {
 			fmt.Printf("远程链接：%s已经关闭！\n", this.Conn.RemoteAddr().String())

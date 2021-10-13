@@ -5,29 +5,31 @@ import (
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/wrong"
-	"github.com/xtaci/kcp-go/v5"
 	"io"
 	"log"
 	"net"
 )
 
-type IClientSocket interface {
-	ISocket
-}
+type (
+	IClientSocket interface {
+		ISocket
+	}
 
-type ClientSocket struct {
-	Socket
-	maxClients int
-	minClients int
-}
+	ClientSocket struct {
+		Socket
+		maxClients int
+		minClients int
+	}
+)
 
-func (this *ClientSocket) Init(ip string, port int, params ...OpOption) bool {
+func (this *ClientSocket) Init(ip string, port int) bool {
 	if this.Port == port || this.IP == ip {
 		return false
 	}
-	this.Socket.Init(ip, port, params...)
+	this.Socket.Init(ip, port)
 	this.IP = ip
 	this.Port = port
+	fmt.Println(ip, port)
 	return true
 }
 
@@ -36,14 +38,15 @@ func (this *ClientSocket) Start() bool {
 		this.IP = "127.0.0.1"
 	}
 	if this.Connect() {
+		this.Conn.(*net.TCPConn).SetNoDelay(true)
 		go this.Run()
 	}
 	return true
 }
 
-func (this *ClientSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+func (this *ClientSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
 	buff := rpc.Marshal(head, funcName, params...)
-	this.Send(head, buff)
+	return this.Send(head, buff)
 }
 
 func (this *ClientSocket) Send(head rpc3.RpcHead, buff []byte) int {
@@ -68,33 +71,19 @@ func (this *ClientSocket) Restart() bool {
 }
 func (this *ClientSocket) Connect() bool {
 	var strRemote = fmt.Sprintf("%s:%d", this.IP, this.Port)
-	connectStr := "Tcp"
-	if this.bKcp {
-		ln, err1 := kcp.Dial(strRemote)
-		if err1 != nil {
-			return false
-		}
-		this.SetConn(ln)
-		connectStr = "Kcp"
-	} else {
-		tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
-		if err != nil {
-			log.Printf("%v", err)
-		}
-		ln, err1 := net.DialTCP("tcp4", nil, tcpAddr)
-		if err1 != nil {
-			return false
-		}
-		this.SetConn(ln)
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
+	if err != nil {
+		log.Printf("%v", err)
 	}
-	fmt.Printf("%s 连接成功，请输入信息！\n", connectStr)
+	ln, err1 := net.DialTCP("tcp4", nil, tcpAddr)
+	if err1 != nil {
+		return false
+	}
+	this.SetTcpConn(ln)
+	fmt.Printf("连接成功，请输入信息！\n")
 	this.CallMsg("COMMON_RegisterRequest")
 	return true
 }
-
-func (this *ClientSocket) OnDisconnect() {
-}
-
 func (this *ClientSocket) OnNetFail(int) {
 	this.Stop()
 	this.CallMsg("DISCONNECT", this.clientId)
