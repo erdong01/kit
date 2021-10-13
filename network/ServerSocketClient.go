@@ -10,7 +10,6 @@ import (
 	"google.golang.org/protobuf/proto"
 	"hash/crc32"
 	"io"
-	"log"
 	"time"
 )
 
@@ -128,7 +127,7 @@ func (this *ServerSocketClient) Run() bool {
 	loop := func() bool {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Println(err)
+				wrong.TraceCode(err)
 			}
 		}()
 
