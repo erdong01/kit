@@ -231,10 +231,10 @@ func (this *Actor) call(io CallIO) {
 	}
 }
 func (this *Actor) consume() {
-	atomic.StoreInt32(&this.mailIn, 0)
 	for data := this.mailBox.Pop(); data != nil; data = this.mailBox.Pop() {
 		this.call(data.(CallIO))
 	}
+	atomic.StoreInt32(&this.mailIn, 0)
 }
 
 func (this *Actor) loop() bool {
