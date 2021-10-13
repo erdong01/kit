@@ -66,11 +66,11 @@ func (this *ServerSocket) Start() bool {
 
 	var strRemote = fmt.Sprintf("%s:%d", this.IP, this.Port)
 	//初始tcp
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", strRemote)
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-	ln, err := net.ListenTCP("tcp4", tcpAddr)
+	ln, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
 		log.Fatalf("%v", err)
 		return false
