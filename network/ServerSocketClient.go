@@ -166,10 +166,10 @@ func (this *ServerSocketClient) Run() bool {
 			break
 		}
 	}
-	this.Close()
 	if this.Socket.clientClose != nil {
 		this.Socket.clientClose(this.clientId)
 	}
+	this.Close()
 	fmt.Printf("%s关闭连接;socketId:%d \n", this.IP, this.GetId())
 	return true
 }
