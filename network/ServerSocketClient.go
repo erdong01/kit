@@ -77,7 +77,7 @@ func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
 		}
 	}()
 
-	if this.connectType == CLIENT_CONNECT { //对外链接send不阻塞
+	if this != nil && this.connectType == CLIENT_CONNECT { //对外链接send不阻塞
 		select {
 		case this.sendChan <- buff:
 		default: //网络太卡,tcp send缓存满了并且发送队列也满了
