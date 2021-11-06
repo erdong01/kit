@@ -30,12 +30,12 @@ type (
 	Cluster struct {
 		actor.Actor
 		*Service       //集群注册
-		master         *Master
 		clusterMap     [MAX_CLUSTER_NUM]HashClusterMap
 		clusterLocker  [MAX_CLUSTER_NUM]*sync.RWMutex
 		hashRing       [MAX_CLUSTER_NUM]*tools.HashRing //hash一致性
 		conn           *nats.Conn
 		dieChan        chan bool
+		master         *Master
 		clusterInfoMap map[uint32]*common.ClusterInfo
 		packetFuncList *vector.Vector //call back
 		callBackMap    sync.Map
@@ -74,6 +74,7 @@ func (this *Cluster) Init(info *common.ClusterInfo, Endpoints []string, natsUrl 
 		this.clusterMap[i] = make(HashClusterMap)
 		this.hashRing[i] = tools.NewHashRing()
 	}
+	//注册服务器
 	this.Service = NewService(info, Endpoints)
 	this.master = NewMaster(&EmptyClusterInfo{}, Endpoints, &this.Actor)
 	this.clusterInfoMap = make(map[uint32]*common.ClusterInfo)
@@ -116,6 +117,7 @@ func (this *Cluster) call(parmas ...interface{}) {
 }
 
 func (this *Cluster) RegisterClusterCall() {
+	//集群新加member
 	this.RegisterCall("Cluster_Add", func(ctx context.Context, info *common.ClusterInfo) {
 		_, bEx := this.clusterInfoMap[info.Id()]
 		if !bEx {
@@ -124,6 +126,18 @@ func (this *Cluster) RegisterClusterCall() {
 		}
 	})
 
+	this.RegisterCall("Cluster_Del", func(ctx context.Context, info *common.ClusterInfo) {
+		delete(this.clusterInfoMap, info.Id())
+		this.DelCluster(info)
+	})
+	//链接断开
+	this.RegisterCall("DISCONNECT", func(ctx context.Context, ClusterId uint32) {
+		pInfo, bEx := this.clusterInfoMap[ClusterId]
+		if bEx {
+			this.DelCluster(pInfo)
+		}
+		delete(this.clusterInfoMap, ClusterId)
+	})
 }
 
 func (this *Cluster) AddCluster(info *common.ClusterInfo) {

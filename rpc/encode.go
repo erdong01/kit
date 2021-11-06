@@ -48,7 +48,7 @@ func marshalPacket(head rpc3.RpcHead, funcName string, packet proto.Message) ([]
 		}
 	}()
 
-	rpcPacket := &rpc3.RpcPacket{FuncName: strings.ToLower(funcName), ArgLen: 0, RpcHead: (*rpc3.RpcHead)(&head)}
+	rpcPacket := &rpc3.RpcPacket{FuncName: strings.ToLower(funcName), RpcHead: (*rpc3.RpcHead)(&head)}
 	buff, _ := proto.Marshal(packet)
 	rpcPacket.RpcBody = buff
 	dat, _ := proto.Marshal(rpcPacket)

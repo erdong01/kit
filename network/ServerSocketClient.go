@@ -71,6 +71,9 @@ func (this *ServerSocketClient) Start() bool {
 	return true
 }
 func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
+	if this == nil {
+		return 0
+	}
 	defer func() {
 		if err := recover(); err != nil {
 			wrong.TraceCode(err)
@@ -166,10 +169,10 @@ func (this *ServerSocketClient) Run() bool {
 			break
 		}
 	}
-	this.Close()
 	if this.Socket.clientClose != nil {
 		this.Socket.clientClose(this.clientId)
 	}
+	this.Close()
 	fmt.Printf("%s关闭连接;socketId:%d \n", this.IP, this.GetId())
 	return true
 }

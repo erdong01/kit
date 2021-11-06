@@ -213,9 +213,6 @@ func (this *Actor) call(io CallIO) {
 		k := pFunc.FuncType
 		rpcPacket.RpcHead.SocketId = io.SocketId
 		params := rpc.UnmarshalBody(rpcPacket, k)
-		if funcName != "cluster_add" {
-			fmt.Println(funcName, params)
-		}
 		if len(params) >= 1 {
 			in := make([]reflect.Value, len(params))
 			for i, param := range params {
@@ -234,10 +231,10 @@ func (this *Actor) call(io CallIO) {
 	}
 }
 func (this *Actor) consume() {
+	atomic.StoreInt32(&this.mailIn, 0)
 	for data := this.mailBox.Pop(); data != nil; data = this.mailBox.Pop() {
 		this.call(data.(CallIO))
 	}
-	atomic.StoreInt32(&this.mailIn, 0)
 }
 
 func (this *Actor) loop() bool {
