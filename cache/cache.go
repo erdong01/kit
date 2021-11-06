@@ -1,8 +1,9 @@
 package cache
 
 import (
-	"github.com/cespare/xxhash"
 	"sync"
+
+	"github.com/cespare/xxhash"
 )
 
 const (
@@ -21,4 +22,22 @@ type Cache struct {
 
 func hashFunc(data []byte) uint64 {
 	return xxhash.Sum64(data)
+}
+
+func NewCache(size int) (cache *Cache) {
+	return NewCacheCustomTimer(size, defaultTimer{})
+}
+
+func NewCacheCustomTimer(size int, timer Timer) (cache *Cache) {
+	if size < minBufSize {
+		size = minBufSize
+	}
+	if timer == nil {
+		timer = defaultTimer{}
+	}
+	cache = new(Cache)
+	for i := 0; i < segmentCount; i++ {
+		cache.segments[i] = newSegment(size/segmentCount, timer)
+	}
+	return
 }

@@ -11,15 +11,36 @@ type Timer interface {
 	Now() uint32
 }
 
+type StoppableTimer interface {
+	Timer
+	Stop()
+}
+
 // Helper function that returns Unix time in seconds
 func getUnixTime() uint32 {
 	return uint32(time.Now().Unix())
+}
+
+type defaultTimer struct{}
+
+func (timer defaultTimer) Now() uint32 {
+	return getUnixTime()
 }
 
 type cacheTimer struct {
 	now    uint32
 	ticker *time.Ticker
 	done   chan bool
+}
+
+func NewCachedTimer() StoppableTimer {
+	timer := &cacheTimer{
+		now:    getUnixTime(),
+		ticker: time.NewTicker(time.Second),
+		done:   make(chan bool),
+	}
+	go timer.update()
+	return timer
 }
 
 func (this *cacheTimer) Now() uint32 {
