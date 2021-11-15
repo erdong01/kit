@@ -19,7 +19,7 @@ const (
 	SERVER_CONNECT = iota //对内
 )
 const (
-	MAX_SEND_CHAN  = 100
+	MAX_SEND_CHAN  = 512
 	HEART_TIME_OUT = 30
 )
 
