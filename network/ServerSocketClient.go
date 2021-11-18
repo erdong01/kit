@@ -133,6 +133,7 @@ func (this *ServerSocketClient) Close() {
 }
 func (this *ServerSocketClient) Run() bool {
 	var buff = make([]byte, this.ReceiveBufferSize)
+	this.SetState(SSF_RUN)
 	loop := func() bool {
 		defer func() {
 			if err := recover(); err != nil {
@@ -146,6 +147,9 @@ func (this *ServerSocketClient) Run() bool {
 		n, err := this.Conn.Read(buff)
 		if err == io.EOF {
 			fmt.Printf("远程链接：%s已经关闭！\n", this.Conn.RemoteAddr().String())
+			if this.Socket.clientClose != nil {
+				this.Socket.clientClose(this.clientId)
+			}
 			this.OnNetFail()
 			return false
 		}
