@@ -66,6 +66,20 @@ func (this *ClientSocket) Send(head rpc3.RpcHead, buff []byte) int {
 	return 0
 }
 
+func (this *ClientSocket) DoSend(buff []byte) int {
+	if this.Conn == nil {
+		return 0
+	}
+
+	n, err := this.Conn.Write(this.packetParser.Write(buff))
+
+	handleError(err)
+	if n > 0 {
+		return n
+	}
+	return 0
+}
+
 func (this *ClientSocket) Restart() bool {
 	return true
 }
