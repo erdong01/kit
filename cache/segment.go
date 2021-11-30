@@ -59,7 +59,7 @@ type segment struct {
 }
 
 func newSegment(bufSize int, segId int, timer Timer) (seg segment) {
-	seg.rb = NewRingBuf(bufSize, 0)
+	//seg.rb = NewRingBuf(bufSize, 0)
 	seg.segId = segId
 	seg.timer = timer
 	seg.vacuumLen = int64(bufSize)

@@ -37,7 +37,7 @@ func NewCacheCustomTimer(size int, timer Timer) (cache *Cache) {
 	}
 	cache = new(Cache)
 	for i := 0; i < segmentCount; i++ {
-		cache.segments[i] = newSegment(size/segmentCount, timer)
+		//cache.segments[i] = newSegment(size/segmentCount, timer)
 	}
 	return
 }

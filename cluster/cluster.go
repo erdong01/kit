@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	MAX_CLUSTER_NUM = int(rpc3.SERVICE_ZONESERVER) + 1
+	MAX_CLUSTER_NUM = 100
 	CALL_TIME_OUT   = 50 * time.Millisecond
 )
 
