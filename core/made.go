@@ -5,8 +5,6 @@ import (
 	gongDbDrive "github.com/erDong01/micro-kit/db/mongoDB/drive"
 	mysqlDrive "github.com/erDong01/micro-kit/db/mysql/drive"
 	redisDrive "github.com/erDong01/micro-kit/db/redis/drive"
-	"github.com/erDong01/micro-kit/http"
-	"github.com/gin-gonic/gin"
 	rds "github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
@@ -126,13 +124,6 @@ func Version(version string) Option {
 	}
 }
 
-// Engine 设置项目版本
-func Engine(route func(g *gin.Engine) *gin.Engine) Option {
-	return func(c *Core) {
-		http.Init(route(GetEngine()), c.Info.port)
-	}
-}
-
 // DbRegister 设置数据库
 func DbRegister() Option {
 	return func(c *Core) {
@@ -151,14 +142,4 @@ func ConfigRegister() Option {
 	return func(c *Core) {
 		config.Init("config")
 	}
-}
-
-// GetEngine 获取当前gin引擎
-func GetEngine() *gin.Engine {
-	return gin.Default()
-}
-
-// GetEngine 获取当前gin引擎
-func SetPort(port int) {
-	New().Info.port = port
 }
