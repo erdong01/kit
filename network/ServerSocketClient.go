@@ -2,17 +2,18 @@ package network
 
 import (
 	"fmt"
+	"hash/crc32"
+	"io"
+	"log"
+	"net"
+	"time"
+
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools"
 	"github.com/erDong01/micro-kit/tools/timer"
 	"github.com/erDong01/micro-kit/wrong"
 	"google.golang.org/protobuf/proto"
-	"hash/crc32"
-	"io"
-	"log"
-	"net"
-	"time"
 )
 
 const (
@@ -41,7 +42,7 @@ func handleError(err error) {
 	if err == nil {
 		return
 	}
-	wrong.TraceCode(err)
+	log.Printf("错误：%s\n", err.Error())
 }
 func (this *ServerSocketClient) Init(ip string, port int) bool {
 	if this.connectType == CLIENT_CONNECT {
