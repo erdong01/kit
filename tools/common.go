@@ -14,7 +14,7 @@ import (
 
 const (
 	INT_MAX       = int(2147483647)
-	TCP_HEAD_SIZE = 4     //解决tpc粘包半包,包头固定长度
+	TCP_HEAD_SIZE = 4    //解决tpc粘包半包,包头固定长度
 	TCP_END       = "💞♡" //解决tpc粘包半包,特殊结束标志,pb采用Varint编码高位有特殊含义
 )
 
@@ -161,32 +161,32 @@ func Assert(x bool, y string) {
 		log.Printf("\nFatal :{%s}", y)
 	}
 }
-func ToLower(name string) string{
+func ToLower(name string) string {
 	return strings.ToLower(name)
 }
 
 //-----------string strconv type-------------//
-func Int(str string) int{
+func Int(str string) int {
 	n, _ := strconv.Atoi(str)
 	return n
 }
 
-func Int64(str string) int64{
+func Int64(str string) int64 {
 	n, _ := strconv.ParseInt(str, 0, 64)
 	return n
 }
 
-func Float32(str string) float32{
+func Float32(str string) float32 {
 	n, _ := strconv.ParseFloat(str, 32)
 	return float32(n)
 }
 
-func Float64(str string) float64{
+func Float64(str string) float64 {
 	n, _ := strconv.ParseFloat(str, 64)
 	return n
 }
 
-func Bool(str string) bool{
+func Bool(str string) bool {
 	n, _ := strconv.ParseBool(str)
 	return n
 }
@@ -194,5 +194,5 @@ func Bool(str string) bool{
 func Time(str string) int64 {
 	return GetDBTime(str).Unix()
 }
-//--------------------------------------------//
 
+//--------------------------------------------//

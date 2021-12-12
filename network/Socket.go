@@ -1,11 +1,12 @@
 package network
 
 import (
+	"net"
+	"sync/atomic"
+
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools/vector"
-	"net"
-	"sync/atomic"
 )
 
 const (
@@ -102,7 +103,7 @@ func (this *Socket) Stop() bool {
 	if this.Conn != nil && atomic.CompareAndSwapInt32(&this.state, SSF_RUN, SSF_STOP) {
 		this.Conn.Close()
 	}
-	return true
+	return false
 }
 func (this *Socket) Run() bool {
 	return true
