@@ -51,6 +51,7 @@ message ClusterInfo{
   int32 Port = 3;
   int32 Weight = 4;
   uint32 SocketId = 5;
+  string Url = 6;
 }
 
 //服务器类型
