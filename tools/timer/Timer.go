@@ -9,11 +9,11 @@ import (
 
 const (
 	TimeNearShift  = 8
-	TimeNear       = (1 << TimeNearShift)
+	TimeNear       = 1 << TimeNearShift
 	TimeLevelShift = 6
-	TimeLevel      = (1 << TimeLevelShift)
-	TimeNearMask   = (TimeNear - 1)
-	TimeLevelMask  = (TimeLevel - 1)
+	TimeLevel      = 1 << TimeLevelShift
+	TimeNearMask   = TimeNear - 1
+	TimeLevelMask  = TimeLevel - 1
 	TickInterval   = 10 * time.Millisecond
 )
 

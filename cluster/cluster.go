@@ -261,7 +261,7 @@ func (this *Cluster) CallMsg(cb interface{}, head rpc3.RpcHead, funcName string,
 
 func (this *Cluster) RandomCluster(head rpc3.RpcHead) rpc3.RpcHead {
 	if head.Id == 0 {
-		head.Id = int64((uint32(tools.RAND.RandI(1, 0xFFFFFFFF))))
+		head.Id = int64(uint32(tools.RAND.RandI(1, 0xFFFFFFFF)))
 	}
 	_, head.ClusterId = this.hashRing[head.DestServerType].Get64(head.Id)
 	pCluster := this.GetCluster(head)

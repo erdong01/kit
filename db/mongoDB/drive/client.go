@@ -19,8 +19,8 @@ func Init(Uri ...string) *mongo.Client {
 		mongoConf.Uri = Uri[0]
 	}
 	return Connect(options.Client().ApplyURI(mongoConf.Uri).
-		SetMinPoolSize(10).
-		SetMaxPoolSize(1000))
+		SetMinPoolSize(20).
+		SetMaxPoolSize(3000))
 }
 
 func Connect(opts ...*options.ClientOptions) *mongo.Client {
