@@ -63,6 +63,8 @@ enum SERVICE{
   WORLDSERVER = 4;//世界
   ZONESERVER = 5;//地图
   WORLDDBSERVER = 6;//db
+  WORLDDBSERVER = 7;//db
+  WORLDDBSERVER = 8;//db
 };
 
 //发送标志

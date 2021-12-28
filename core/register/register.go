@@ -52,6 +52,6 @@ func (r *Register) SetName(name string) *Register {
 
 // SetPort 设置端口号
 func (r *Register) SetPort(port int) *Register {
-	core.SetPort(port)
+	core.New().Info.Port = port
 	return r
 }

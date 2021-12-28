@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/tools"
-	"strings"
 )
 
 type (
@@ -18,22 +19,22 @@ type (
 	}
 )
 
-func (this ClusterInfo) IpString() string {
-	return fmt.Sprintf("%s:%d", this.Ip, this.Port)
+func (clusterInfo *ClusterInfo) IpString() string {
+	return fmt.Sprintf("%s:%d", clusterInfo.Ip, clusterInfo.Port)
 }
 
-func (this *ClusterInfo) RaftIp() string {
-	return fmt.Sprintf("%s:%d", this.Ip, this.Port+10000)
+func (clusterInfo *ClusterInfo) RaftIp() string {
+	return fmt.Sprintf("%s:%d", clusterInfo.Ip, clusterInfo.Port+10000)
 }
 
-func (this *ClusterInfo) String() string {
-	return strings.ToLower(this.Type.String())
+func (clusterInfo *ClusterInfo) String() string {
+	return strings.ToLower(clusterInfo.Type.String())
 }
 
-func (this *ClusterInfo) Id() uint32 {
-	return tools.ToHash(this.IpString())
+func (clusterInfo *ClusterInfo) Id() uint32 {
+	return tools.ToHash(clusterInfo.IpString())
 }
 
-func (this *ClusterInfo) ServiceType() rpc3.SERVICE {
-	return this.Type
+func (clusterInfo *ClusterInfo) ServiceType() rpc3.SERVICE {
+	return clusterInfo.Type
 }

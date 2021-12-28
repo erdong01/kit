@@ -55,7 +55,7 @@ func (*Core) GetDb() *gorm.DB {
 
 // GetDb 获取当前数据库实例
 func (*Core) GetPort() int {
-	return New().Info.port
+	return New().Info.Port
 }
 
 // GetRedis 获取当前Redis实例
@@ -113,7 +113,7 @@ func Name(name string) Option {
 // Port 设置端口号
 func Port(port int) Option {
 	return func(c *Core) {
-		New().Info.port = port
+		New().Info.Port = port
 	}
 }
 

@@ -1,16 +1,17 @@
 package core
 
 import (
+	"sync"
+
 	"github.com/erDong01/micro-kit/config"
 	"github.com/go-redis/redis/v8"
-	"go.etcd.io/etcd/client/v3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
-	"sync"
 )
 
 type info struct {
-	port    int
+	Port    int
 	env     string
 	Name    string
 	version string
