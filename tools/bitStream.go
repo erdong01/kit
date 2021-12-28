@@ -258,12 +258,12 @@ func (this *BitStream) WriteFlag(value bool) bool {
 	}
 
 	if value {
-		this.dataPtr[(this.flagNum >> 3)] |= (1 << uint32(this.flagNum&0x7))
+		this.dataPtr[(this.flagNum >> 3)] |= 1 << uint32(this.flagNum&0x7)
 	} else {
 		this.dataPtr[(this.flagNum >> 3)] &= ^(1 << uint32(this.flagNum&0x7))
 	}
 	this.flagNum++
-	return (value)
+	return value
 }
 
 func (this *BitStream) ReadString() string {

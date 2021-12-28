@@ -30,7 +30,7 @@ func DispatchPacket(packet rpc3.Packet) bool {
 	rpcPacket, head := rpc.Unmarshal(packet.Buff)
 	switch head.DestServerType {
 	case rpc3.SERVICE_GATESERVER:
-		var messageName string = ""
+		var messageName = ""
 		buf := bytes.NewBuffer(rpcPacket.RpcBody)
 		dec := gob.NewDecoder(buf)
 		dec.Decode(&messageName)

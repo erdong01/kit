@@ -26,7 +26,7 @@ func (this *Rand) RandF(i float32, n float32) float32 {
 		return i
 	}
 
-	return (i + (n-i)*this.Float32())
+	return i + (n-i)*this.Float32()
 }
 
 var RAND = Rand{rand.New(rand.NewSource(time.Now().UnixNano()))}

@@ -43,7 +43,7 @@ func New() *Core {
 }
 
 func Copy() *Core {
-	var core *Core = new(Core)
+	var core = new(Core)
 	*core = *New()
 	return core
 }

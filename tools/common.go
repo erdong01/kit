@@ -75,7 +75,6 @@ func Int16ToBytes(val int16) []byte {
 }
 
 // BytesToInt16
-// @author chenqiaojie
 // @Description: 字节转换成为int16
 // @param data []byte
 // @return int16
