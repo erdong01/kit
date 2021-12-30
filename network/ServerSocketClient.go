@@ -95,7 +95,7 @@ func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
 }
 
 func (this *ServerSocketClient) DoSend(buff []byte) int {
-	if this.Conn == nil {
+	if this == nil || this.Conn == nil {
 		return 0
 	}
 
