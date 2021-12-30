@@ -67,7 +67,7 @@ func (this *ClientSocket) Send(head rpc3.RpcHead, buff []byte) int {
 }
 
 func (this *ClientSocket) DoSend(buff []byte) int {
-	if this.Conn == nil {
+	if this == nil || this.Conn == nil {
 		return 0
 	}
 
