@@ -20,7 +20,10 @@ func Init(Uri ...string) *mongo.Client {
 	}
 	return Connect(options.Client().ApplyURI(mongoConf.Uri).
 		SetMinPoolSize(20).
-		SetMaxPoolSize(3000))
+		SetMaxPoolSize(4096).
+		SetConnectTimeout(time.Second * 65).
+		SetMaxConnIdleTime(time.Minute * 5).
+		SetSocketTimeout(time.Second * 60))
 }
 
 func Connect(opts ...*options.ClientOptions) *mongo.Client {
