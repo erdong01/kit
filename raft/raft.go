@@ -1,14 +1,15 @@
 package raft
 
 import (
-	"github.com/erDong01/micro-kit/cluster/common"
-	"github.com/erDong01/micro-kit/tools"
-	"github.com/hashicorp/raft"
-	raftBoltdb "github.com/hashicorp/raft-boltdb"
 	"net"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/erDong01/micro-kit/cluster/common"
+	"github.com/erDong01/micro-kit/tools"
+	"github.com/hashicorp/raft"
+	raftBoltdb "github.com/hashicorp/raft-boltdb"
 )
 
 type (
