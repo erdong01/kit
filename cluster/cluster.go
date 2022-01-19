@@ -3,6 +3,11 @@ package cluster
 import (
 	"context"
 	"errors"
+	"log"
+	"reflect"
+	"sync"
+	"time"
+
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/cluster/common"
 	"github.com/erDong01/micro-kit/network"
@@ -11,14 +16,10 @@ import (
 	"github.com/erDong01/micro-kit/tools"
 	"github.com/erDong01/micro-kit/tools/vector"
 	"github.com/nats-io/nats.go"
-	"log"
-	"reflect"
-	"sync"
-	"time"
 )
 
 const (
-	MAX_CLUSTER_NUM = 100
+	MAX_CLUSTER_NUM = 128
 	CALL_TIME_OUT   = 50 * time.Millisecond
 )
 
@@ -87,15 +88,19 @@ func (this *Cluster) Init(info *common.ClusterInfo, Endpoints []string, natsUrl 
 		log.Fatal("nats connect error!!!!", err)
 	}
 	this.conn = conn
+
 	this.conn.Subscribe(GetChannel(*info), func(msg *nats.Msg) {
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
 	})
+
 	this.conn.Subscribe(GetTopicChannel(*info), func(msg *nats.Msg) {
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
 	})
+
 	this.conn.Subscribe(GetCallChannel(*info), func(msg *nats.Msg) {
 		this.HandlePacket(rpc3.Packet{Buff: msg.Data, Reply: msg.Reply})
 	})
+
 	rpc.GCall = reflect.ValueOf(this.call)
 	this.Actor.Start()
 }

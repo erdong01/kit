@@ -16,7 +16,7 @@ type (
 	Raft struct {
 		*raft.Raft
 		*common.ClusterInfo
-		hashRing       *tools.HashRing
+		hashRing       *tools.HashRing //hash一致性
 		clusterInfoMap map[uint32]*common.ClusterInfo
 	}
 )

@@ -3,10 +3,11 @@ package etcdv3
 import (
 	"context"
 	"fmt"
-	"github.com/erDong01/micro-kit/tools"
-	clientv3 "go.etcd.io/etcd/client/v3"
 	"log"
 	"time"
+
+	"github.com/erDong01/micro-kit/tools"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 const (
@@ -30,19 +31,22 @@ func (this *Snowflake) Run() {
 		//设置key
 		key := this.Key()
 		tx := this.client.Txn(context.Background())
+		//key no exist
 		leaseResp, err := this.lease.Grant(context.Background(), 60)
 		if err != nil {
 			goto TrySet
 		}
 		this.leaseId = leaseResp.ID
-		tx.If(clientv3.Compare(clientv3.CreateRevision(key), "=", 0)).Then(clientv3.OpPut(key, "", clientv3.WithLease(this.leaseId))).Else()
+		tx.If(clientv3.Compare(clientv3.CreateRevision(key), "=", 0)).
+			Then(clientv3.OpPut(key, "", clientv3.WithLease(this.leaseId))).
+			Else()
 		txnRes, err := tx.Commit()
-		if err != nil || !txnRes.Succeeded {
+		if err != nil || !txnRes.Succeeded { //抢锁失败
 			resp, err := this.client.Get(context.Background(), uuid_dir)
 			if err == nil && (resp != nil && resp.Kvs != nil) {
 				Ids := [tools.WorkeridMax + 1]bool{}
 				for _, v := range resp.Kvs {
-					Id := tools.Int(string(v.Value[len(uuid_dir)+1]))
+					Id := tools.Int(string(v.Value[len(uuid_dir)+1:]))
 					Ids[Id] = true
 				}
 				for i, v := range Ids {
@@ -56,7 +60,7 @@ func (this *Snowflake) Run() {
 			this.id = this.id & tools.WorkeridMax
 			goto TrySet
 		}
-		tools.UUID.Init(this.id)
+		tools.UUID.Init(this.id) //设置uuid
 		//保持ttl
 	TryTTL:
 		_, err = this.lease.KeepAliveOnce(context.Background(), this.leaseId)
@@ -69,6 +73,7 @@ func (this *Snowflake) Run() {
 	}
 }
 
+//uuid生成器
 func (this *Snowflake) Init(endpoints []string) {
 	cfg := clientv3.Config{
 		Endpoints: endpoints,

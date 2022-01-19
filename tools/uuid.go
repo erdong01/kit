@@ -1,10 +1,11 @@
 package tools
 
 import (
-	"github.com/erDong01/micro-kit/tools/vector"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/erDong01/micro-kit/tools/vector"
 )
 
 /*
