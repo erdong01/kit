@@ -12,6 +12,7 @@ import (
 
 const (
 	uuid_dir = "uuid/"
+	ttl_time = time.Minute
 )
 
 type Snowflake struct {

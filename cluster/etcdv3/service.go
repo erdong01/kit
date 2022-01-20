@@ -3,10 +3,11 @@ package etcdv3
 import (
 	"context"
 	"encoding/json"
-	"github.com/erDong01/micro-kit/cluster/common"
-	clientv3 "go.etcd.io/etcd/client/v3"
 	"log"
 	"time"
+
+	"github.com/erDong01/micro-kit/cluster/common"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 const (
@@ -27,7 +28,9 @@ func (this *Service) Run() {
 		this.leasseId = leaseResp.ID
 		key := ETCD_DIR + this.String() + "/" + this.IpString()
 		data, _ := json.Marshal(this.ClusterInfo)
-		this.client.Put(context.Background(), key, string(data), clientv3.WithLease(this.leasseId))
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		this.client.Put(ctx, key, string(data), clientv3.WithLease(this.leasseId))
+		cancel()
 		time.Sleep(time.Second * 3)
 	}
 }

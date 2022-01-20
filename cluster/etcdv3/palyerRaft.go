@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	clientv3 "go.etcd.io/etcd/client/v3"
 	"log"
 	"sync"
+
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 const (
