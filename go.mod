@@ -12,10 +12,15 @@ require (
 	github.com/hashicorp/raft-boltdb v0.0.0-20210409134258-03c10cc3d4ea
 	github.com/joeycumines/go-bigbuff v1.15.0
 	github.com/json-iterator/go v1.1.12
+	github.com/klauspost/reedsolomon v1.9.16 // indirect
 	github.com/nats-io/nats-server/v2 v2.7.0 // indirect
 	github.com/nats-io/nats.go v1.13.1-0.20211122170419-d7c1d78a50fc
 	github.com/spf13/viper v1.10.1
+	github.com/templexxx/cpufeat v0.0.0-20180724012125-cef66df7f161 // indirect
+	github.com/templexxx/xor v0.0.0-20191217153810-f85b25db303b // indirect
+	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/xlab/treeprint v1.1.0
+	github.com/xtaci/kcp-go v4.3.4+incompatible // indirect
 	go.etcd.io/etcd/client/v3 v3.5.1
 	go.mongodb.org/mongo-driver v1.8.2
 	google.golang.org/grpc v1.43.0

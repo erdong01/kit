@@ -2,13 +2,14 @@ package network
 
 import (
 	"fmt"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"github.com/erDong01/micro-kit/rpc"
-	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
 	"sync"
 	"sync/atomic"
+
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/rpc"
+	"google.golang.org/protobuf/proto"
 )
 
 var SocketServer *ServerSocket
@@ -34,6 +35,7 @@ type ServerSocket struct {
 	clientLock  *sync.RWMutex
 	listen      *net.TCPListener
 	lock        sync.Mutex
+	kcpListern  net.Listener
 }
 
 type ClientChan struct {
@@ -95,23 +97,23 @@ func (this *ServerSocket) GetClientById(id uint32) *ServerSocketClient {
 }
 
 func (this *ServerSocket) AddClient(tcpConn *net.TCPConn, addr string, connectType int) *ServerSocketClient {
-	socketClient := this.LoadClient()
-	if socketClient != nil {
-		socketClient.Init("", 0)
-		socketClient.ServerSocket = this
-		socketClient.ReceiveBufferSize = this.ReceiveBufferSize
-		socketClient.SetMaxPacketLen(this.GetMaxPacketLen())
-		socketClient.clientId = this.AssignClientId()
-		socketClient.IP = addr
-		socketClient.SetConnectType(connectType)
-		socketClient.SetTcpConn(tcpConn)
-		socketClient.SetClientClose(this.GetClientClose()) //自己加的
+	pClient := this.LoadClient()
+	if pClient != nil {
+		pClient.Init("", 0)
+		pClient.ServerSocket = this
+		pClient.ReceiveBufferSize = this.ReceiveBufferSize
+		pClient.SetMaxPacketLen(this.GetMaxPacketLen())
+		pClient.clientId = this.AssignClientId()
+		pClient.IP = addr
+		pClient.SetConnectType(connectType)
+		pClient.SetTcpConn(tcpConn)
+		pClient.SetClientClose(this.GetClientClose()) //自己加的
 		this.clientLock.Lock()
-		this.clientList[socketClient.clientId] = socketClient
+		this.clientList[pClient.clientId] = pClient
 		this.clientLock.Unlock()
-		socketClient.Start()
+		pClient.Start()
 		this.clientCount++
-		return socketClient
+		return pClient
 	} else {
 		log.Printf("%s", "无法创建客户端连接对象")
 	}
@@ -134,7 +136,7 @@ func (this *ServerSocket) LoadClient() *ServerSocketClient {
 	return &ServerSocketClient{}
 }
 
-func (this *ServerSocket) Send(head rpc3.RpcHead, buff []byte) int {
+func (this *ServerSocket) Send(head rpc3.RpcHead, packet rpc3.Packet) int {
 	client := this.GetClientById(head.SocketId)
 	if client != nil {
 		client.Send(head, buff)
@@ -150,10 +152,6 @@ func (this *ServerSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...
 	return 0
 }
 
-func (this *ServerSocket) Close() {
-	defer this.listen.Close()
-	this.Clear()
-}
 func (this *ServerSocket) Run() bool {
 	for {
 		conn, err := this.listen.AcceptTCP()
@@ -178,7 +176,10 @@ func (this *ServerSocket) Disconnect(bool) bool {
 
 func (this *ServerSocket) OnNetFail(int) {
 }
-
+func (this *ServerSocket) Close() {
+	defer this.listen.Close()
+	this.Clear()
+}
 func (this *ServerSocket) handleConn(tcpConn *net.TCPConn, addr string) bool {
 	if tcpConn == nil {
 		return false

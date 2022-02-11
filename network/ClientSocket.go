@@ -2,12 +2,13 @@ package network
 
 import (
 	"fmt"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"github.com/erDong01/micro-kit/rpc"
-	"github.com/erDong01/micro-kit/wrong"
 	"io"
 	"log"
 	"net"
+
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erDong01/micro-kit/wrong"
 )
 
 type (
@@ -38,18 +39,16 @@ func (this *ClientSocket) Start() bool {
 		this.IP = "127.0.0.1"
 	}
 	if this.Connect() {
-		this.Conn.(*net.TCPConn).SetNoDelay(true)
 		go this.Run()
 	}
 	return true
 }
 
 func (this *ClientSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
-	buff := rpc.Marshal(head, funcName, params...)
-	return this.Send(head, buff)
+	return this.Send(head, rpc.Marshal(head, funcName, params...))
 }
 
-func (this *ClientSocket) Send(head rpc3.RpcHead, buff []byte) int {
+func (this *ClientSocket) Send(head rpc3.RpcHead, packet rpc3.Packet) int {
 	defer func() {
 		if err := recover(); err != nil {
 			wrong.TraceCode(err)
@@ -58,7 +57,7 @@ func (this *ClientSocket) Send(head rpc3.RpcHead, buff []byte) int {
 	if this.Conn == nil {
 		return 0
 	}
-	n, err := this.Conn.Write(this.packetParser.Write(buff))
+	n, err := this.Conn.Write(this.packetParser.Write(packet.Buff))
 	handleError(err)
 	if n > 0 {
 		return n

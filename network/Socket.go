@@ -29,7 +29,13 @@ type (
 
 	PacketFunc   func(packet rpc3.Packet) bool //回调函数
 	HandlePacket func(buff []byte)
-	Socket       struct {
+	Op           struct {
+		kcp bool
+	}
+
+	OpOption func(*Op)
+
+	Socket struct {
 		Conn              net.Conn
 		Port              int
 		IP                string
@@ -40,6 +46,10 @@ type (
 		clientId uint32
 		seq      int64
 
+		totalNum     int
+		acceptedNum  int
+		connectedNum int
+
 		sendTimes      int
 		receiveTimes   int
 		PacketFuncList *vector.Vector
@@ -48,6 +58,7 @@ type (
 		halfSize     int
 		packetParser PacketParser
 		heartTime    int
+		bKcp         bool
 
 		clientClose ClientClose
 	}
@@ -84,15 +95,30 @@ type (
 	}
 )
 
-func (this *Socket) Init(string, int) bool {
+func (op *Op) applyOpts(opts []OpOption) {
+	for _, opt := range opts {
+		opt(op)
+	}
+}
+func WithKcp() OpOption {
+	return func(op *Op) {
+		op.kcp = true
+	}
+}
+func (this *Socket) Init(ip string, port int, params ...OpOption) bool {
+	op := &Op{}
+	op.applyOpts(params)
 	this.PacketFuncList = vector.NewVector()
-	this.ReceiveBufferSize = 1024
 	this.SetState(SSF_NULL)
+	this.ReceiveBufferSize = 1024
 	this.connectType = SERVER_CONNECT
 	this.half = false
 	this.halfSize = 0
 	this.heartTime = 0
 	this.packetParser = NewPacketParser(PacketConfig{Func: this.HandlePacket})
+	if op.kcp {
+		this.bKcp = true
+	}
 	return true
 }
 
@@ -138,7 +164,7 @@ func (this *Socket) SetState(state int32) {
 func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
 }
 
-func (this *Socket) Send(rpc3.RpcHead, []byte) int {
+func (this *Socket) Send(rpc3.RpcHead, rpc3.Packet) int {
 	return 0
 }
 
@@ -184,8 +210,7 @@ func (this *Socket) BindPacketFunc(callfunc PacketFunc) {
 }
 
 func (this *Socket) CallMsg(funcName string, params ...interface{}) {
-	buff := rpc.Marshal(rpc3.RpcHead{}, funcName, params...)
-	this.HandlePacket(buff)
+	this.HandlePacket(rpc.Marshal(rpc3.RpcHead{}, funcName, params...).Buff)
 }
 
 func (this *Socket) HandlePacket(buff []byte) {

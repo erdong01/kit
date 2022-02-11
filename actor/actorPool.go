@@ -1,15 +1,16 @@
 package actor
 
 import (
+	"sync"
+
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
-	"sync"
 )
 
 type ActorPool struct {
 	Actor
-	ActorMap  map[int64]IActor
-	ActorLock *sync.RWMutex
+	actorMap  map[int64]IActor
+	ctorLock *sync.RWMutex
 }
 type IActorPool interface {
 	GetActor(Id int64) IActor                         //获取actor
@@ -20,15 +21,15 @@ type IActorPool interface {
 }
 
 func (this *ActorPool) Init(chanNum int) {
-	this.ActorMap = make(map[int64]IActor)
-	this.ActorLock = &sync.RWMutex{}
+	this.actorMap = make(map[int64]IActor)
+	this.ctorLock = &sync.RWMutex{}
 	this.Actor.Init()
 }
 
 func (this *ActorPool) GetActor(Id int64) IActor {
-	this.ActorLock.RLock()
-	pActor, bEx := this.ActorMap[Id]
-	this.ActorLock.RUnlock()
+	this.ctorLock.RLock()
+	pActor, bEx := this.actorMap[Id]
+	this.ctorLock.RUnlock()
 	if bEx {
 		return pActor
 	}
@@ -36,31 +37,31 @@ func (this *ActorPool) GetActor(Id int64) IActor {
 }
 
 func (this *ActorPool) AddActor(Id int64, actor IActor) {
-	this.ActorLock.Lock()
-	this.ActorMap[Id] = actor
-	this.ActorLock.Unlock()
+	this.ctorLock.Lock()
+	this.actorMap[Id] = actor
+	this.ctorLock.Unlock()
 }
 
 func (this *ActorPool) DelActor(Id int64) {
-	this.ActorLock.Lock()
-	delete(this.ActorMap, Id)
-	this.ActorLock.Unlock()
+	this.ctorLock.Lock()
+	delete(this.actorMap, Id)
+	this.ctorLock.Unlock()
 }
 
 func (this *ActorPool) GetActorNum() int {
 	nLen := 0
-	this.ActorLock.RLock()
-	nLen = len(this.ActorMap)
-	this.ActorLock.RUnlock()
+	this.ctorLock.RLock()
+	nLen = len(this.actorMap)
+	this.ctorLock.RUnlock()
 	return nLen
 }
 
 func (this *ActorPool) BoardCast(funcName string, params ...interface{}) {
-	this.ActorLock.RLock()
-	for _, v := range this.ActorMap {
+	this.ctorLock.RLock()
+	for _, v := range this.actorMap {
 		v.SendMsg(rpc3.RpcHead{}, funcName, params...)
 	}
-	this.ActorLock.RUnlock()
+	this.ctorLock.RUnlock()
 }
 func (this *ActorPool) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
 	buff := rpc.Marshal(head, funcName, params...)

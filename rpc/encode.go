@@ -3,23 +3,24 @@ package rpc
 import (
 	"bytes"
 	"encoding/gob"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"google.golang.org/protobuf/proto"
 	"log"
 	"strings"
+
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/wrong"
+	"google.golang.org/protobuf/proto"
 )
 
 //rpc  Marshal
-func Marshal(head rpc3.RpcHead, funcName string, params ...interface{}) []byte {
-	data, _ := marshal(head, funcName, params...)
-	return data
+func Marshal(head rpc3.RpcHead, funcName string, params ...interface{}) rpc3.Packet {
+	return marshal(head, funcName, params...)
 }
 
 //rpc  marshal
-func marshal(head rpc3.RpcHead, funcName string, params ...interface{}) ([]byte, *rpc3.RpcPacket) {
+func marshal(head rpc3.RpcHead, funcName string, params ...interface{}) rpc3.Packet {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Print(err)
+			wrong.TraceCode(err)
 		}
 	}()
 
@@ -31,7 +32,7 @@ func marshal(head rpc3.RpcHead, funcName string, params ...interface{}) ([]byte,
 	}
 	rpcPacket.RpcBody = buf.Bytes()
 	dat, _ := proto.Marshal(rpcPacket)
-	return dat, rpcPacket
+	return rpc3.Packet{Buff: dat, RpcPacket: rpcPacket}
 }
 
 //rpc  MarshalPacket
