@@ -56,6 +56,8 @@ type (
 		Init()
 		Stop()
 		Start()
+		// FindCall(funcName string) *CallFunc
+		// RegisterCall(funcName string, call interface{})
 		SendMsg(head rpc3.RpcHead, funcName string, params ...interface{})
 		Send(head rpc3.RpcHead, packet rpc3.Packet)
 
@@ -114,6 +116,23 @@ func (this *Actor) GetName() string {
 	return this.actorName
 }
 
+// func (this *Actor) FindCall(funcName string) *CallFunc {
+// 	funcName = strings.ToLower(funcName)
+// 	fun, exist := this.CallMap[funcName]
+// 	if exist == true {
+// 		return fun
+// 	}
+// 	return nil
+// }
+// func (this *Actor) RegisterCall(funcName string, call interface{}) {
+// 	funcName = strings.ToLower(funcName)
+// 	if this.FindCall(funcName) != nil {
+// 		log.Fatalln("actor error [%s] 消息重复定义", funcName)
+// 	}
+
+// 	callfunc := &CallFunc{Func: call, FuncVal: reflect.ValueOf(call), FuncType: reflect.TypeOf(call), FuncParams: reflect.TypeOf(call).String()}
+// 	this.CallMap[funcName] = callfunc
+// }
 func (this *Actor) GetRpcHead(ctx context.Context) rpc3.RpcHead {
 	rpcHead := ctx.Value("rpcHead").(rpc3.RpcHead)
 	return rpcHead
