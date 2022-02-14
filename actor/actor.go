@@ -72,6 +72,7 @@ type (
 		Register(IActor, Op)
 		HasRpc(string) bool
 		GetAcotr() *Actor
+		ClientSocket(ctx context.Context) *network.ServerSocketClient
 	}
 
 	CallIO struct {
