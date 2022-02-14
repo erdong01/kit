@@ -101,14 +101,17 @@ func (this *ActorBase) IsActorType(actorType ACTOR_TYPE) bool {
 }
 
 func AssignActorId() int64 {
-	atomic.AddInt64(&IdSeed, 1)
-	return int64(IdSeed)
+	return atomic.AddInt64(&IdSeed, 1)
 }
 func (this *Actor) GetId() int64 {
 	return this.id
 }
 func (this *Actor) SetId(id int64) {
 	this.id = id
+}
+
+func (this *Actor) GetName() string {
+	return this.actorName
 }
 
 func (this *Actor) GetRpcHead(ctx context.Context) rpc3.RpcHead {
@@ -145,7 +148,11 @@ func (this *Actor) Init() {
 		this.id = AssignActorId()
 	}
 }
-
+func (this *Actor) Register(pActor IActor, op Op) {
+	rType := reflect.TypeOf(pActor)
+	this.ActorBase = ActorBase{rType: rType, rVal: reflect.ValueOf(pActor), Self: pActor, actorName: op.name,
+		actorType: op.aType, rpcMethodMap: op.rpcMethodMap}
+}
 func (this *Actor) RegisterTimer(duration time.Duration, fun func(), opts ...timer.OpOption) {
 	if this.mTimerId == nil {
 		this.mTimerId = new(int64)
@@ -188,6 +195,7 @@ func (this *Actor) Send(head rpc3.RpcHead, packet rpc3.Packet) {
 	}()
 	var io CallIO
 	io.RpcHead = head
+	io.RpcPacket = packet.RpcPacket
 	io.Buff = packet.Buff
 	this.mailBox.Push(io)
 	if atomic.CompareAndSwapInt32(&this.mailIn, 0, 1) {

@@ -74,7 +74,7 @@ func (this *EmptyClusterInfo) String() string {
 	return ""
 }
 
-func (this *Cluster) Init(info *common.ClusterInfo, Endpoints []string, natsUrl string) {
+func (this *Cluster) InitCluster(info *common.ClusterInfo, Endpoints []string, natsUrl string) {
 	this.Actor.Init()
 	for i := 0; i < MAX_CLUSTER_NUM; i++ {
 		this.clusterLocker[i] = &sync.RWMutex{}

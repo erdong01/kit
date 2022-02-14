@@ -2,13 +2,14 @@ package cluster
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/cluster/common"
 	"github.com/erDong01/micro-kit/cluster/etcdv3"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/nats-io/nats.go"
-	"log"
-	"strings"
 )
 
 type (
@@ -39,6 +40,7 @@ func NewSnowflake(Endpoints []string) *Snowflake {
 	return (*Snowflake)(uuid)
 }
 
+//注册playerraft
 func NewPlayerRaft(Endpoints []string) *PlayerRaft {
 	playerRaft := &etcdv3.PlayerRaft{}
 	playerRaft.Init(Endpoints)
@@ -56,17 +58,6 @@ func (this *PlayerRaft) Lease(leaseId int64) error {
 	return (*etcdv3.PlayerRaft)(this).Lease(leaseId)
 }
 
-func GetRpcChannel(head rpc3.RpcHead) string {
-	return fmt.Sprintf("%s/%s/%d", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
-}
-
-func GetRpcTopicChannel(head rpc3.RpcHead) string {
-	return fmt.Sprintf("%s/%s", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()))
-}
-func GetRpcCallChannel(head rpc3.RpcHead) string {
-	return fmt.Sprintf("%s/%s/call/%d", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
-}
-
 func GetChannel(clusterInfo common.ClusterInfo) string {
 	return fmt.Sprintf("%s/%s/%d", etcdv3.ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
 }
@@ -79,6 +70,16 @@ func GetCallChannel(clusterInfo common.ClusterInfo) string {
 	return fmt.Sprintf("%s/%s/call/%d", etcdv3.ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
 }
 
+func GetRpcChannel(head rpc3.RpcHead) string {
+	return fmt.Sprintf("%s/%s/%d", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
+}
+func GetRpcTopicChannel(head rpc3.RpcHead) string {
+	return fmt.Sprintf("%s/%s", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()))
+}
+
+func GetRpcCallChannel(head rpc3.RpcHead) string {
+	return fmt.Sprintf("%s/%s/call/%d", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
+}
 func SetupNatsConn(connectString string, appDieChan chan bool, options ...nats.Option) (*nats.Conn, error) {
 	natsOptions := append(
 		options,
