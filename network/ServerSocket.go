@@ -139,7 +139,7 @@ func (this *ServerSocket) LoadClient() *ServerSocketClient {
 func (this *ServerSocket) Send(head rpc3.RpcHead, packet rpc3.Packet) int {
 	client := this.GetClientById(head.SocketId)
 	if client != nil {
-		client.Send(head, buff)
+		client.Send(head, packet)
 	}
 	return 0
 }
@@ -196,6 +196,6 @@ func (this *ServerSocket) SendPacket(head rpc3.RpcHead, funcName string, packet 
 	if client == nil {
 		return 0
 	}
-	buff := rpc.MarshalPacket(head, funcName, packet)
-	return client.Send(rpc3.RpcHead{}, buff)
+	sendPacket := rpc.Marshal(head, funcName, packet)
+	return client.Send(rpc3.RpcHead{}, sendPacket)
 }

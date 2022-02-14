@@ -71,7 +71,7 @@ func (this *ServerSocketClient) Start() bool {
 	}
 	return true
 }
-func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
+func (this *ServerSocketClient) Send(head rpc3.RpcHead, packet rpc3.Packet) int {
 	if this == nil {
 		return 0
 	}
@@ -83,12 +83,12 @@ func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
 
 	if this.connectType == CLIENT_CONNECT { //对外链接send不阻塞
 		select {
-		case this.sendChan <- buff:
+		case this.sendChan <- packet.Buff:
 		default: //网络太卡,tcp send缓存满了并且发送队列也满了
 			this.OnNetFail()
 		}
 	} else {
-		return this.DoSend(buff)
+		return this.DoSend(packet.Buff)
 
 	}
 	return 0
@@ -207,7 +207,7 @@ func (this *ServerSocketClient) SendLoop() bool {
 }
 
 func (this *ServerSocketClient) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) int {
-	buff := rpc.MarshalPacket(head, funcName, packet)
+	buff := rpc.Marshal(head, funcName, packet)
 	return this.Send(rpc3.RpcHead{}, buff)
 }
 
