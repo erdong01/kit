@@ -9,7 +9,7 @@ import (
 
 type ActorPool struct {
 	Actor
-	actorMap  map[int64]IActor
+	actorMap map[int64]IActor
 	ctorLock *sync.RWMutex
 }
 type IActorPool interface {
@@ -68,7 +68,7 @@ func (this *ActorPool) SendMsg(head rpc3.RpcHead, funcName string, params ...int
 	head.SocketId = 0
 	if head.Id != 0 {
 		pActor := this.GetActor(head.Id)
-		if pActor != nil && pActor.FindCall(funcName) != nil {
+		if pActor != nil && pActor.HasRpc(funcName) {
 			pActor.Send(head, buff)
 			return
 		}
@@ -78,16 +78,16 @@ func (this *ActorPool) SendMsg(head rpc3.RpcHead, funcName string, params ...int
 
 func (this *ActorPool) PacketFunc(packet rpc3.Packet) bool {
 	rpcPacket, head := rpc.UnmarshalHead(packet.Buff)
-	if this.FindCall(rpcPacket.FuncName) != nil {
+	if this.HasRpc(rpcPacket.FuncName) {
 		head.SocketId = packet.Id
 		head.Reply = packet.Reply
-		this.Send(head, packet.Buff)
+		this.Send(head, packet)
 	} else {
 		pActor := this.GetActor(rpcPacket.RpcHead.Id)
-		if pActor != nil && pActor.FindCall(rpcPacket.FuncName) != nil {
+		if pActor != nil && pActor.HasRpc(rpcPacket.FuncName) {
 			head.SocketId = packet.Id
 			head.Reply = packet.Reply
-			pActor.Send(head, packet.Buff)
+			pActor.Send(head, packet)
 		}
 	}
 	return false

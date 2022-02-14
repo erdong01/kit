@@ -57,7 +57,7 @@ type (
 		Stop()
 		Start()
 		SendMsg(head rpc3.RpcHead, funcName string, params ...interface{})
-		Send(head rpc3.RpcHead, buff []byte)
+		Send(head rpc3.RpcHead, packet rpc3.Packet)
 
 		RegisterTimer(duration time.Duration, fun func(), opts ...timer.OpOption) //注册定时器,时间为纳秒 1000 * 1000 * 1000
 		GetId() int64

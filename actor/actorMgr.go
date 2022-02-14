@@ -53,23 +53,6 @@ type (
 	}
 )
 
-func (this *ActorMgr) AddActor(pActor IActor, names ...string) {
-	name := ""
-	if len(names) == 0 {
-		name = tools.GetClassName(pActor)
-		_, exist := this.actorMap[name]
-		if exist {
-			log.Printf("Register an existed GobalActor")
-			return
-		}
-
-	} else {
-		name = names[0]
-	}
-
-	this.actorMap[name] = pActor
-}
-
 func (op *Op) applyOpts(opts []OpOption) {
 	for _, opt := range opts {
 		opt(op)
