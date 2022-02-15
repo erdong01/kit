@@ -9,6 +9,7 @@ import (
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/wrong"
+	"github.com/xtaci/kcp-go/v5"
 )
 
 type (
@@ -84,22 +85,32 @@ func (this *ClientSocket) Restart() bool {
 }
 func (this *ClientSocket) Connect() bool {
 	var strRemote = fmt.Sprintf("%s:%d", this.IP, this.Port)
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
-	if err != nil {
-		log.Printf("%v", err)
+	connectStr := "Tcp"
+	if this.bKcp {
+		ln, err1 := kcp.Dial(strRemote)
+		if err1 != nil {
+			return false
+		}
+		this.SetConn(ln)
+		connectStr = "Kcp"
+	} else {
+		tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
+		if err != nil {
+			log.Printf("%v", err)
+		}
+		ln, err1 := net.DialTCP("tcp4", nil, tcpAddr)
+		if err1 != nil {
+			return false
+		}
+		this.SetConn(ln)
 	}
-	ln, err1 := net.DialTCP("tcp4", nil, tcpAddr)
-	if err1 != nil {
-		return false
-	}
-	this.SetTcpConn(ln)
-	fmt.Printf("连接成功，请输入信息！\n")
-	this.CallMsg("COMMON_RegisterRequest")
+	fmt.Printf("%s 连接成功，请输入信息！\n", connectStr)
+	this.CallMsg(rpc3.RpcHead{}, "COMMON_RegisterRequest")
 	return true
 }
 func (this *ClientSocket) OnNetFail(int) {
 	this.Stop()
-	this.CallMsg("DISCONNECT", this.clientId)
+	this.CallMsg(rpc3.RpcHead{}, "DISCONNECT", this.clientId)
 }
 
 func (this *ClientSocket) Run() bool {
