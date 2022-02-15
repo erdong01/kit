@@ -75,9 +75,9 @@ func WithRpcMethodMap(rpcMethodMap map[string]string) OpOption {
 	}
 }
 
-func WithType(actor_type ACTOR_TYPE) OpOption {
+func WithType(actorType ACTOR_TYPE) OpOption {
 	return func(op *Op) {
-		op.mType = actor_type
+		op.mType = actorType
 	}
 }
 

@@ -49,7 +49,7 @@ type WriteChan struct {
 	id   int
 }
 
-func (this *ServerSocket) Init(ip string, port int) bool {
+func (this *ServerSocket) Init(ip string, port int, params ...OpOption) bool {
 	this.Socket.Init(ip, port)
 	this.clientList = make(map[uint32]*ServerSocketClient)
 	this.clientLock = &sync.RWMutex{}
@@ -96,7 +96,7 @@ func (this *ServerSocket) GetClientById(id uint32) *ServerSocketClient {
 	return nil
 }
 
-func (this *ServerSocket) AddClient(tcpConn *net.TCPConn, addr string, connectType int) *ServerSocketClient {
+func (this *ServerSocket) AddClient(conn net.Conn, addr string, connectType int) *ServerSocketClient {
 	pClient := this.LoadClient()
 	if pClient != nil {
 		pClient.Init("", 0)
@@ -106,8 +106,7 @@ func (this *ServerSocket) AddClient(tcpConn *net.TCPConn, addr string, connectTy
 		pClient.clientId = this.AssignClientId()
 		pClient.IP = addr
 		pClient.SetConnectType(connectType)
-		pClient.SetTcpConn(tcpConn)
-		pClient.SetClientClose(this.GetClientClose()) //自己加的
+		pClient.SetConn(conn)
 		this.clientLock.Lock()
 		this.clientList[pClient.clientId] = pClient
 		this.clientLock.Unlock()
@@ -163,6 +162,22 @@ func (this *ServerSocket) Run() bool {
 		this.handleConn(conn, conn.RemoteAddr().String())
 	}
 }
+
+func (this *ServerSocket) RunKcp() bool {
+	for {
+		kcpConn, err := this.kcpListern.Accept()
+		handleError(err)
+		if err != nil {
+			return false
+		}
+
+		fmt.Printf("kcp客户端：%s已连接！\n", kcpConn.RemoteAddr().String())
+		//延迟，关闭链接
+		//defer kcpConn.Close()
+		this.handleConn(kcpConn, kcpConn.RemoteAddr().String())
+	}
+}
+
 func (this *ServerSocket) Restart() bool {
 	return true
 }
@@ -180,7 +195,7 @@ func (this *ServerSocket) Close() {
 	defer this.listen.Close()
 	this.Clear()
 }
-func (this *ServerSocket) handleConn(tcpConn *net.TCPConn, addr string) bool {
+func (this *ServerSocket) handleConn(tcpConn net.Conn, addr string) bool {
 	if tcpConn == nil {
 		return false
 	}

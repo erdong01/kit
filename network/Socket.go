@@ -64,7 +64,7 @@ type (
 	}
 
 	ISocket interface {
-		Init(string, int) bool
+		Init(string, int, ...OpOption) bool
 		Start() bool
 		Stop() bool
 		Run() bool
@@ -74,9 +74,9 @@ type (
 		OnNetFail(int)
 		Clear()
 		Close()
-		SendMsg(rpc3.RpcHead, string, ...interface{})
-		Send(rpc3.RpcHead, []byte) int
-		CallMsg(string, ...interface{}) //回调消息处理
+		SendMsg(rpc3.RpcHead, string, ...interface{}) int
+		Send(rpc3.RpcHead, rpc3.Packet) int
+		CallMsg(rpc3.RpcHead, string, ...interface{}) //回调消息处理
 
 		GetId() uint32
 		GetState() int32
@@ -87,11 +87,8 @@ type (
 		GetMaxPacketLen() int
 		BindPacketFunc(PacketFunc)
 		SetConnectType(int)
-		SetTcpConn(net.Conn)
+		SetConn(net.Conn)
 		HandlePacket([]byte)
-
-		SetClientClose(ClientClose)
-		GetClientClose() ClientClose
 	}
 )
 
@@ -161,7 +158,8 @@ func (this *Socket) SetState(state int32) {
 	atomic.StoreInt32(&this.state, state)
 }
 
-func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
+	return 0
 }
 
 func (this *Socket) Send(rpc3.RpcHead, rpc3.Packet) int {
@@ -201,7 +199,7 @@ func (this *Socket) SetConnectType(nType int) {
 	this.connectType = nType
 }
 
-func (this *Socket) SetTcpConn(conn net.Conn) {
+func (this *Socket) SetConn(conn net.Conn) {
 	this.Conn = conn
 }
 
@@ -209,7 +207,7 @@ func (this *Socket) BindPacketFunc(callfunc PacketFunc) {
 	this.PacketFuncList.PushBack(callfunc)
 }
 
-func (this *Socket) CallMsg(funcName string, params ...interface{}) {
+func (this *Socket) CallMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
 	this.HandlePacket(rpc.Marshal(rpc3.RpcHead{}, funcName, params...).Buff)
 }
 
@@ -220,11 +218,4 @@ func (this *Socket) HandlePacket(buff []byte) {
 			break
 		}
 	}
-}
-
-func (this *Socket) SetClientClose(c ClientClose) {
-	this.clientClose = c
-}
-func (this *Socket) GetClientClose() ClientClose {
-	return this.clientClose
 }
