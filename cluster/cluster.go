@@ -43,7 +43,8 @@ type (
 	}
 
 	ICluster interface {
-		Init(info *common.ClusterInfo, Endpoints []string, natsUrl string)
+		actor.IActor
+		InitCluster(info *common.ClusterInfo, Endpoints []string, natsUrl string)
 		RegisterClusterCall() //注册集群通用回调
 		AddCluster(info *common.ClusterInfo)
 		DelCluster(info *common.ClusterInfo)
@@ -52,7 +53,6 @@ type (
 
 		BindPacketFunc(packetFunc network.PacketFunc)
 		SendMsg(rpc3.RpcHead, string, ...interface{})                    //发送给集群特定服务器
-		Send(rpc3.RpcHead, []byte)                                       //发送给集群特定服务器
 		CallMsg(interface{}, rpc3.RpcHead, string, ...interface{}) error //同步给集群特定服务器
 
 		RandomCluster(head rpc3.RpcHead) rpc3.RpcHead //随机分配
