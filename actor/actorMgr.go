@@ -28,7 +28,7 @@ const (
 type (
 	Op struct {
 		name         string //name
-		aType        ACTOR_TYPE
+		mType        ACTOR_TYPE
 		rpcMethodMap map[string]string
 	}
 
@@ -44,8 +44,8 @@ type (
 	}
 	IActorMgr interface {
 		Init()
-		RegisterActor(IActor, ...string) //注册回调
-		PacketFunc(rpc3.Packet) bool     //回调函数
+		RegisterActor(pActor IActor, params ...OpOption) //注册回调
+		PacketFunc(rpc3.Packet) bool                     //回调函数
 		SendMsg(rpc3.RpcHead, string, ...interface{})
 	}
 	ICluster interface {
@@ -60,7 +60,7 @@ func (op *Op) applyOpts(opts []OpOption) {
 }
 
 func (op *Op) IsActorType(actorType ACTOR_TYPE) bool {
-	return op.aType == actorType
+	return op.mType == actorType
 }
 
 func WithName(name string) OpOption {
@@ -74,6 +74,13 @@ func WithRpcMethodMap(rpcMethodMap map[string]string) OpOption {
 		op.rpcMethodMap = rpcMethodMap
 	}
 }
+
+func WithType(actor_type ACTOR_TYPE) OpOption {
+	return func(op *Op) {
+		op.mType = actor_type
+	}
+}
+
 func (this *ActorMgr) Init() {
 	this.actorMap = make(map[reflect.Type]IActor)
 	this.actorNameMap = make(map[string]IActor)
@@ -130,7 +137,7 @@ func (this *ActorMgr) RegisterActor(pActor IActor, params ...OpOption) {
 
 func (this *ActorMgr) AddPlayer(pActor IActor) {
 	rType := reflect.TypeOf(pActor)
-	op := Op{aType: ACTOR_TYPE_PLAYER, name: this.actorMap[rType].GetName(), rpcMethodMap: this.rpcMethodMap[rType]}
+	op := Op{mType: ACTOR_TYPE_PLAYER, name: this.actorMap[rType].GetName(), rpcMethodMap: this.rpcMethodMap[rType]}
 	pActor.Register(pActor, op)
 	this.playerLock.Lock()
 	this.playerMap[pActor.GetId()] = pActor

@@ -171,7 +171,7 @@ func (this *Actor) Init() {
 func (this *Actor) Register(pActor IActor, op Op) {
 	rType := reflect.TypeOf(pActor)
 	this.ActorBase = ActorBase{rType: rType, rVal: reflect.ValueOf(pActor), Self: pActor, actorName: op.name,
-		actorType: op.aType, rpcMethodMap: op.rpcMethodMap}
+		actorType: op.mType, rpcMethodMap: op.rpcMethodMap}
 }
 func (this *Actor) RegisterTimer(duration time.Duration, fun func(), opts ...timer.OpOption) {
 	if this.mTimerId == nil {
