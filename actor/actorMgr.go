@@ -120,7 +120,7 @@ func (this *ActorMgr) RegisterActor(pActor IActor, params ...OpOption) {
 				if !bInShare {
 					pMsgHandle, bEx := this.msgMap[funcName]
 					if bEx && pMsgHandle != nil {
-						log.Panicf("RegisterFuncName [%s] exist_actor [%s] actor [%s]", methodName, pMsgHandle.GetName(), op.name)
+						log.Printf("RegisterFuncName [%s] exist_actor [%s] actor [%s]", methodName, pMsgHandle.GetName(), op.name)
 						return
 					}
 					this.msgMap[funcName] = pActor
