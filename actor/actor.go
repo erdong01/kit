@@ -11,7 +11,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools/mpsc"
@@ -72,7 +71,7 @@ type (
 		Register(IActor, Op)
 		HasRpc(string) bool
 		GetAcotr() *Actor
-		ClientSocket(ctx context.Context) *network.ServerSocketClient
+		//ClientSocket(ctx context.Context) *network.ServerSocketClient
 	}
 
 	CallIO struct {
@@ -341,7 +340,7 @@ func GetRpcMethodMap(rType reflect.Type, tagName string) map[string]string {
 }
 
 //ClientSocket 给客户发送消息
-func (this *Actor) ClientSocket(ctx context.Context) *network.ServerSocketClient {
-	rpcHead := ctx.Value("rpcHead").(rpc3.RpcHead)
-	return network.SocketServer.GetClientById(rpcHead.SocketId)
-}
+//func (this *Actor) ClientSocket(ctx context.Context) *network.ServerSocketClient {
+//	rpcHead := ctx.Value("rpcHead").(rpc3.RpcHead)
+//	return network.SocketServer.GetClientById(rpcHead.SocketId)
+//}
