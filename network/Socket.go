@@ -89,6 +89,9 @@ type (
 		SetConnectType(int)
 		SetConn(net.Conn)
 		HandlePacket([]byte)
+
+		//SetClientClose(ClientClose)
+		//GetClientClose() ClientClose
 	}
 )
 
@@ -218,4 +221,11 @@ func (this *Socket) HandlePacket(buff []byte) {
 			break
 		}
 	}
+}
+
+func (this *Socket) SetClientClose(c ClientClose) {
+	this.clientClose = c
+}
+func (this *Socket) GetClientClose() ClientClose {
+	return this.clientClose
 }
