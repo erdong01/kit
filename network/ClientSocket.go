@@ -24,7 +24,7 @@ type (
 	}
 )
 
-func (this *ClientSocket) Init(ip string, port int) bool {
+func (this *ClientSocket) Init(ip string, port int, params ...OpOption) bool {
 	if this.Port == port || this.IP == ip {
 		return false
 	}
