@@ -39,7 +39,6 @@ type (
 		master         *Master
 		clusterInfoMap map[uint32]*common.ClusterInfo
 		packetFuncList *vector.Vector //call back
-		callBackMap    sync.Map
 	}
 
 	ICluster interface {
@@ -229,33 +228,25 @@ func (this *Cluster) CallMsg(cb interface{}, head rpc3.RpcHead, funcName string,
 	default:
 		_, head.ClusterId = this.hashRing[head.DestServerType].Get64(head.Id)
 	}
+
 	reply, err := this.conn.Request(GetRpcCallChannel(head), buff, CALL_TIME_OUT)
 	if err == nil {
 		rpcPacket, _ := rpc.Unmarshal(reply.Data)
-		var cf *actor.CallFunc
-		val, bOk := this.callBackMap.Load(funcName)
-		if !bOk {
-			cf = &actor.CallFunc{Func: cb, FuncVal: reflect.ValueOf(cb), FuncType: reflect.TypeOf(cb), FuncParams: reflect.TypeOf(cb).String()}
-			this.callBackMap.Store(funcName, cf)
-		} else {
-			cf = val.(*actor.CallFunc)
-		}
+		cf := &actor.CallFunc{Func: cb, FuncVal: reflect.ValueOf(cb), FuncType: reflect.TypeOf(cb), FuncParams: reflect.TypeOf(cb).String()}
 		f := cf.FuncVal
 		k := cf.FuncType
 		err, params := rpc.UnmarshalBodyCall(rpcPacket, k)
 		if err != nil {
 			return err
 		}
-
 		iLen := len(params)
 		if iLen >= 1 {
 			in := make([]reflect.Value, iLen)
 			for i, param := range params {
 				in[i] = reflect.ValueOf(param)
 			}
-			this.Trace(funcName)
+
 			f.Call(in)
-			this.Trace("")
 		} else {
 			log.Printf("CallMsg [%s] params at least one context", funcName)
 			return errors.New("callmsg params at least one context")

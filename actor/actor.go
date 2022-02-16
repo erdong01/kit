@@ -153,6 +153,7 @@ func (this *Actor) FindCall(funcName string) *CallFunc {
 	}
 	return nil
 }
+
 func (this *Actor) RegisterCall(funcName string, call interface{}) {
 	funcName = strings.ToLower(funcName)
 	if this.FindCall(funcName) != nil {
@@ -248,14 +249,14 @@ func (this *Actor) loop() bool {
 		this.consume()
 	case msg := <-this.acotrChan:
 		if msg == DESDORY_EVENT {
-			return false
+			return true
 		}
 	}
-	return true
+	return false
 }
 func (this *Actor) run() {
 	for {
-		if !this.loop() {
+		if this.loop() {
 			break
 		}
 	}
