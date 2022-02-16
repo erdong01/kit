@@ -44,15 +44,7 @@ func handleError(err error) {
 	}
 	log.Printf("错误：%s\n", err.Error())
 }
-func (this *ServerSocketClient) Init(ip string, port int, params ...OpOption) bool {
-	this.Socket.Init(ip, port)
-	return true
-}
-
-func (this *ServerSocketClient) Start() bool {
-	if this.ServerSocket == nil {
-		return false
-	}
+func (this *ServerSocketClient) Init(ip string, port int) bool {
 	if this.connectType == CLIENT_CONNECT {
 		this.sendChan = make(chan []byte, MAX_SEND_CHAN)
 		this.timerId = new(int64)
@@ -61,7 +53,14 @@ func (this *ServerSocketClient) Start() bool {
 			this.Update()
 		})
 	}
+	this.Socket.Init(ip, port)
+	return true
+}
 
+func (this *ServerSocketClient) Start() bool {
+	if this.ServerSocket == nil {
+		return false
+	}
 	if this.PacketFuncList.Len() == 0 {
 		this.PacketFuncList = this.ServerSocket.PacketFuncList
 	}
@@ -72,7 +71,7 @@ func (this *ServerSocketClient) Start() bool {
 	}
 	return true
 }
-func (this *ServerSocketClient) Send(head rpc3.RpcHead, packet rpc3.Packet) int {
+func (this *ServerSocketClient) Send(head rpc3.RpcHead, buff []byte) int {
 	if this == nil {
 		return 0
 	}
@@ -84,12 +83,12 @@ func (this *ServerSocketClient) Send(head rpc3.RpcHead, packet rpc3.Packet) int 
 
 	if this.connectType == CLIENT_CONNECT { //对外链接send不阻塞
 		select {
-		case this.sendChan <- packet.Buff:
+		case this.sendChan <- buff:
 		default: //网络太卡,tcp send缓存满了并且发送队列也满了
-			this.OnNetFail(0)
+			this.OnNetFail()
 		}
 	} else {
-		return this.DoSend(packet.Buff)
+		return this.DoSend(buff)
 
 	}
 	return 0
@@ -109,7 +108,7 @@ func (this *ServerSocketClient) DoSend(buff []byte) int {
 	return 0
 }
 
-func (this *ServerSocketClient) OnNetFail(error int) {
+func (this *ServerSocketClient) OnNetFail() {
 	this.Stop()
 	if this.connectType == CLIENT_CONNECT {
 		stream := tools.NewBitStream(make([]byte, 32), 32)
@@ -117,7 +116,7 @@ func (this *ServerSocketClient) OnNetFail(error int) {
 		stream.WriteInt(int(this.clientId), 32)
 		this.HandlePacket(stream.GetBuffer())
 	} else {
-		this.CallMsg(rpc3.RpcHead{}, "DISCONNECT", this.clientId)
+		this.CallMsg("DISCONNECT", this.clientId)
 	}
 	if this.ServerSocket != nil {
 		this.ServerSocket.DelClient(this)
@@ -149,18 +148,18 @@ func (this *ServerSocketClient) Run() bool {
 		n, err := this.Conn.Read(buff)
 		if err == io.EOF {
 			fmt.Printf("远程链接：%s已经关闭！\n", this.Conn.RemoteAddr().String())
-			this.OnNetFail(0)
+			this.OnNetFail()
 			return false
 		}
 		if err != nil {
 			handleError(err)
-			this.OnNetFail(0)
+			this.OnNetFail()
 			return false
 		}
 		if n > 0 {
 			//熔断
 			if !this.packetParser.Read(buff[:n]) && this.connectType == CLIENT_CONNECT {
-				this.OnNetFail(1)
+				this.OnNetFail()
 				return false
 			}
 		}
@@ -183,7 +182,7 @@ func (this *ServerSocketClient) Run() bool {
 func (this *ServerSocketClient) Update() {
 	now := int(time.Now().Unix())
 	if this.heartTime < now {
-		this.OnNetFail(2)
+		this.OnNetFail()
 		return
 	}
 }
@@ -197,7 +196,7 @@ func (this *ServerSocketClient) SendLoop() bool {
 		}()
 		select {
 		case buff := <-this.sendChan:
-			if buff == nil { //信道关闭
+			if buff == nil {
 				return false
 			} else {
 				this.DoSend(buff)
@@ -208,7 +207,7 @@ func (this *ServerSocketClient) SendLoop() bool {
 }
 
 func (this *ServerSocketClient) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) int {
-	buff := rpc.Marshal(head, funcName, packet)
+	buff := rpc.MarshalPacket(head, funcName, packet)
 	return this.Send(rpc3.RpcHead{}, buff)
 }
 

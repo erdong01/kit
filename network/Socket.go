@@ -29,13 +29,7 @@ type (
 
 	PacketFunc   func(packet rpc3.Packet) bool //回调函数
 	HandlePacket func(buff []byte)
-	Op           struct {
-		kcp bool
-	}
-
-	OpOption func(*Op)
-
-	Socket struct {
+	Socket       struct {
 		Conn              net.Conn
 		Port              int
 		IP                string
@@ -46,10 +40,6 @@ type (
 		clientId uint32
 		seq      int64
 
-		totalNum     int
-		acceptedNum  int
-		connectedNum int
-
 		sendTimes      int
 		receiveTimes   int
 		PacketFuncList *vector.Vector
@@ -58,13 +48,12 @@ type (
 		halfSize     int
 		packetParser PacketParser
 		heartTime    int
-		bKcp         bool
 
 		clientClose ClientClose
 	}
 
 	ISocket interface {
-		Init(string, int, ...OpOption) bool
+		Init(string, int) bool
 		Start() bool
 		Stop() bool
 		Run() bool
@@ -74,9 +63,9 @@ type (
 		OnNetFail(int)
 		Clear()
 		Close()
-		SendMsg(rpc3.RpcHead, string, ...interface{}) int
-		Send(rpc3.RpcHead, rpc3.Packet) int
-		CallMsg(rpc3.RpcHead, string, ...interface{}) //回调消息处理
+		SendMsg(rpc3.RpcHead, string, ...interface{})
+		Send(rpc3.RpcHead, []byte) int
+		CallMsg(string, ...interface{}) //回调消息处理
 
 		GetId() uint32
 		GetState() int32
@@ -87,38 +76,23 @@ type (
 		GetMaxPacketLen() int
 		BindPacketFunc(PacketFunc)
 		SetConnectType(int)
-		SetConn(net.Conn)
+		SetTcpConn(net.Conn)
 		HandlePacket([]byte)
 
-		//SetClientClose(ClientClose)
-		//GetClientClose() ClientClose
+		SetClientClose(ClientClose)
+		GetClientClose() ClientClose
 	}
 )
 
-func (op *Op) applyOpts(opts []OpOption) {
-	for _, opt := range opts {
-		opt(op)
-	}
-}
-func WithKcp() OpOption {
-	return func(op *Op) {
-		op.kcp = true
-	}
-}
-func (this *Socket) Init(ip string, port int, params ...OpOption) bool {
-	op := &Op{}
-	op.applyOpts(params)
+func (this *Socket) Init(string, int) bool {
 	this.PacketFuncList = vector.NewVector()
-	this.SetState(SSF_NULL)
 	this.ReceiveBufferSize = 1024
+	this.SetState(SSF_NULL)
 	this.connectType = SERVER_CONNECT
 	this.half = false
 	this.halfSize = 0
 	this.heartTime = 0
 	this.packetParser = NewPacketParser(PacketConfig{Func: this.HandlePacket})
-	if op.kcp {
-		this.bKcp = true
-	}
 	return true
 }
 
@@ -161,11 +135,10 @@ func (this *Socket) SetState(state int32) {
 	atomic.StoreInt32(&this.state, state)
 }
 
-func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
-	return 0
+func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
 }
 
-func (this *Socket) Send(rpc3.RpcHead, rpc3.Packet) int {
+func (this *Socket) Send(rpc3.RpcHead, []byte) int {
 	return 0
 }
 
@@ -202,7 +175,7 @@ func (this *Socket) SetConnectType(nType int) {
 	this.connectType = nType
 }
 
-func (this *Socket) SetConn(conn net.Conn) {
+func (this *Socket) SetTcpConn(conn net.Conn) {
 	this.Conn = conn
 }
 
@@ -210,8 +183,9 @@ func (this *Socket) BindPacketFunc(callfunc PacketFunc) {
 	this.PacketFuncList.PushBack(callfunc)
 }
 
-func (this *Socket) CallMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
-	this.HandlePacket(rpc.Marshal(rpc3.RpcHead{}, funcName, params...).Buff)
+func (this *Socket) CallMsg(funcName string, params ...interface{}) {
+	buff := rpc.Marshal(rpc3.RpcHead{}, funcName, params...)
+	this.HandlePacket(buff)
 }
 
 func (this *Socket) HandlePacket(buff []byte) {

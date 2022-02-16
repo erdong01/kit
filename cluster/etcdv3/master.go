@@ -41,14 +41,13 @@ func (this *Master) BindActor(pActor actor.IActor) {
 }
 
 func (this *Master) addService(info *common.ClusterInfo) {
-	actor.MGR.SendMsg(rpc3.RpcHead{}, "Cluster_Add", info)
+	this.actor.SendMsg(rpc3.RpcHead{}, "cluster_add", info)
 	this.serviceMap[info.Id()] = info
 }
 
 func (this *Master) delService(info *common.ClusterInfo) {
 	delete(this.serviceMap, info.Id())
-	actor.MGR.SendMsg(rpc3.RpcHead{}, "Cluster_Del", info)
-
+	this.actor.SendMsg(rpc3.RpcHead{}, "Cluster_Del", info)
 }
 
 func NodeToService(val []byte) *common.ClusterInfo {
