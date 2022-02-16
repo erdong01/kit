@@ -13,9 +13,10 @@ require (
 	github.com/joeycumines/go-bigbuff v1.15.0
 	github.com/json-iterator/go v1.1.12
 	github.com/nats-io/nats-server/v2 v2.7.2 // indirect
-	github.com/nats-io/nats.go v1.13.1-0.20211122170419-d7c1d78a50fc
+	github.com/nats-io/nats.go v1.13.1-0.20220121202836-972a071d373d
 	github.com/spf13/viper v1.10.1
 	github.com/xlab/treeprint v1.1.0
+	github.com/xtaci/kcp-go/v5 v5.6.1 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.1
 	go.mongodb.org/mongo-driver v1.8.2
 	google.golang.org/grpc v1.43.0

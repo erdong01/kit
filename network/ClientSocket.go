@@ -93,7 +93,7 @@ func (this *ClientSocket) Connect() bool {
 	if err1 != nil {
 		return false
 	}
-	this.SetTcpConn(ln)
+	this.SetConn(ln)
 	fmt.Printf("连接成功，请输入信息！\n")
 	this.CallMsg("COMMON_RegisterRequest")
 	return true

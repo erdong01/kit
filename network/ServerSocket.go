@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
+	"github.com/xtaci/kcp-go/v5"
 	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
@@ -34,6 +35,7 @@ type ServerSocket struct {
 	clientLock  *sync.RWMutex
 	listen      *net.TCPListener
 	lock        sync.Mutex
+	kcpListern  net.Listener
 }
 
 type ClientChan struct {
@@ -47,8 +49,8 @@ type WriteChan struct {
 	id   int
 }
 
-func (this *ServerSocket) Init(ip string, port int) bool {
-	this.Socket.Init(ip, port)
+func (this *ServerSocket) Init(ip string, port int, params ...OpOption) bool {
+	this.Socket.Init(ip, port, params...)
 	this.clientList = make(map[uint32]*ServerSocketClient)
 	this.clientLock = &sync.RWMutex{}
 	this.IP = ip
@@ -63,22 +65,28 @@ func (this *ServerSocket) Start() bool {
 	}
 
 	var strRemote = fmt.Sprintf("%s:%d", this.IP, this.Port)
+	//初始tcp
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-	ln, err := net.ListenTCP("tcp4", tcpAddr)
+	this.listen, err = net.ListenTCP("tcp4", tcpAddr)
 	if err != nil {
 		log.Fatalf("%v", err)
 		return false
 	}
 
-	fmt.Printf("启动监听，等待链接！\n")
+	//初始kcp
+	this.kcpListern, err = kcp.Listen(strRemote)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
 
-	this.listen = ln
+	fmt.Printf("启动监听，等待链接！\n")
 	//延迟，监听关闭
 	//defer ln.Close()
 	go this.Run()
+	go this.RunKcp()
 	return true
 }
 func (this *ServerSocket) AssignClientId() uint32 {
@@ -94,7 +102,7 @@ func (this *ServerSocket) GetClientById(id uint32) *ServerSocketClient {
 	return nil
 }
 
-func (this *ServerSocket) AddClient(tcpConn *net.TCPConn, addr string, connectType int) *ServerSocketClient {
+func (this *ServerSocket) AddClient(tcpConn net.Conn, addr string, connectType int) *ServerSocketClient {
 	socketClient := this.LoadClient()
 	if socketClient != nil {
 		socketClient.Init("", 0)
@@ -104,7 +112,7 @@ func (this *ServerSocket) AddClient(tcpConn *net.TCPConn, addr string, connectTy
 		socketClient.clientId = this.AssignClientId()
 		socketClient.IP = addr
 		socketClient.SetConnectType(connectType)
-		socketClient.SetTcpConn(tcpConn)
+		socketClient.SetConn(tcpConn)
 		socketClient.SetClientClose(this.GetClientClose()) //自己加的
 		this.clientLock.Lock()
 		this.clientList[socketClient.clientId] = socketClient
@@ -150,10 +158,6 @@ func (this *ServerSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...
 	return 0
 }
 
-func (this *ServerSocket) Close() {
-	defer this.listen.Close()
-	this.Clear()
-}
 func (this *ServerSocket) Run() bool {
 	for {
 		conn, err := this.listen.AcceptTCP()
@@ -179,7 +183,12 @@ func (this *ServerSocket) Disconnect(bool) bool {
 func (this *ServerSocket) OnNetFail(int) {
 }
 
-func (this *ServerSocket) handleConn(tcpConn *net.TCPConn, addr string) bool {
+func (this *ServerSocket) Close() {
+	defer this.listen.Close()
+	this.Clear()
+}
+
+func (this *ServerSocket) handleConn(tcpConn net.Conn, addr string) bool {
 	if tcpConn == nil {
 		return false
 	}
@@ -188,6 +197,21 @@ func (this *ServerSocket) handleConn(tcpConn *net.TCPConn, addr string) bool {
 		return false
 	}
 	return true
+}
+
+func (this *ServerSocket) RunKcp() bool {
+	for {
+		kcpConn, err := this.kcpListern.Accept()
+		handleError(err)
+		if err != nil {
+			return false
+		}
+
+		fmt.Printf("kcp客户端：%s已连接！\n", kcpConn.RemoteAddr().String())
+		//延迟，关闭链接
+		//defer kcpConn.Close()
+		this.handleConn(kcpConn, kcpConn.RemoteAddr().String())
+	}
 }
 
 func (this *ServerSocket) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) int {

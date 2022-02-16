@@ -29,7 +29,14 @@ type (
 
 	PacketFunc   func(packet rpc3.Packet) bool //回调函数
 	HandlePacket func(buff []byte)
-	Socket       struct {
+
+	Op struct {
+		kcp bool
+	}
+
+	OpOption func(*Op)
+
+	Socket struct {
 		Conn              net.Conn
 		Port              int
 		IP                string
@@ -40,6 +47,10 @@ type (
 		clientId uint32
 		seq      int64
 
+		totalNum     int
+		acceptedNum  int
+		connectedNum int
+
 		sendTimes      int
 		receiveTimes   int
 		PacketFuncList *vector.Vector
@@ -48,12 +59,13 @@ type (
 		halfSize     int
 		packetParser PacketParser
 		heartTime    int
+		bKcp         bool
 
 		clientClose ClientClose
 	}
 
 	ISocket interface {
-		Init(string, int) bool
+		Init(string, int, ...OpOption) bool
 		Start() bool
 		Stop() bool
 		Run() bool
@@ -76,7 +88,7 @@ type (
 		GetMaxPacketLen() int
 		BindPacketFunc(PacketFunc)
 		SetConnectType(int)
-		SetTcpConn(net.Conn)
+		SetConn(net.Conn)
 		HandlePacket([]byte)
 
 		SetClientClose(ClientClose)
@@ -84,7 +96,21 @@ type (
 	}
 )
 
-func (this *Socket) Init(string, int) bool {
+func (op *Op) applyOpts(opts []OpOption) {
+	for _, opt := range opts {
+		opt(op)
+	}
+}
+
+func WithKcp() OpOption {
+	return func(op *Op) {
+		op.kcp = true
+	}
+}
+
+func (this *Socket) Init(ip string, port int, params ...OpOption) bool {
+	op := &Op{}
+	op.applyOpts(params)
 	this.PacketFuncList = vector.NewVector()
 	this.ReceiveBufferSize = 1024
 	this.SetState(SSF_NULL)
@@ -93,6 +119,9 @@ func (this *Socket) Init(string, int) bool {
 	this.halfSize = 0
 	this.heartTime = 0
 	this.packetParser = NewPacketParser(PacketConfig{Func: this.HandlePacket})
+	if op.kcp {
+		this.bKcp = true
+	}
 	return true
 }
 
@@ -175,7 +204,7 @@ func (this *Socket) SetConnectType(nType int) {
 	this.connectType = nType
 }
 
-func (this *Socket) SetTcpConn(conn net.Conn) {
+func (this *Socket) SetConn(conn net.Conn) {
 	this.Conn = conn
 }
 
