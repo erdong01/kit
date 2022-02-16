@@ -89,9 +89,11 @@ func (this *ServerSocket) Start() bool {
 	go this.RunKcp()
 	return true
 }
+
 func (this *ServerSocket) AssignClientId() uint32 {
 	return atomic.AddUint32(&this.idSeed, 1)
 }
+
 func (this *ServerSocket) GetClientById(id uint32) *ServerSocketClient {
 	this.clientLock.RLock()
 	client, exist := this.clientList[id]
@@ -158,17 +160,6 @@ func (this *ServerSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...
 	return 0
 }
 
-func (this *ServerSocket) Run() bool {
-	for {
-		conn, err := this.listen.AcceptTCP()
-		if err != nil {
-			fmt.Println("接受客户端连接异常：", err.Error())
-			continue
-		}
-		fmt.Println("客户端连接:", conn.RemoteAddr().String())
-		this.handleConn(conn, conn.RemoteAddr().String())
-	}
-}
 func (this *ServerSocket) Restart() bool {
 	return true
 }
@@ -188,15 +179,16 @@ func (this *ServerSocket) Close() {
 	this.Clear()
 }
 
-func (this *ServerSocket) handleConn(tcpConn net.Conn, addr string) bool {
-	if tcpConn == nil {
-		return false
+func (this *ServerSocket) Run() bool {
+	for {
+		conn, err := this.listen.AcceptTCP()
+		if err != nil {
+			fmt.Println("接受客户端连接异常：", err.Error())
+			continue
+		}
+		fmt.Println("客户端连接:", conn.RemoteAddr().String())
+		this.handleConn(conn, conn.RemoteAddr().String())
 	}
-	client := this.AddClient(tcpConn, addr, this.connectType)
-	if client == nil {
-		return false
-	}
-	return true
 }
 
 func (this *ServerSocket) RunKcp() bool {
@@ -212,6 +204,17 @@ func (this *ServerSocket) RunKcp() bool {
 		//defer kcpConn.Close()
 		this.handleConn(kcpConn, kcpConn.RemoteAddr().String())
 	}
+}
+
+func (this *ServerSocket) handleConn(tcpConn net.Conn, addr string) bool {
+	if tcpConn == nil {
+		return false
+	}
+	client := this.AddClient(tcpConn, addr, this.connectType)
+	if client == nil {
+		return false
+	}
+	return true
 }
 
 func (this *ServerSocket) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) int {
