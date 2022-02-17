@@ -28,14 +28,14 @@ func (this *Snowflake) Key() string {
 
 func (this *Snowflake) Run() {
 	for {
-	TrySet:
+	TrySET:
 		//设置key
 		key := this.Key()
 		tx := this.client.Txn(context.Background())
 		//key no exist
 		leaseResp, err := this.lease.Grant(context.Background(), 60)
 		if err != nil {
-			goto TrySet
+			goto TrySET
 		}
 		this.leaseId = leaseResp.ID
 		tx.If(clientv3.Compare(clientv3.CreateRevision(key), "=", 0)).
@@ -50,23 +50,26 @@ func (this *Snowflake) Run() {
 					Id := tools.Int(string(v.Value[len(uuid_dir)+1:]))
 					Ids[Id] = true
 				}
+
 				for i, v := range Ids {
 					if v == false {
 						this.id = int64(i) & tools.WorkeridMax
-						goto TrySet
+						goto TrySET
 					}
 				}
 			}
 			this.id++
 			this.id = this.id & tools.WorkeridMax
-			goto TrySet
+			goto TrySET
 		}
+
 		tools.UUID.Init(this.id) //设置uuid
+
 		//保持ttl
 	TryTTL:
 		_, err = this.lease.KeepAliveOnce(context.Background(), this.leaseId)
 		if err != nil {
-			goto TrySet
+			goto TrySET
 		} else {
 			time.Sleep(time.Second * 10)
 			goto TryTTL
