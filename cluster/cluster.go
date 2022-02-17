@@ -129,7 +129,7 @@ func (this *Cluster) RegisterClusterCall() {
 			this.clusterInfoMap[info.Id()] = info
 		}
 	})
-
+	//集群删除member
 	this.RegisterCall("Cluster_Del", func(ctx context.Context, info *common.ClusterInfo) {
 		delete(this.clusterInfoMap, info.Id())
 		this.DelCluster(info)

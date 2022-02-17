@@ -17,7 +17,7 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/xlab/treeprint v1.1.0
 	github.com/xtaci/kcp-go/v5 v5.6.1
-	go.etcd.io/etcd/client/v3 v3.5.1
+	go.etcd.io/etcd/client/v3 v3.5.2
 	go.mongodb.org/mongo-driver v1.8.2
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	google.golang.org/grpc v1.43.0
