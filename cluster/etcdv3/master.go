@@ -32,6 +32,7 @@ func (this *Master) Init(info common.IClusterInfo, Endpoints []string, pActor ac
 	this.Start()
 	this.IClusterInfo = info
 }
+
 func (this *Master) Start() {
 	go this.Run()
 }
@@ -41,7 +42,7 @@ func (this *Master) BindActor(pActor actor.IActor) {
 }
 
 func (this *Master) addService(info *common.ClusterInfo) {
-	this.actor.SendMsg(rpc3.RpcHead{}, "cluster_add", info)
+	this.actor.SendMsg(rpc3.RpcHead{}, "Cluster_Add", info)
 	this.serviceMap[info.Id()] = info
 }
 
