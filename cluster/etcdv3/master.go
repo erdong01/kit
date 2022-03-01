@@ -3,10 +3,10 @@ package etcdv3
 import (
 	"context"
 	"encoding/json"
+	"github.com/erDong01/micro-kit/common"
 	"log"
 
 	"github.com/erDong01/micro-kit/actor"
-	"github.com/erDong01/micro-kit/cluster/common"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )

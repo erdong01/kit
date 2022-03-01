@@ -2,7 +2,7 @@ package netgate
 
 import (
 	"github.com/erDong01/micro-kit/cluster"
-	"github.com/erDong01/micro-kit/cluster/common"
+	"github.com/erDong01/micro-kit/common"
 	"github.com/erDong01/micro-kit/examples/message"
 	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/pb/rpc3"

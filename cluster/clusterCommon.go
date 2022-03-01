@@ -3,8 +3,8 @@ package cluster
 import (
 	"fmt"
 	"github.com/erDong01/micro-kit/actor"
-	"github.com/erDong01/micro-kit/cluster/common"
 	"github.com/erDong01/micro-kit/cluster/etcdv3"
+	"github.com/erDong01/micro-kit/common"
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/nats-io/nats.go"
 	"log"
