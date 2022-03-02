@@ -2,8 +2,6 @@ package cache
 
 import (
 	"errors"
-	"fmt"
-	"reflect"
 	"sync/atomic"
 	"unsafe"
 )
