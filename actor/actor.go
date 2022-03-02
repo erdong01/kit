@@ -3,12 +3,6 @@ package actor
 import (
 	"context"
 	"fmt"
-	"github.com/erDong01/micro-kit/network"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"github.com/erDong01/micro-kit/rpc"
-	"github.com/erDong01/micro-kit/tools/mpsc"
-	"github.com/erDong01/micro-kit/tools/timer"
-	"github.com/erDong01/micro-kit/wrong"
 	"log"
 	"reflect"
 	"runtime"
@@ -16,6 +10,13 @@ import (
 	"sync/atomic"
 	"time"
 	"unsafe"
+
+	"github.com/erDong01/micro-kit/network"
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erDong01/micro-kit/tools/mpsc"
+	"github.com/erDong01/micro-kit/tools/timer"
+	"github.com/erDong01/micro-kit/wrong"
 )
 
 var (
@@ -157,7 +158,7 @@ func (this *Actor) FindCall(funcName string) *CallFunc {
 func (this *Actor) RegisterCall(funcName string, call interface{}) {
 	funcName = strings.ToLower(funcName)
 	if this.FindCall(funcName) != nil {
-		log.Fatalln("actor error [%s] 消息重复定义", funcName)
+		log.Fatalf("actor error [%s] 消息重复定义", funcName)
 	}
 
 	callfunc := &CallFunc{Func: call, FuncVal: reflect.ValueOf(call), FuncType: reflect.TypeOf(call), FuncParams: reflect.TypeOf(call).String()}
