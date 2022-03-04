@@ -3,9 +3,9 @@ package etcdv3
 import (
 	"context"
 	"encoding/json"
-	"github.com/erDong01/micro-kit/common"
 	"log"
-	"time"
+
+	"github.com/erDong01/micro-kit/common"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -23,14 +23,36 @@ type Service struct {
 }
 
 func (this *Service) Run() {
-	for {
-		leaseResp, _ := this.lease.Grant(context.Background(), 10)
-		this.leaseId = leaseResp.ID
-		key := ETCD_DIR + this.String() + "/" + this.IpString()
-		data, _ := json.Marshal(this.ClusterInfo)
-		this.client.Put(context.Background(), key, string(data), clientv3.WithLease(this.leaseId))
-		time.Sleep(time.Second * 3)
+	leaseResp, err := this.lease.Grant(context.Background(), 10)
+	if err != nil {
+		log.Fatalln(err)
 	}
+	this.leaseId = leaseResp.ID
+	var (
+		keepResp     *clientv3.LeaseKeepAliveResponse
+		keepRespChan <-chan *clientv3.LeaseKeepAliveResponse
+	)
+	if keepRespChan, err = this.lease.KeepAlive(context.TODO(), this.leaseId); err != nil {
+		log.Println(err)
+		return
+	}
+	go func() {
+		for {
+			select {
+			case keepResp = <-keepRespChan:
+				if keepRespChan == nil {
+					log.Println("租约已经失效")
+					goto END
+				} else { //每秒会续租一次，所以就会受到一次应答
+					log.Println("收到自动续租应答:", keepResp.ID)
+				}
+			}
+		}
+	END:
+	}()
+	key := ETCD_DIR + this.String() + "/" + this.IpString()
+	data, _ := json.Marshal(this.ClusterInfo)
+	this.client.Put(context.Background(), key, string(data), clientv3.WithLease(this.leaseId))
 }
 
 func (this *Service) Init(info *common.ClusterInfo, endpoints []string) {
@@ -46,5 +68,5 @@ func (this *Service) Init(info *common.ClusterInfo, endpoints []string) {
 	this.Start()
 }
 func (this *Service) Start() {
-	go this.Run()
+	this.Run()
 }
