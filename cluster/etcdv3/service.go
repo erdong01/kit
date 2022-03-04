@@ -41,7 +41,7 @@ func (this *Service) Run() {
 			select {
 			case keepResp = <-keepRespChan:
 				if keepRespChan == nil {
-					log.Println("租约已经失效")
+					log.Println("租约已经失效", keepResp.ID)
 					goto END
 				} else { //每秒会续租一次，所以就会受到一次应答
 					// log.Println("收到自动续租应答:", keepResp.ID)
