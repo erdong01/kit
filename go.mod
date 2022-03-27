@@ -12,8 +12,8 @@ require (
 	github.com/hashicorp/raft-boltdb v0.0.0-20210409134258-03c10cc3d4ea
 	github.com/joeycumines/go-bigbuff v1.15.0
 	github.com/json-iterator/go v1.1.12
-	github.com/nats-io/nats-server/v2 v2.7.2 // indirect
-	github.com/nats-io/nats.go v1.13.1-0.20220121202836-972a071d373d
+	github.com/nats-io/nats-server/v2 v2.7.4 // indirect
+	github.com/nats-io/nats.go v1.13.1-0.20220308171302-2f2f6968e98d
 	github.com/spf13/viper v1.10.1
 	github.com/xlab/treeprint v1.1.0
 	github.com/xtaci/kcp-go/v5 v5.6.1
