@@ -1,67 +1,135 @@
 package actor
 
 import (
-	"github.com/erDong01/micro-kit/network"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"github.com/erDong01/micro-kit/tools"
 	"log"
-	"strings"
+	"reflect"
+
+	"github.com/erDong01/micro-kit/base"
+
+	"github.com/erDong01/micro-kit/network"
+	"github.com/erDong01/micro-kit/rpc"
 )
 
+type ACTOR_TYPE uint32
+
+const (
+	ACTOR_TYPE_SINGLETON ACTOR_TYPE = iota //单列
+	ACTOR_TYPE_VIRTUAL   ACTOR_TYPE = iota //玩家 必须初始一个全局的actor 作为类型判断
+	ACTOR_TYPE_POOL      ACTOR_TYPE = iota //固定数量actor池
+	ACTOR_TYPE_STUB      ACTOR_TYPE = iota //stub
+) //ACTOR_TYPE
+
+const (
+	MAX_RPC_TAG = 10
+)
+
+// 一些全局的actor,不可删除的,不用锁考虑性能
+// 不是全局的actor,请使用actor pool
 type (
+	Op struct {
+		name      string //name
+		actorType ACTOR_TYPE
+		pool      IActorPool //ACTOR_TYPE_VIRTUAL ACTOR_TYPE_POOL
+	}
+
+	OpOption func(*Op)
 	ActorMgr struct {
-		ActorMap map[string]IActor
+		actorTypeMap map[reflect.Type]IActor
+		actorMap     map[string]IActor
+		isStart      bool
 	}
 	IActorMgr interface {
 		Init()
-		AddActor(IActor, ...string)
-		GetActor(string) IActor
-		InitActorHandle(ICluster)
-		SendMsg(rpc3.RpcHead, string, ...interface{})
+		RegisterActor(ac IActor, params ...OpOption) //注册回调
+		PacketFunc(rpc.Packet) bool                  //回调函数
+		SendMsg(rpc.RpcHead, string, ...interface{})
 	}
+
 	ICluster interface {
 		BindPacketFunc(packetFunc network.PacketFunc)
 	}
 )
 
-func (this *ActorMgr) Init() {
-	this.ActorMap = make(map[string]IActor)
+func (op *Op) applyOpts(opts []OpOption) {
+	for _, opt := range opts {
+		opt(op)
+	}
 }
-func (this *ActorMgr) AddActor(pActor IActor, names ...string) {
-	name := ""
-	if len(names) == 0 {
-		name = tools.GetClassName(pActor)
-		_, exist := this.ActorMap[name]
-		if exist {
-			log.Printf("Register an existed GobalActor")
-			return
+
+func (op *Op) IsActorType(actorType ACTOR_TYPE) bool {
+	return op.actorType == actorType
+}
+
+func WithType(actor_type ACTOR_TYPE) OpOption {
+	return func(op *Op) {
+		op.actorType = actor_type
+	}
+}
+
+func withPool(pPool IActorPool) OpOption { //ACTOR_TYPE_VIRTUAL ACTOR_TYPE_POOL
+	return func(op *Op) {
+		op.pool = pPool
+	}
+}
+
+func (a *ActorMgr) Init() {
+	a.actorTypeMap = make(map[reflect.Type]IActor)
+	a.actorMap = make(map[string]IActor)
+}
+
+func (a *ActorMgr) Start() {
+	a.isStart = true
+}
+
+func (a *ActorMgr) RegisterActor(ac IActor, params ...OpOption) {
+	op := Op{}
+	op.applyOpts(params)
+	rType := reflect.TypeOf(ac)
+	name := base.GetClassName(rType)
+	_, bEx := a.actorTypeMap[rType]
+	if bEx {
+		log.Panicf("InitActor actor[%s] must  global variable", name)
+		return
+	}
+
+	op.name = name
+	ac.register(ac, op)
+	a.actorTypeMap[rType] = ac
+	a.actorMap[name] = ac
+	if op.pool != nil {
+		ac.bindPool(op.pool)
+	}
+}
+
+func (this *ActorMgr) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
+	head.SocketId = 0
+	this.SendActor(funcName, head, rpc.Marshal(head, funcName, params...))
+}
+func (a *ActorMgr) SendActor(funcName string, head rpc.RpcHead, packet rpc.Packet) bool {
+	var ac IActor
+	bEx := false
+	ac, bEx = a.actorMap[head.ActorName]
+	if bEx && ac != nil {
+		if ac.HasRpc(funcName) {
+			switch ac.GetActorType() {
+			case ACTOR_TYPE_SINGLETON:
+				ac.Acotr().Send(head, packet)
+				return true
+			case ACTOR_TYPE_VIRTUAL:
+				return ac.getPool().SendAcotr(head, packet)
+			case ACTOR_TYPE_POOL:
+				return ac.getPool().SendAcotr(head, packet)
+			}
 		}
-	} else {
-		name = names[0]
 	}
-
-	this.ActorMap[name] = pActor
+	return false
 }
-
-func (this *ActorMgr) GetActor(name string) IActor {
-	name = strings.ToLower(name)
-	pActor, exist := this.ActorMap[name]
-	if exist {
-		return pActor
-	}
-	return nil
-}
-func (this *ActorMgr) InitActorHandle(pCluster ICluster) {
-	for _, v := range this.ActorMap {
-		pCluster.BindPacketFunc(v.PacketFunc)
-	}
-}
-func (this *ActorMgr) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
-	name := strings.ToLower(head.ActorName)
-	pActor, exist := this.ActorMap[name]
-	if exist {
-		pActor.SendMsg(head, funcName, params...)
-	}
+func (a *ActorMgr) PacketFunc(packet rpc.Packet) bool {
+	rpcPacket, head := rpc.Unmarshal(packet.Buff)
+	packet.RpcPacket = rpcPacket
+	head.SocketId = packet.Id
+	head.Reply = packet.Reply
+	return a.SendActor(rpcPacket.FuncName, head, packet)
 }
 
 var (

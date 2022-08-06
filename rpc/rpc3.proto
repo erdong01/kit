@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package rpc;
 
-option go_package = "../rpc3";
+option go_package = "../rpc";
 
 service TestService {
   rpc TestSon(F) returns (T){}
@@ -65,6 +65,11 @@ enum SERVICE{
   WORLDDBSERVER = 6;//db
   ServiceWarKings = 7;//王者战记
   ServiceFruitPark = 8;//db水果乐园
+  GATE= 9;//网关,转发服务
+  GM=10;//gamemgr
+  GAME=11;//game
+  ZONE=12;//地图
+  DB=13;//db
 };
 
 //发送标志

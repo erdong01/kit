@@ -5,7 +5,7 @@ import (
 	"github.com/erDong01/micro-kit/common"
 	"github.com/erDong01/micro-kit/examples/message"
 	"github.com/erDong01/micro-kit/network"
-	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools"
 	"time"
 )
@@ -49,7 +49,7 @@ func (this *ServerMgr) Init() bool {
 	this.service.Start()
 	var packet1 EventProcess
 	this.cluster = new(cluster.Cluster)
-	this.cluster.Init(&common.ClusterInfo{Type: rpc3.SERVICE_GATESERVER, Ip: UserNetIP, Port: int32(port)}, etcdEndpoints, Nats_Cluster)
+	this.cluster.Init(&common.ClusterInfo{Type: rpc.SERVICE_GATESERVER, Ip: UserNetIP, Port: int32(port)}, etcdEndpoints, Nats_Cluster)
 	this.cluster.BindPacketFunc(packet1.PacketFunc)
 	this.cluster.BindPacketFunc(DispatchPacket)
 	//初始玩家管理

@@ -3,27 +3,29 @@ package rpc
 import (
 	"bytes"
 	"encoding/gob"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"google.golang.org/protobuf/proto"
 	"log"
 	"strings"
+
+	"github.com/erDong01/micro-kit/base"
+	"github.com/erDong01/micro-kit/wrong"
+	"google.golang.org/protobuf/proto"
 )
 
-//rpc  Marshal
-func Marshal(head rpc3.RpcHead, funcName string, params ...interface{}) []byte {
-	data, _ := marshal(head, funcName, params...)
-	return data
+// rpc  Marshal
+func Marshal(head *RpcHead, funcName *string, params ...interface{}) Packet {
+	return marshal(head, funcName, params...)
 }
 
-//rpc  marshal
-func marshal(head rpc3.RpcHead, funcName string, params ...interface{}) ([]byte, *rpc3.RpcPacket) {
+// rpc  marshal
+func marshal(head *RpcHead, funcName *string, params ...interface{}) Packet {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Print(err)
+			wrong.TraceCode(err)
 		}
 	}()
 
-	rpcPacket := &rpc3.RpcPacket{FuncName: strings.ToLower(funcName), ArgLen: int32(len(params)), RpcHead: (*rpc3.RpcHead)(&head)}
+	*funcName = Route(head, *funcName)
+	rpcPacket := &RpcPacket{FuncName: *funcName, ArgLen: int32(len(params)), RpcHead: (*RpcHead)(head)}
 	buf := bytes.NewBuffer([]byte{})
 	enc := gob.NewEncoder(buf)
 	for _, param := range params {
@@ -31,24 +33,34 @@ func marshal(head rpc3.RpcHead, funcName string, params ...interface{}) ([]byte,
 	}
 	rpcPacket.RpcBody = buf.Bytes()
 	dat, _ := proto.Marshal(rpcPacket)
-	return dat, rpcPacket
+	return Packet{Buff: dat, RpcPacket: rpcPacket}
 }
 
-//rpc  MarshalPacket
-func MarshalPacket(head rpc3.RpcHead, funcName string, packet proto.Message) []byte {
+// rpc  MarshalPB
+func marshalPB(bitstream *base.BitStream, packet proto.Message) {
+	message := proto.MessageName(packet)
+	bitstream.WriteString(string(message.Name()))
+	buf, _ := proto.Marshal(packet)
+	nLen := len(buf)
+	bitstream.WriteInt(nLen, 32)
+	bitstream.WriteBits(buf, nLen<<3)
+}
+
+// rpc  MarshalPacket
+func MarshalPacket(head RpcHead, funcName string, packet proto.Message) []byte {
 	data, _ := marshalPacket(head, funcName, packet)
 	return data
 }
 
-//rpc  marshal
-func marshalPacket(head rpc3.RpcHead, funcName string, packet proto.Message) ([]byte, *rpc3.RpcPacket) {
+// rpc  marshal
+func marshalPacket(head RpcHead, funcName string, packet proto.Message) ([]byte, *RpcPacket) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Print(err)
 		}
 	}()
 
-	rpcPacket := &rpc3.RpcPacket{FuncName: strings.ToLower(funcName), RpcHead: (*rpc3.RpcHead)(&head)}
+	rpcPacket := &RpcPacket{FuncName: strings.ToLower(funcName), RpcHead: (*RpcHead)(&head)}
 	buff, _ := proto.Marshal(packet)
 	rpcPacket.RpcBody = buff
 	dat, _ := proto.Marshal(rpcPacket)

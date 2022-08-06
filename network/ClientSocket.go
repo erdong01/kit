@@ -2,12 +2,13 @@ package network
 
 import (
 	"fmt"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"github.com/erDong01/micro-kit/rpc"
-	"github.com/erDong01/micro-kit/wrong"
 	"io"
 	"log"
 	"net"
+
+	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erDong01/micro-kit/wrong"
+	"github.com/xtaci/kcp-go/v5"
 )
 
 type (
@@ -22,7 +23,7 @@ type (
 	}
 )
 
-func (this *ClientSocket) Init(ip string, port int) bool {
+func (this *ClientSocket) Init(ip string, port int, params ...OpOption) bool {
 	if this.Port == port || this.IP == ip {
 		return false
 	}
@@ -38,18 +39,16 @@ func (this *ClientSocket) Start() bool {
 		this.IP = "127.0.0.1"
 	}
 	if this.Connect() {
-		this.Conn.(*net.TCPConn).SetNoDelay(true)
 		go this.Run()
 	}
 	return true
 }
 
-func (this *ClientSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
-	buff := rpc.Marshal(head, funcName, params...)
-	return this.Send(head, buff)
+func (this *ClientSocket) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) int {
+	return this.Send(head, rpc.Marshal(head, funcName, params...))
 }
 
-func (this *ClientSocket) Send(head rpc3.RpcHead, buff []byte) int {
+func (this *ClientSocket) Send(head rpc.RpcHead, packet rpc.Packet) int {
 	defer func() {
 		if err := recover(); err != nil {
 			wrong.TraceCode(err)
@@ -58,7 +57,7 @@ func (this *ClientSocket) Send(head rpc3.RpcHead, buff []byte) int {
 	if this.Conn == nil {
 		return 0
 	}
-	n, err := this.Conn.Write(this.packetParser.Write(buff))
+	n, err := this.Conn.Write(this.packetParser.Write(packet.Buff))
 	handleError(err)
 	if n > 0 {
 		return n
@@ -85,22 +84,32 @@ func (this *ClientSocket) Restart() bool {
 }
 func (this *ClientSocket) Connect() bool {
 	var strRemote = fmt.Sprintf("%s:%d", this.IP, this.Port)
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
-	if err != nil {
-		log.Printf("%v", err)
+	connectStr := "Tcp"
+	if this.bKcp {
+		ln, err1 := kcp.Dial(strRemote)
+		if err1 != nil {
+			return false
+		}
+		this.SetConn(ln)
+		connectStr = "Kcp"
+	} else {
+		tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
+		if err != nil {
+			log.Printf("%v", err)
+		}
+		ln, err1 := net.DialTCP("tcp4", nil, tcpAddr)
+		if err1 != nil {
+			return false
+		}
+		this.SetConn(ln)
 	}
-	ln, err1 := net.DialTCP("tcp4", nil, tcpAddr)
-	if err1 != nil {
-		return false
-	}
-	this.SetConn(ln)
-	fmt.Printf("连接成功，请输入信息！\n")
-	this.CallMsg("COMMON_RegisterRequest")
+	fmt.Printf("%s 连接成功，请输入信息！\n", connectStr)
+	this.CallMsg(rpc.RpcHead{}, "COMMON_RegisterRequest")
 	return true
 }
 func (this *ClientSocket) OnNetFail(int) {
 	this.Stop()
-	this.CallMsg("DISCONNECT", this.clientId)
+	this.CallMsg(rpc.RpcHead{}, "DISCONNECT", this.clientId)
 }
 
 func (this *ClientSocket) Run() bool {

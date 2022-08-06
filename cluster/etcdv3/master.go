@@ -3,11 +3,11 @@ package etcdv3
 import (
 	"context"
 	"encoding/json"
-	"github.com/erDong01/micro-kit/common"
+	"github.com/erDong01/micro-kit/rpc"
 	"log"
 
 	"github.com/erDong01/micro-kit/actor"
-	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/cluster/common"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -32,7 +32,6 @@ func (this *Master) Init(info common.IClusterInfo, Endpoints []string, pActor ac
 	this.Start()
 	this.IClusterInfo = info
 }
-
 func (this *Master) Start() {
 	go this.Run()
 }
@@ -42,13 +41,14 @@ func (this *Master) BindActor(pActor actor.IActor) {
 }
 
 func (this *Master) addService(info *common.ClusterInfo) {
-	this.actor.SendMsg(rpc3.RpcHead{}, "Cluster_Add", info)
+	actor.MGR.SendMsg(rpc.RpcHead{}, "Cluster_Add", info)
 	this.serviceMap[info.Id()] = info
 }
 
 func (this *Master) delService(info *common.ClusterInfo) {
 	delete(this.serviceMap, info.Id())
-	this.actor.SendMsg(rpc3.RpcHead{}, "Cluster_Del", info)
+	actor.MGR.SendMsg(rpc.RpcHead{}, "Cluster_Del", info)
+
 }
 
 func NodeToService(val []byte) *common.ClusterInfo {

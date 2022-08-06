@@ -2,13 +2,19 @@ package cluster
 
 import (
 	"fmt"
-	"github.com/erDong01/micro-kit/actor"
-	"github.com/erDong01/micro-kit/cluster/etcdv3"
-	"github.com/erDong01/micro-kit/common"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"github.com/nats-io/nats.go"
+	"github.com/erDong01/micro-kit/rpc"
 	"log"
 	"strings"
+
+	"github.com/erDong01/micro-kit/actor"
+	"github.com/erDong01/micro-kit/cluster/common"
+	"github.com/erDong01/micro-kit/cluster/etcdv3"
+	"github.com/nats-io/nats.go"
+)
+
+const (
+	ETCD_DIR     = "server/"
+	OFFLINE_TIME = etcdv3.OFFLINE_TIME
 )
 
 type (
@@ -39,16 +45,17 @@ func NewSnowflake(Endpoints []string) *Snowflake {
 	return (*Snowflake)(uuid)
 }
 
+//注册playerraft
 func NewPlayerRaft(Endpoints []string) *PlayerRaft {
 	playerRaft := &etcdv3.PlayerRaft{}
 	playerRaft.Init(Endpoints)
 	return (*PlayerRaft)(playerRaft)
 }
-func (this *PlayerRaft) GetPlayer(Id int64) *rpc3.PlayerClusterInfo {
+func (this *PlayerRaft) GetPlayer(Id int64) *rpc.PlayerClusterInfo {
 	return (*etcdv3.PlayerRaft)(this).GetPlayer(Id)
 }
 
-func (this *PlayerRaft) Publish(info *rpc3.PlayerClusterInfo) bool {
+func (this *PlayerRaft) Publish(info *rpc.PlayerClusterInfo) bool {
 	return (*etcdv3.PlayerRaft)(this).Publish(info)
 }
 
@@ -56,29 +63,29 @@ func (this *PlayerRaft) Lease(leaseId int64) error {
 	return (*etcdv3.PlayerRaft)(this).Lease(leaseId)
 }
 
-func GetRpcChannel(head rpc3.RpcHead) string {
-	return fmt.Sprintf("%s/%s/%d", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
-}
-
-func GetRpcTopicChannel(head rpc3.RpcHead) string {
-	return fmt.Sprintf("%s/%s", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()))
-}
-func GetRpcCallChannel(head rpc3.RpcHead) string {
-	return fmt.Sprintf("%s/%s/call/%d", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
-}
-
 func GetChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s/%d", etcdv3.ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
+	return fmt.Sprintf("%s/%s/%d", ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
 }
 
 func GetTopicChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s", etcdv3.ETCD_DIR, clusterInfo.String())
+	return fmt.Sprintf("%s/%s", ETCD_DIR, clusterInfo.String())
 }
 
 func GetCallChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s/call/%d", etcdv3.ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
+	return fmt.Sprintf("%s/%s/call/%d", ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
 }
 
+func GetRpcChannel(head rpc.RpcHead) string {
+	return fmt.Sprintf("%s/%s/%d", ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
+}
+
+func GetRpcTopicChannel(head rpc.RpcHead) string {
+	return fmt.Sprintf("%s/%s", ETCD_DIR, strings.ToLower(head.DestServerType.String()))
+}
+
+func GetRpcCallChannel(head rpc.RpcHead) string {
+	return fmt.Sprintf("%s/%s/call/%d", ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
+}
 func SetupNatsConn(connectString string, appDieChan chan bool, options ...nats.Option) (*nats.Conn, error) {
 	natsOptions := append(
 		options,
@@ -95,7 +102,7 @@ func SetupNatsConn(connectString string, appDieChan chan bool, options ...nats.O
 				return
 			}
 
-			log.Fatalf("nats connection closed. reason: %q", nc.LastError())
+			log.Println("nats connection closed. reason: %q", nc.LastError())
 			if appDieChan != nil {
 				appDieChan <- true
 			}

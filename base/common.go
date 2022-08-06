@@ -1,4 +1,4 @@
-package tools
+package base
 
 import (
 	"encoding/binary"
@@ -164,7 +164,7 @@ func ToLower(name string) string {
 	return strings.ToLower(name)
 }
 
-//-----------string strconv type-------------//
+// -----------string strconv type-------------//
 func Int(str string) int {
 	n, _ := strconv.Atoi(str)
 	return n
