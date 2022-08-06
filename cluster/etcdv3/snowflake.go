@@ -3,6 +3,7 @@ package etcdv3
 import (
 	"context"
 	"fmt"
+	"github.com/erDong01/micro-kit/base"
 	"log"
 	"time"
 
@@ -47,7 +48,7 @@ func (this *Snowflake) Run() {
 			if err == nil && (resp != nil && resp.Kvs != nil) {
 				Ids := [tools.WorkeridMax + 1]bool{}
 				for _, v := range resp.Kvs {
-					Id := tools.Int(string(v.Value[len(uuid_dir)+1:]))
+					Id := base.Int(string(v.Value[len(uuid_dir)+1:]))
 					Ids[Id] = true
 				}
 				for i, v := range Ids {
@@ -74,7 +75,7 @@ func (this *Snowflake) Run() {
 	}
 }
 
-//uuid生成器
+// uuid生成器
 func (this *Snowflake) Init(endpoints []string) {
 	cfg := clientv3.Config{
 		Endpoints: endpoints,

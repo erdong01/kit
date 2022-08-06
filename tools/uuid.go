@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"github.com/erDong01/micro-kit/base"
 	"log"
 	"sync"
 	"time"
@@ -99,7 +100,7 @@ func ParseUUID(id int64) (ts int64, workerId int64, seq int64) {
 	return ts, workerId, seq
 }
 
-//----------WorkIdQue----------//
+// ----------WorkIdQue----------//
 func (this *WorkIdQue) Init(id int) {
 	this.m_WorkMap = make(map[uint32]int)
 	this.m_IdelVec = vector.NewVector()
@@ -107,7 +108,7 @@ func (this *WorkIdQue) Init(id int) {
 }
 
 func (this *WorkIdQue) Add(val string) int {
-	nVal := ToHash(val)
+	nVal := base.ToHash(val)
 	nId, bExist := this.m_WorkMap[nVal]
 	if bExist {
 		return nId
@@ -128,7 +129,7 @@ func (this *WorkIdQue) Add(val string) int {
 }
 
 func (this *WorkIdQue) Del(val string) int {
-	nVal := ToHash(val)
+	nVal := base.ToHash(val)
 	nId, bExist := this.m_WorkMap[nVal]
 	if !bExist {
 		return -1

@@ -6,7 +6,6 @@ import (
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/examples/message"
 	"github.com/erDong01/micro-kit/network"
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools"
 	"google.golang.org/protobuf/proto"
@@ -42,14 +41,14 @@ func ToCrc(accountName string, pwd string, buildNo string, nKey int64) uint32 {
 
 func SendPacket(packet proto.Message) {
 	buff := message.Encode(packet)
-	CLIENT.Send(rpc3.RpcHead{}, buff)
+	CLIENT.Send(rpc.RpcHead{}, buff)
 }
 
 func (this *EventProcess) SendPacket(packet proto.Message) {
 	buff := message.Encode(packet)
-	this.Client.Send(rpc3.RpcHead{}, buff)
+	this.Client.Send(rpc.RpcHead{}, buff)
 }
-func (this *EventProcess) PacketFunc(packet1 rpc3.Packet) bool {
+func (this *EventProcess) PacketFunc(packet1 rpc.Packet) bool {
 	packetId, data := message.Decode(packet1.Buff)
 	packet := message.GetPakcet(packetId)
 	if packet == nil {
@@ -57,7 +56,7 @@ func (this *EventProcess) PacketFunc(packet1 rpc3.Packet) bool {
 	}
 	err := message.UnmarshalText(packet, data)
 	if err == nil {
-		this.Send(rpc3.RpcHead{}, rpc.Marshal(rpc3.RpcHead{}, message.GetMessageName(packet), packet))
+		this.Send(rpc.RpcHead{}, rpc.Marshal(rpc.RpcHead{}, message.GetMessageName(packet), packet))
 		return true
 	}
 
@@ -69,7 +68,7 @@ func (this *EventProcess) Init(num int) {
 		this.AccountId = packet.GetAccountId()
 		nLen := len(packet.GetPlayerData())
 		if nLen == 0 {
-			packet1 := &message.C_W_CreatePlayerRequest{PacketHead: message.BuildPacketHead(this.AccountId, rpc3.SERVICE_GATESERVER),
+			packet1 := &message.C_W_CreatePlayerRequest{PacketHead: message.BuildPacketHead(this.AccountId, rpc.SERVICE_GATESERVER),
 				PlayerName: "我是大坏蛋",
 				Sex:        int32(0)}
 			this.SendPacket(packet1)
@@ -81,7 +80,7 @@ func (this *EventProcess) Init(num int) {
 	this.Actor.Start()
 }
 func (this *EventProcess) LoginGame() {
-	packet1 := &message.C_W_Game_LoginRequset{PacketHead: message.BuildPacketHead(this.AccountId, rpc3.SERVICE_GATESERVER),
+	packet1 := &message.C_W_Game_LoginRequset{PacketHead: message.BuildPacketHead(this.AccountId, rpc.SERVICE_GATESERVER),
 		PlayerId: this.PlayerId}
 	this.SendPacket(packet1)
 }
@@ -95,12 +94,12 @@ func (this *EventProcess) LoginAccount() {
 	this.AccountName = fmt.Sprintf("test32%d", id)
 	this.Passwd = tools.MD5(ToSlat(this.AccountName, "123456"))
 	//this.AccountName = fmt.Sprintf("test%d", base.RAND.RandI(0, 7000))
-	packet1 := &message.C_A_LoginRequest{PacketHead: message.BuildPacketHead(0, rpc3.SERVICE_GATESERVER),
+	packet1 := &message.C_A_LoginRequest{PacketHead: message.BuildPacketHead(0, rpc.SERVICE_GATESERVER),
 		AccountName: this.AccountName, Password: this.Passwd, BuildNo: "1,5,1,1", Key: this.dh.ShareKey()}
 	this.SendPacket(packet1)
 }
 func (this *EventProcess) LoginGate() {
-	packet1 := &message.C_G_LoginResquest{PacketHead: message.BuildPacketHead(0, rpc3.SERVICE_GATESERVER),
+	packet1 := &message.C_G_LoginResquest{PacketHead: message.BuildPacketHead(0, rpc.SERVICE_GATESERVER),
 		Key: this.dh.PubKey()}
 	this.SendPacket(packet1)
 }

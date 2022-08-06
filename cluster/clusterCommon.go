@@ -2,13 +2,13 @@ package cluster
 
 import (
 	"fmt"
+	"github.com/erDong01/micro-kit/rpc"
 	"log"
 	"strings"
 
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/cluster/common"
 	"github.com/erDong01/micro-kit/cluster/etcdv3"
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/nats-io/nats.go"
 )
 
@@ -51,11 +51,11 @@ func NewPlayerRaft(Endpoints []string) *PlayerRaft {
 	playerRaft.Init(Endpoints)
 	return (*PlayerRaft)(playerRaft)
 }
-func (this *PlayerRaft) GetPlayer(Id int64) *rpc3.PlayerClusterInfo {
+func (this *PlayerRaft) GetPlayer(Id int64) *rpc.PlayerClusterInfo {
 	return (*etcdv3.PlayerRaft)(this).GetPlayer(Id)
 }
 
-func (this *PlayerRaft) Publish(info *rpc3.PlayerClusterInfo) bool {
+func (this *PlayerRaft) Publish(info *rpc.PlayerClusterInfo) bool {
 	return (*etcdv3.PlayerRaft)(this).Publish(info)
 }
 
@@ -75,15 +75,15 @@ func GetCallChannel(clusterInfo common.ClusterInfo) string {
 	return fmt.Sprintf("%s/%s/call/%d", ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
 }
 
-func GetRpcChannel(head rpc3.RpcHead) string {
+func GetRpcChannel(head rpc.RpcHead) string {
 	return fmt.Sprintf("%s/%s/%d", ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
 }
 
-func GetRpcTopicChannel(head rpc3.RpcHead) string {
+func GetRpcTopicChannel(head rpc.RpcHead) string {
 	return fmt.Sprintf("%s/%s", ETCD_DIR, strings.ToLower(head.DestServerType.String()))
 }
 
-func GetRpcCallChannel(head rpc3.RpcHead) string {
+func GetRpcCallChannel(head rpc.RpcHead) string {
 	return fmt.Sprintf("%s/%s/call/%d", ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
 }
 func SetupNatsConn(connectString string, appDieChan chan bool, options ...nats.Option) (*nats.Conn, error) {

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"github.com/erDong01/micro-kit/examples/message"
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/wrong"
 	"google.golang.org/protobuf/proto"
@@ -18,10 +17,10 @@ var (
 )
 
 func SendToClient(socketId uint32, packet proto.Message) {
-	SERVER.GetServer().Send(rpc3.RpcHead{SocketId: socketId}, message.Encode(packet))
+	SERVER.GetServer().Send(rpc.RpcHead{SocketId: socketId}, message.Encode(packet))
 }
 
-func DispatchPacket(packet rpc3.Packet) bool {
+func DispatchPacket(packet rpc.Packet) bool {
 	defer func() {
 		if err := recover(); err != nil {
 			wrong.TraceCode(err)
@@ -29,7 +28,7 @@ func DispatchPacket(packet rpc3.Packet) bool {
 	}()
 	rpcPacket, head := rpc.Unmarshal(packet.Buff)
 	switch head.DestServerType {
-	case rpc3.SERVICE_GATESERVER:
+	case rpc.SERVICE_GATESERVER:
 		var messageName = ""
 		buf := bytes.NewBuffer(rpcPacket.RpcBody)
 		dec := gob.NewDecoder(buf)
@@ -41,10 +40,10 @@ func DispatchPacket(packet rpc3.Packet) bool {
 		dec.Decode(packet)
 		buff := message.Encode(packet)
 		if messageName == string(A_C_RegisterResponse) || messageName == string(A_C_LoginResponse) {
-			SERVER.GetServer().Send(rpc3.RpcHead{SocketId: head.SocketId}, buff)
+			SERVER.GetServer().Send(rpc.RpcHead{SocketId: head.SocketId}, buff)
 		} else {
 			socketId := SERVER.GetPlayerMgr().GetSocket(head.Id)
-			SERVER.GetServer().Send(rpc3.RpcHead{SocketId: socketId}, buff)
+			SERVER.GetServer().Send(rpc.RpcHead{SocketId: socketId}, buff)
 		}
 	default:
 		SERVER.GetCluster().Send(head, packet.Buff)

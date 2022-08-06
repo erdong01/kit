@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"github.com/erDong01/micro-kit/base"
 	"math/rand"
 	"time"
 )
@@ -13,7 +14,7 @@ type (
 
 func (this *Rand) RandI(i int, n int) int {
 	if i > n {
-		Assert(false, "Rand::RandI: inverted range")
+		base.Assert(false, "Rand::RandI: inverted range")
 		return i
 	}
 
@@ -22,7 +23,7 @@ func (this *Rand) RandI(i int, n int) int {
 
 func (this *Rand) RandF(i float32, n float32) float32 {
 	if i > n {
-		Assert(false, "Rand::RandF: inverted range")
+		base.Assert(false, "Rand::RandF: inverted range")
 		return i
 	}
 

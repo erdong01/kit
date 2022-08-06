@@ -3,51 +3,48 @@ package actor
 import (
 	"log"
 	"reflect"
-	"strings"
-	"sync"
+
+	"github.com/erDong01/micro-kit/base"
 
 	"github.com/erDong01/micro-kit/network"
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
-	"github.com/erDong01/micro-kit/tools"
 )
 
 type ACTOR_TYPE uint32
 
 const (
 	ACTOR_TYPE_SINGLETON ACTOR_TYPE = iota //单列
-	ACTOR_TYPE_PLAYER    ACTOR_TYPE = iota //玩家 必须初始一个全局的actor 作为类型判断
+	ACTOR_TYPE_VIRTUAL   ACTOR_TYPE = iota //玩家 必须初始一个全局的actor 作为类型判断
+	ACTOR_TYPE_POOL      ACTOR_TYPE = iota //固定数量actor池
+	ACTOR_TYPE_STUB      ACTOR_TYPE = iota //stub
 ) //ACTOR_TYPE
 
 const (
 	MAX_RPC_TAG = 10
 )
 
-//一些全局的actor,不可删除的,不用锁考虑性能
-//不是全局的actor,请使用actor pool
+// 一些全局的actor,不可删除的,不用锁考虑性能
+// 不是全局的actor,请使用actor pool
 type (
 	Op struct {
-		name         string //name
-		mType        ACTOR_TYPE
-		rpcMethodMap map[string]string
+		name      string //name
+		actorType ACTOR_TYPE
+		pool      IActorPool //ACTOR_TYPE_VIRTUAL ACTOR_TYPE_POOL
 	}
 
 	OpOption func(*Op)
 	ActorMgr struct {
-		actorMap     map[reflect.Type]IActor
-		actorNameMap map[string]IActor
-		msgMap       map[string]IActor
-		rpcMethodMap map[reflect.Type]map[string]string
-		playerMap    map[int64]IActor
-		playerLock   *sync.RWMutex
-		bStart       bool
+		actorTypeMap map[reflect.Type]IActor
+		actorMap     map[string]IActor
+		isStart      bool
 	}
 	IActorMgr interface {
 		Init()
-		RegisterActor(pActor IActor, params ...OpOption) //注册回调
-		PacketFunc(rpc3.Packet) bool                     //回调函数
-		SendMsg(rpc3.RpcHead, string, ...interface{})
+		RegisterActor(ac IActor, params ...OpOption) //注册回调
+		PacketFunc(rpc.Packet) bool                  //回调函数
+		SendMsg(rpc.RpcHead, string, ...interface{})
 	}
+
 	ICluster interface {
 		BindPacketFunc(packetFunc network.PacketFunc)
 	}
@@ -60,144 +57,79 @@ func (op *Op) applyOpts(opts []OpOption) {
 }
 
 func (op *Op) IsActorType(actorType ACTOR_TYPE) bool {
-	return op.mType == actorType
+	return op.actorType == actorType
 }
 
-func WithName(name string) OpOption {
+func WithType(actor_type ACTOR_TYPE) OpOption {
 	return func(op *Op) {
-		op.name = name
+		op.actorType = actor_type
 	}
 }
 
-func WithRpcMethodMap(rpcMethodMap map[string]string) OpOption {
+func withPool(pPool IActorPool) OpOption { //ACTOR_TYPE_VIRTUAL ACTOR_TYPE_POOL
 	return func(op *Op) {
-		op.rpcMethodMap = rpcMethodMap
+		op.pool = pPool
 	}
 }
 
-func WithType(actorType ACTOR_TYPE) OpOption {
-	return func(op *Op) {
-		op.mType = actorType
-	}
+func (a *ActorMgr) Init() {
+	a.actorTypeMap = make(map[reflect.Type]IActor)
+	a.actorMap = make(map[string]IActor)
 }
 
-func (this *ActorMgr) Init() {
-	this.actorMap = make(map[reflect.Type]IActor)
-	this.actorNameMap = make(map[string]IActor)
-	this.msgMap = make(map[string]IActor)
-	this.rpcMethodMap = map[reflect.Type]map[string]string{}
-	this.playerMap = make(map[int64]IActor)
-	this.playerLock = &sync.RWMutex{}
+func (a *ActorMgr) Start() {
+	a.isStart = true
 }
 
-func (this *ActorMgr) Start() {
-	this.bStart = true
-}
-
-func (this *ActorMgr) RegisterActor(pActor IActor, params ...OpOption) {
+func (a *ActorMgr) RegisterActor(ac IActor, params ...OpOption) {
 	op := Op{}
 	op.applyOpts(params)
-	if len(op.name) == 0 {
-		op.name = tools.GetClassName(pActor)
-	}
-	rType := reflect.TypeOf(pActor)
-	_, bEx := this.actorMap[rType]
+	rType := reflect.TypeOf(ac)
+	name := base.GetClassName(rType)
+	_, bEx := a.actorTypeMap[rType]
 	if bEx {
-		log.Panicf("InitActor actor[%s] must  global variable", op.name)
+		log.Panicf("InitActor actor[%s] must  global variable", name)
 		return
 	}
-	//rpc
-	shareRpcMethodMap := GetRpcMethodMap(rType, "share_rpc")
-	methodNum := rType.NumMethod()
-	this.rpcMethodMap[rType] = map[string]string{}
-	for i := 0; i < methodNum; i++ {
-		m := rType.Method(i)
-		if m.Type.NumIn() >= 2 {
-			if m.Type.In(1).String() == "context.Context" {
-				funcName := strings.ToLower(m.Name)
-				methodName := m.Name
-				_, bInShare := shareRpcMethodMap[funcName]
-				if !bInShare {
-					pMsgHandle, bEx := this.msgMap[funcName]
-					if bEx && pMsgHandle != nil {
-						log.Printf("RegisterFuncName [%s] exist_actor [%s] actor [%s]", methodName, pMsgHandle.GetName(), op.name)
-						return
-					}
-					this.msgMap[funcName] = pActor
-				}
-				this.rpcMethodMap[rType][funcName] = methodName
-			}
-		}
+
+	op.name = name
+	ac.register(ac, op)
+	a.actorTypeMap[rType] = ac
+	a.actorMap[name] = ac
+	if op.pool != nil {
+		ac.bindPool(op.pool)
 	}
-	op.rpcMethodMap = this.rpcMethodMap[rType]
-	pActor.Register(pActor, op)
-	this.actorMap[rType] = pActor
-	this.actorNameMap[op.name] = pActor
 }
 
-func (this *ActorMgr) AddPlayer(pActor IActor) {
-	rType := reflect.TypeOf(pActor)
-	op := Op{mType: ACTOR_TYPE_PLAYER, name: this.actorMap[rType].GetName(), rpcMethodMap: this.rpcMethodMap[rType]}
-	pActor.Register(pActor, op)
-	this.playerLock.Lock()
-	this.playerMap[pActor.GetId()] = pActor
-	this.playerLock.Unlock()
-}
-func (this *ActorMgr) DelPlayer(Id int64) {
-	this.playerLock.Lock()
-	delete(this.playerMap, Id)
-	this.playerLock.Unlock()
-}
-
-func (this *ActorMgr) GetPlayer(Id int64) IActor {
-	this.playerLock.RLock()
-	pActor, bEx := this.playerMap[Id]
-	this.playerLock.RUnlock()
-	if bEx {
-		return pActor
-	}
-	return nil
-}
-
-func (this *ActorMgr) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+func (this *ActorMgr) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
 	head.SocketId = 0
 	this.SendActor(funcName, head, rpc.Marshal(head, funcName, params...))
 }
-func (this *ActorMgr) SendActor(funcName string, head rpc3.RpcHead, packet rpc3.Packet) bool {
-	var pActor IActor
-	funcName = strings.ToLower(funcName)
+func (a *ActorMgr) SendActor(funcName string, head rpc.RpcHead, packet rpc.Packet) bool {
+	var ac IActor
 	bEx := false
-	if head.ActorName != "" {
-		pActor, bEx = this.actorNameMap[head.ActorName]
-	} else {
-		pActor, bEx = this.msgMap[funcName]
-	}
-	if bEx && pActor != nil {
-		if pActor.HasRpc(funcName) {
-			switch pActor.GetActorType() {
+	ac, bEx = a.actorMap[head.ActorName]
+	if bEx && ac != nil {
+		if ac.HasRpc(funcName) {
+			switch ac.GetActorType() {
 			case ACTOR_TYPE_SINGLETON:
-				pActor.GetAcotr().Send(head, packet)
+				ac.Acotr().Send(head, packet)
 				return true
-			case ACTOR_TYPE_PLAYER:
-				if head.Id != 0 {
-					pActor := this.GetPlayer(head.Id)
-					if pActor != nil {
-						pActor.GetAcotr().Send(head, packet)
-						return true
-					}
-
-				}
+			case ACTOR_TYPE_VIRTUAL:
+				return ac.getPool().SendAcotr(head, packet)
+			case ACTOR_TYPE_POOL:
+				return ac.getPool().SendAcotr(head, packet)
 			}
 		}
 	}
 	return false
 }
-func (this *ActorMgr) PacketFunc(packet rpc3.Packet) bool {
+func (a *ActorMgr) PacketFunc(packet rpc.Packet) bool {
 	rpcPacket, head := rpc.Unmarshal(packet.Buff)
 	packet.RpcPacket = rpcPacket
 	head.SocketId = packet.Id
 	head.Reply = packet.Reply
-	return this.SendActor(rpcPacket.FuncName, head, packet)
+	return a.SendActor(rpcPacket.FuncName, head, packet)
 }
 
 var (

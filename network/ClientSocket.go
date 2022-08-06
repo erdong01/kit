@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/wrong"
 	"github.com/xtaci/kcp-go/v5"
@@ -45,11 +44,11 @@ func (this *ClientSocket) Start() bool {
 	return true
 }
 
-func (this *ClientSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
+func (this *ClientSocket) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) int {
 	return this.Send(head, rpc.Marshal(head, funcName, params...))
 }
 
-func (this *ClientSocket) Send(head rpc3.RpcHead, packet rpc3.Packet) int {
+func (this *ClientSocket) Send(head rpc.RpcHead, packet rpc.Packet) int {
 	defer func() {
 		if err := recover(); err != nil {
 			wrong.TraceCode(err)
@@ -105,12 +104,12 @@ func (this *ClientSocket) Connect() bool {
 		this.SetConn(ln)
 	}
 	fmt.Printf("%s 连接成功，请输入信息！\n", connectStr)
-	this.CallMsg(rpc3.RpcHead{}, "COMMON_RegisterRequest")
+	this.CallMsg(rpc.RpcHead{}, "COMMON_RegisterRequest")
 	return true
 }
 func (this *ClientSocket) OnNetFail(int) {
 	this.Stop()
-	this.CallMsg(rpc3.RpcHead{}, "DISCONNECT", this.clientId)
+	this.CallMsg(rpc.RpcHead{}, "DISCONNECT", this.clientId)
 }
 
 func (this *ClientSocket) Run() bool {
