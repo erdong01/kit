@@ -8,8 +8,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/erDong01/micro-kit/base"
+
 	"github.com/erDong01/micro-kit/actor"
-	"github.com/erDong01/micro-kit/cluster/common"
+	"github.com/erDong01/micro-kit/common"
+	etv3 "github.com/erDong01/micro-kit/common/cluster/etcdv3"
 	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools"
@@ -25,6 +28,13 @@ const (
 type (
 	HashClusterMap       map[uint32]*common.ClusterInfo
 	HashClusterSocketMap map[uint32]*common.ClusterInfo
+	Op                   struct {
+		mailBoxEndpoints     []string
+		stubMailBoxEndpoints []string
+		stub                 common.Stub
+	}
+
+	OpOption func(*Op)
 
 	//集群服务器
 	Cluster struct {
@@ -32,13 +42,15 @@ type (
 		*Service       //集群注册
 		clusterMap     [MAX_CLUSTER_NUM]HashClusterMap
 		clusterLocker  [MAX_CLUSTER_NUM]*sync.RWMutex
-		hashRing       [MAX_CLUSTER_NUM]*tools.HashRing //hash一致性
+		hashRing       [MAX_CLUSTER_NUM]*base.HashRing //hash一致性
 		conn           *nats.Conn
 		dieChan        chan bool
 		master         *Master
 		clusterInfoMap map[uint32]*common.ClusterInfo
 		packetFuncList *vector.Vector //call back
-		// callBackMap    sync.Map
+		MailBox        etv3.MailBox
+		StubMailBox    etv3.StubMailBox
+		Stub           common.Stub
 	}
 
 	ICluster interface {
@@ -78,7 +90,7 @@ func (this *Cluster) InitCluster(info *common.ClusterInfo, Endpoints []string, n
 	for i := 0; i < MAX_CLUSTER_NUM; i++ {
 		this.clusterLocker[i] = &sync.RWMutex{}
 		this.clusterMap[i] = make(HashClusterMap)
-		this.hashRing[i] = tools.NewHashRing()
+		this.hashRing[i] = base.NewHashRing()
 	}
 	//注册服务器
 	this.Service = NewService(info, Endpoints)
@@ -112,8 +124,8 @@ func (this *Cluster) InitCluster(info *common.ClusterInfo, Endpoints []string, n
 	this.Actor.Start()
 }
 
-//params[0]:rpc.RpcHead
-//params[1]:error
+// params[0]:rpc.RpcHead
+// params[1]:error
 func (this *Cluster) call(parmas ...interface{}) {
 	head := *parmas[0].(*rpc.RpcHead)
 	reply := head.Reply
@@ -251,7 +263,7 @@ func (this *Cluster) RandomCluster(head rpc.RpcHead) rpc.RpcHead {
 	return head
 }
 
-//集群新加member
+// 集群新加member
 func (this *Cluster) Cluster_Add(ctx context.Context, info *common.ClusterInfo) {
 	_, bEx := this.clusterInfoMap[info.Id()]
 	if !bEx {
@@ -260,7 +272,7 @@ func (this *Cluster) Cluster_Add(ctx context.Context, info *common.ClusterInfo) 
 	}
 }
 
-//集群删除member
+// 集群删除member
 func (this *Cluster) Cluster_Del(ctx context.Context, info *common.ClusterInfo) {
 	delete(this.clusterInfoMap, info.Id())
 	this.DelCluster(info)

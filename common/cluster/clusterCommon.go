@@ -2,65 +2,65 @@ package cluster
 
 import (
 	"fmt"
+	etcdv32 "github.com/erDong01/micro-kit/common/cluster/etcdv3"
 	"github.com/erDong01/micro-kit/rpc"
 	"log"
 	"strings"
 
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/cluster/common"
-	"github.com/erDong01/micro-kit/cluster/etcdv3"
 	"github.com/nats-io/nats.go"
 )
 
 const (
 	ETCD_DIR     = "server/"
-	OFFLINE_TIME = etcdv3.OFFLINE_TIME
+	OFFLINE_TIME = etcdv32.OFFLINE_TIME
 )
 
 type (
-	Service    etcdv3.Service
-	Master     etcdv3.Master
-	Snowflake  etcdv3.Snowflake
-	PlayerRaft etcdv3.PlayerRaft
+	Service    etcdv32.Service
+	Master     etcdv32.Master
+	Snowflake  etcdv32.Snowflake
+	PlayerRaft etcdv32.PlayerRaft
 )
 
-//NewService 注册服务器
+// NewService 注册服务器
 func NewService(info *common.ClusterInfo, Endpoints []string) *Service {
-	service := &etcdv3.Service{}
+	service := &etcdv32.Service{}
 	service.Init(info, Endpoints)
 	return (*Service)(service)
 }
 
-//NewMaster 监控服务器
+// NewMaster 监控服务器
 func NewMaster(info common.IClusterInfo, Endpoints []string, pActor actor.IActor) *Master {
-	master := &etcdv3.Master{}
+	master := &etcdv32.Master{}
 	master.Init(info, Endpoints, pActor)
 	return (*Master)(master)
 }
 
-//NewSnowflake uuid生成器
+// NewSnowflake uuid生成器
 func NewSnowflake(Endpoints []string) *Snowflake {
-	uuid := &etcdv3.Snowflake{}
+	uuid := &etcdv32.Snowflake{}
 	uuid.Init(Endpoints)
 	return (*Snowflake)(uuid)
 }
 
-//注册playerraft
+// 注册playerraft
 func NewPlayerRaft(Endpoints []string) *PlayerRaft {
-	playerRaft := &etcdv3.PlayerRaft{}
+	playerRaft := &etcdv32.PlayerRaft{}
 	playerRaft.Init(Endpoints)
 	return (*PlayerRaft)(playerRaft)
 }
 func (this *PlayerRaft) GetPlayer(Id int64) *rpc.PlayerClusterInfo {
-	return (*etcdv3.PlayerRaft)(this).GetPlayer(Id)
+	return (*etcdv32.PlayerRaft)(this).GetPlayer(Id)
 }
 
 func (this *PlayerRaft) Publish(info *rpc.PlayerClusterInfo) bool {
-	return (*etcdv3.PlayerRaft)(this).Publish(info)
+	return (*etcdv32.PlayerRaft)(this).Publish(info)
 }
 
 func (this *PlayerRaft) Lease(leaseId int64) error {
-	return (*etcdv3.PlayerRaft)(this).Lease(leaseId)
+	return (*etcdv32.PlayerRaft)(this).Lease(leaseId)
 }
 
 func GetChannel(clusterInfo common.ClusterInfo) string {

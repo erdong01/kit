@@ -2,12 +2,13 @@ package rpc
 
 import (
 	"context"
+	"github.com/erDong01/micro-kit/base"
+	etcdv32 "github.com/erDong01/micro-kit/common/cluster/etcdv3"
 	"reflect"
 	"sync"
 
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/cluster/common"
-	"github.com/erDong01/micro-kit/cluster/etcdv3"
 	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools"
@@ -15,10 +16,10 @@ import (
 )
 
 type (
-	Service    etcdv3.Service
-	Master     etcdv3.Master
-	Snowflake  etcdv3.Snowflake
-	PlayerRaft etcdv3.PlayerRaft
+	Service    etcdv32.Service
+	Master     etcdv32.Master
+	Snowflake  etcdv32.Snowflake
+	PlayerRaft etcdv32.PlayerRaft
 	//集群包管理
 	IClusterPacket interface {
 		actor.IActor
@@ -37,7 +38,7 @@ type (
 		m_ClusterLocker  *sync.RWMutex
 		m_Packet         IClusterPacket
 		m_Master         *Master
-		m_HashRing       *tools.HashRing //hash一致性
+		m_HashRing       *base.HashRing //hash一致性
 		m_ClusterInfoMap map[uint32]*common.ClusterInfo
 		m_PacketFuncList *vector.Vector //call back
 	}
@@ -60,23 +61,23 @@ type (
 	}
 )
 
-//注册服务器
+// 注册服务器
 func NewService(info *common.ClusterInfo, Endpoints []string) *Service {
-	service := &etcdv3.Service{}
+	service := &etcdv32.Service{}
 	service.Init(info, Endpoints)
 	return (*Service)(service)
 }
 
-//监控服务器
+// 监控服务器
 func NewMaster(info *common.ClusterInfo, Endpoints []string, pActor actor.IActor) *Master {
-	master := &etcdv3.Master{}
+	master := &etcdv32.Master{}
 	master.Init(info, Endpoints, pActor)
 	return (*Master)(master)
 }
 
-//uuid生成器
+// uuid生成器
 func NewSnowflake(Endpoints []string) *Snowflake {
-	uuid := &etcdv3.Snowflake{}
+	uuid := &etcdv32.Snowflake{}
 	uuid.Init(Endpoints)
 	return (*Snowflake)(uuid)
 }
@@ -86,14 +87,14 @@ func (this *Cluster) InitCluster(info *common.ClusterInfo, Endpoints []string) {
 	this.m_ClusterLocker = &sync.RWMutex{}
 	this.m_ClusterMap = make(map[uint32]*ClusterNode)
 	this.m_Master = NewMaster(info, Endpoints, &this.Actor)
-	this.m_HashRing = tools.NewHashRing()
+	this.m_HashRing = base.NewHashRing()
 	this.m_ClusterInfoMap = make(map[uint32]*common.ClusterInfo)
 	this.m_PacketFuncList = vector.NewVector()
 	actor.MGR.RegisterActor(this)
 	this.Actor.Start()
 }
 
-//集群新加member
+// 集群新加member
 func (this *Cluster) Cluster_Add(ctx context.Context, info *common.ClusterInfo) {
 	_, bEx := this.m_ClusterInfoMap[info.Id()]
 	if !bEx {
@@ -102,13 +103,13 @@ func (this *Cluster) Cluster_Add(ctx context.Context, info *common.ClusterInfo) 
 	}
 }
 
-//集群删除member
+// 集群删除member
 func (this *Cluster) Cluster_Del(ctx context.Context, info *common.ClusterInfo) {
 	delete(this.m_ClusterInfoMap, info.Id())
 	this.DelCluster(info)
 }
 
-//链接断开
+// 链接断开
 func (this *Cluster) DISCONNECT(ctx context.Context, ClusterId uint32) {
 	pInfo, bEx := this.m_ClusterInfoMap[ClusterId]
 	if bEx {

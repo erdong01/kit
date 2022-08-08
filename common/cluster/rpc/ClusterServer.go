@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"github.com/erDong01/micro-kit/base"
 	"log"
 	"sync"
 
@@ -24,7 +25,7 @@ type (
 		m_ClusterSocketMap HashClusterSocketMap
 		m_ClusterLocker    *sync.RWMutex
 		m_pService         *network.ServerSocket //socket管理
-		m_HashRing         *tools.HashRing       //hash一致性
+		m_HashRing         *base.HashRing        //hash一致性
 	}
 
 	IClusterServer interface {
@@ -54,7 +55,7 @@ func (this *ClusterServer) InitService(info *common.ClusterInfo, Endpoints []str
 	this.Service = NewService(info, Endpoints)
 	this.m_ClusterMap = make(HashClusterMap)
 	this.m_ClusterSocketMap = make(HashClusterSocketMap)
-	this.m_HashRing = tools.NewHashRing()
+	this.m_HashRing = base.NewHashRing()
 	actor.MGR.RegisterActor(this)
 }
 
@@ -185,7 +186,7 @@ func (this *ClusterServer) COMMON_RegisterRequest(ctx context.Context, info *com
 	this.AddCluster(pServerInfo)
 }
 
-//链接断开
+// 链接断开
 func (this *ClusterServer) DISCONNECT(ctx context.Context, socketId uint32) {
 	pCluster := this.GetClusterBySocket(socketId)
 	if pCluster != nil {

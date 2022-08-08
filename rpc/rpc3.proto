@@ -86,3 +86,33 @@ message PlayerClusterInfo{
   uint32 WClusterId = 3;
   uint32 ZClusterId = 4;
 }
+
+//STUB类型
+enum STUB{
+  Master = 0;//master
+  PlayerMgr = 1;//db
+  AccountMgr = 2;//登录
+  ChatMgr = 3;//聊天
+  END = 4;
+};
+
+//邮箱
+message MailBox{
+  int64  Id = 1;
+  int64  LeaseId = 2;
+  MAIL   MailType = 3;
+  uint32 ClusterId = 5;//集群id
+}
+
+//邮件类型
+enum MAIL{
+  Player = 0;//player
+};
+
+//玩法集群信息
+message StubMailBox{
+  int64  Id = 1;
+  int64  LeaseId = 2;
+  STUB   StubType = 3;
+  uint32 ClusterId = 5;//集群id
+}

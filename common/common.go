@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/erDong01/micro-kit/base"
 	"github.com/erDong01/micro-kit/rpc"
-	"strings"
 )
 
 type (
@@ -15,6 +16,9 @@ type (
 		ServiceType() rpc.SERVICE
 		IpString() string
 		RaftIp() string
+	}
+	StubMailBox struct {
+		rpc.StubMailBox
 	}
 )
 
@@ -36,4 +40,12 @@ func (clusterInfo *ClusterInfo) Id() uint32 {
 
 func (clusterInfo *ClusterInfo) ServiceType() rpc.SERVICE {
 	return clusterInfo.Type
+}
+
+func (s *StubMailBox) StubName() string {
+	return s.StubType.String()
+}
+
+func (s *StubMailBox) Key() string {
+	return fmt.Sprintf("%s/%d", s.StubType.String(), s.Id)
 }

@@ -1,8 +1,8 @@
 package netgate
 
 import (
-	"github.com/erDong01/micro-kit/cluster"
 	"github.com/erDong01/micro-kit/common"
+	cluster2 "github.com/erDong01/micro-kit/common/cluster"
 	"github.com/erDong01/micro-kit/examples/message"
 	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/rpc"
@@ -15,13 +15,13 @@ type (
 		service        *network.ServerSocket
 		inited         bool
 		timeTraceTimer *time.Ticker
-		cluster        *cluster.Cluster
+		cluster        *cluster2.Cluster
 		playerMgr      *PlayerManager
 	}
 	IServerMag interface {
 		Init() bool
 		GetServer() *network.ServerSocket
-		GetCluster() *cluster.Service
+		GetCluster() *cluster2.Service
 		OnServerStart()
 	}
 )
@@ -48,7 +48,7 @@ func (this *ServerMgr) Init() bool {
 	this.service.BindPacketFunc(packet.PacketFunc)
 	this.service.Start()
 	var packet1 EventProcess
-	this.cluster = new(cluster.Cluster)
+	this.cluster = new(cluster2.Cluster)
 	this.cluster.Init(&common.ClusterInfo{Type: rpc.SERVICE_GATESERVER, Ip: UserNetIP, Port: int32(port)}, etcdEndpoints, Nats_Cluster)
 	this.cluster.BindPacketFunc(packet1.PacketFunc)
 	this.cluster.BindPacketFunc(DispatchPacket)
@@ -64,7 +64,7 @@ func (this *ServerMgr) GetServer() *network.ServerSocket {
 	return this.service
 }
 
-func (this ServerMgr) GetCluster() *cluster.Cluster {
+func (this ServerMgr) GetCluster() *cluster2.Cluster {
 	return this.cluster
 }
 
