@@ -1,5 +1,6 @@
 package containers
 
+// IteratorWithIndex is stateful iterator for ordered containers whose values can be fetched by an index.
 type IteratorWithIndex interface {
 	// Next moves the iterator to the next element and returns true if there was a next element in the container.
 	// If Next() returns true, then next element's index and value can be retrieved by Index() and Value().
@@ -50,6 +51,7 @@ type IteratorWithKey interface {
 	// Modifies the state of the iterator.
 	First() bool
 }
+
 // ReverseIteratorWithIndex is stateful iterator for ordered containers whose values can be fetched by an index.
 //
 // Essentially it is the same as IteratorWithIndex, but provides additional:

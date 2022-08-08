@@ -19,10 +19,6 @@ const (
 	ACTOR_TYPE_STUB      ACTOR_TYPE = iota //stub
 ) //ACTOR_TYPE
 
-const (
-	MAX_RPC_TAG = 10
-)
-
 // 一些全局的actor,不可删除的,不用锁考虑性能
 // 不是全局的actor,请使用actor pool
 type (
@@ -33,11 +29,13 @@ type (
 	}
 
 	OpOption func(*Op)
+
 	ActorMgr struct {
 		actorTypeMap map[reflect.Type]IActor
 		actorMap     map[string]IActor
 		isStart      bool
 	}
+
 	IActorMgr interface {
 		Init()
 		RegisterActor(ac IActor, params ...OpOption) //注册回调
@@ -101,10 +99,11 @@ func (a *ActorMgr) RegisterActor(ac IActor, params ...OpOption) {
 	}
 }
 
-func (this *ActorMgr) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
+func (a *ActorMgr) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
 	head.SocketId = 0
-	this.SendActor(funcName, head, rpc.Marshal(head, funcName, params...))
+	a.SendActor(funcName, head, rpc.Marshal(&head, &funcName, params...))
 }
+
 func (a *ActorMgr) SendActor(funcName string, head rpc.RpcHead, packet rpc.Packet) bool {
 	var ac IActor
 	bEx := false
@@ -124,6 +123,7 @@ func (a *ActorMgr) SendActor(funcName string, head rpc.RpcHead, packet rpc.Packe
 	}
 	return false
 }
+
 func (a *ActorMgr) PacketFunc(packet rpc.Packet) bool {
 	rpcPacket, head := rpc.Unmarshal(packet.Buff)
 	packet.RpcPacket = rpcPacket

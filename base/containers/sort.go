@@ -1,6 +1,7 @@
 package containers
 
 import "sort"
+
 // Sort sorts values (in-place) with respect to the given comparator.
 //
 // Uses Go's sort (hybrid of quicksort for large and then insertion sort for smaller slices).

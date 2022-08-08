@@ -1,4 +1,4 @@
-package etcdv3
+package etv3
 
 import (
 	"context"
@@ -14,7 +14,7 @@ const (
 	ETCD_DIR = "server/"
 )
 
-//注册服务器
+// 注册服务器
 type Service struct {
 	*common.ClusterInfo
 	client  *clientv3.Client

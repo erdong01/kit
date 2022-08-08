@@ -1,4 +1,4 @@
-package etcdv3
+package etv3
 
 import (
 	"context"
@@ -19,19 +19,21 @@ type Master struct {
 	common.IClusterInfo
 }
 
-func (this *Master) Init(info common.IClusterInfo, Endpoints []string, pActor actor.IActor) {
+// 监控服务器
+func (m *Master) Init(info common.IClusterInfo, Endpoints []string) {
 	cfg := clientv3.Config{
 		Endpoints: Endpoints,
 	}
+
 	etcdClient, err := clientv3.New(cfg)
 	if err != nil {
 		log.Fatal("Error: cannot connec to etcd:", err)
 	}
-	this.serviceMap = make(map[uint32]*common.ClusterInfo)
-	this.client = etcdClient
-	this.BindActor(pActor)
-	this.Start()
-	this.IClusterInfo = info
+
+	m.client = etcdClient
+	m.Start()
+	m.IClusterInfo = info
+	m.InitServices()
 }
 func (this *Master) Start() {
 	go this.Run()
@@ -88,4 +90,13 @@ func (this *Master) GetServices() []*common.ClusterInfo {
 		}
 	}
 	return services
+}
+func (m *Master) InitServices() {
+	resp, err := m.client.Get(context.Background(), ETCD_DIR, clientv3.WithPrefix())
+	if err == nil && (resp != nil && resp.Kvs != nil) {
+		for _, v := range resp.Kvs {
+			info := NodeToService(v.Value)
+			m.addService(info)
+		}
+	}
 }

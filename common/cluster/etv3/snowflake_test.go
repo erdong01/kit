@@ -1,4 +1,4 @@
-package etcdv3_test
+package etv3_test
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package etcdv3
+package etv3
 
 import (
 	"context"
@@ -25,7 +25,7 @@ type (
 	}
 )
 
-//初始化pub
+// 初始化pub
 func (this *PlayerRaft) Init(endpoints []string) {
 	cfg := clientv3.Config{
 		Endpoints: endpoints,

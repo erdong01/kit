@@ -3,7 +3,7 @@ package rpc
 import (
 	"context"
 	"github.com/erDong01/micro-kit/base"
-	etcdv32 "github.com/erDong01/micro-kit/common/cluster/etcdv3"
+	etcdv32 "github.com/erDong01/micro-kit/common/cluster/etv3"
 	"reflect"
 	"sync"
 

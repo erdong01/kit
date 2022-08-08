@@ -11,14 +11,14 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/erDong01/micro-kit/base"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools/mpsc"
 	"github.com/erDong01/micro-kit/tools/timer"
-	"github.com/erDong01/micro-kit/wrong"
 )
 
 var (
-	IdSeed int64
+	g_IdSeed int64
 )
 
 const (
@@ -27,41 +27,37 @@ const (
 	ASF_STOP = iota //已经关闭
 )
 
+// ********************************************************
+// actor 核心actor模式
+// ********************************************************
 type (
 	ActorBase struct {
 		actorName string
 		rType     reflect.Type
 		rVal      reflect.Value
 		actorType ACTOR_TYPE
-		Self      IActor
-
-		rpcMethodMap map[string]string
+		Self      IActor //when parent interface class call interface, it call parent not child  use for virtual
 	}
+
 	Actor struct {
 		ActorBase
 		acotrChan chan int //use for states
 		id        int64
 		state     int32
-
-		trace    traceInfo //trace func
-		mailBox  *mpsc.Queue
-		mailIn   [8]int64
-		mailChan chan bool
-		timerId  *int64
-		pool     IActorPool
-
-		shareRpc int `rpc:"GetRpcHead;UpdateTimer"`
+		trace     traceInfo //trace func
+		mailBox   *mpsc.Queue
+		mailIn    [8]int64
+		mailChan  chan bool
+		timerId   *int64
+		pool      IActorPool //ACTOR_TYPE_VIRTUAL,ACTOR_TYPE_POOL
 	}
 
 	IActor interface {
 		Init()
 		Stop()
 		Start()
-		// FindCall(funcName string) *CallFunc
-		// RegisterCall(funcName string, call interface{})
 		SendMsg(head rpc.RpcHead, funcName string, params ...interface{})
 		Send(head rpc.RpcHead, packet rpc.Packet)
-
 		RegisterTimer(duration time.Duration, fun func(), opts ...timer.OpOption) //注册定时器,时间为纳秒 1000 * 1000 * 1000
 		GetId() int64
 		GetState() int32
@@ -85,12 +81,6 @@ type (
 		*rpc.RpcPacket
 		Buff []byte
 	}
-	CallFunc struct {
-		Func       interface{}
-		FuncType   reflect.Type
-		FuncVal    reflect.Value
-		FuncParams string
-	}
 
 	traceInfo struct {
 		funcName  string
@@ -104,38 +94,41 @@ const (
 	DESDORY_EVENT = iota
 )
 
-func (this *ActorBase) IsActorType(actorType ACTOR_TYPE) bool {
-	return this.actorType == actorType
+func (a *ActorBase) IsActorType(actorType ACTOR_TYPE) bool {
+	return a.actorType == actorType
 }
 
 func AssignActorId() int64 {
-	return atomic.AddInt64(&IdSeed, 1)
-}
-func (this *Actor) GetId() int64 {
-	return this.id
-}
-func (this *Actor) SetId(id int64) {
-	this.id = id
+	return atomic.AddInt64(&g_IdSeed, 1)
 }
 
-func (this *Actor) GetName() string {
-	return this.actorName
+func (a *Actor) GetId() int64 {
+	return a.id
 }
 
-func (this *Actor) GetRpcHead(ctx context.Context) rpc.RpcHead {
+func (a *Actor) SetId(id int64) {
+	a.id = id
+}
+
+func (a *Actor) GetName() string {
+	return a.actorName
+}
+
+func (a *Actor) GetRpcHead(ctx context.Context) rpc.RpcHead {
 	rpcHead := ctx.Value("rpcHead").(rpc.RpcHead)
 	return rpcHead
 }
 
-func (this *Actor) GetState() int32 {
-	return atomic.LoadInt32(&this.state)
-}
-func (this *Actor) GetActorType() ACTOR_TYPE {
-	return this.actorType
+func (a *Actor) GetState() int32 {
+	return atomic.LoadInt32(&a.state)
 }
 
-func (this *Actor) setState(state int32) {
-	atomic.StoreInt32(&this.state, state)
+func (a *Actor) GetActorType() ACTOR_TYPE {
+	return a.actorType
+}
+
+func (a *Actor) setState(state int32) {
+	atomic.StoreInt32(&a.state, state)
 }
 
 func (a *Actor) bindPool(pPool IActorPool) {
@@ -146,8 +139,8 @@ func (a *Actor) getPool() IActorPool {
 	return a.pool
 }
 
-func (this *Actor) HasRpc(funcName string) bool {
-	_, bEx := this.rpcMethodMap[funcName]
+func (a *Actor) HasRpc(funcName string) bool {
+	_, bEx := a.rType.MethodByName(funcName)
 	return bEx
 }
 
@@ -155,26 +148,28 @@ func (a *Actor) Acotr() *Actor {
 	return a
 }
 
-func (this *Actor) Init() {
-	this.mailChan = make(chan bool)
-	this.mailBox = mpsc.New()
-	this.acotrChan = make(chan int, 1)
+func (a *Actor) Init() {
+	a.mailChan = make(chan bool, 1)
+	a.mailBox = mpsc.New()
+	a.acotrChan = make(chan int, 1)
 	//trance
-	this.trace.Init()
-	if this.id == 0 {
-		this.id = AssignActorId()
+	a.trace.Init()
+	if a.id == 0 {
+		a.id = AssignActorId()
 	}
 }
-func (a *Actor) Register(ac IActor, op Op) {
+
+func (a *Actor) register(ac IActor, op Op) {
 	rType := reflect.TypeOf(ac)
 	a.ActorBase = ActorBase{rType: rType, rVal: reflect.ValueOf(ac), Self: ac, actorName: op.name, actorType: op.actorType}
-
 }
+
 func (a *Actor) RegisterTimer(duration time.Duration, fun func(), opts ...timer.OpOption) {
 	if a.timerId == nil {
 		a.timerId = new(int64)
 		*a.timerId = a.id
 	}
+
 	timer.RegisterTimer(a.timerId, duration, func() {
 		a.SendMsg(rpc.RpcHead{ActorName: a.actorName}, "UpdateTimer", (*int64)(unsafe.Pointer(&fun)))
 	}, opts...)
@@ -200,15 +195,15 @@ func (a *Actor) Start() {
 	}
 }
 
-func (this *Actor) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
+func (a *Actor) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
 	head.SocketId = 0
-	this.Send(head, rpc.Marshal(head, funcName, params...))
+	a.Send(head, rpc.Marshal(&head, &funcName, params...))
 }
 
 func (a *Actor) Send(head rpc.RpcHead, packet rpc.Packet) {
 	defer func() {
 		if err := recover(); err != nil {
-			wrong.TraceCode(err)
+			base.TraceCode(err)
 		}
 	}()
 
@@ -260,11 +255,11 @@ func (a *Actor) call(io CallIO) {
 	}
 }
 
-func (this *Actor) UpdateTimer(ctx context.Context, p *int64) {
+func (a *Actor) UpdateTimer(ctx context.Context, p *int64) {
 	func1 := (*func())(unsafe.Pointer(p))
-	this.Trace("timer")
+	a.Trace("timer")
 	(*func1)()
-	this.Trace("")
+	a.Trace("")
 }
 
 func (a *Actor) consume() {
@@ -277,7 +272,7 @@ func (a *Actor) consume() {
 func (a *Actor) loop() bool {
 	defer func() {
 		if err := recover(); err != nil {
-			wrong.TraceCode(a.trace.ToString(), err)
+			base.TraceCode(a.trace.ToString(), err)
 		}
 	}()
 
@@ -292,31 +287,33 @@ func (a *Actor) loop() bool {
 	return false
 }
 
-func (this *Actor) run() {
+func (a *Actor) run() {
 	for {
-		if this.loop() {
+		if a.loop() {
 			break
 		}
 	}
-	this.clear()
+
+	a.clear()
 }
 
-func (this *traceInfo) Init() {
+func (a *traceInfo) Init() {
 	_, file, _, bOk := runtime.Caller(2)
 	if bOk {
 		index := strings.LastIndex(file, "/")
 		if index != -1 {
-			this.fileName = file[index+1:]
-			this.filePath = file[:index]
-			indexTow := strings.LastIndex(this.fileName, ".")
-			if indexTow != -1 {
-				this.className = strings.ToLower(this.fileName[:indexTow])
+			a.fileName = file[index+1:]
+			a.filePath = file[:index]
+			index1 := strings.LastIndex(a.fileName, ".")
+			if index1 != -1 {
+				a.className = strings.ToLower(a.fileName[:index1])
 			}
 		}
 	}
 }
-func (this *traceInfo) ToString() string {
-	return fmt.Sprintf("trace go file[%s] call[%s]\n", this.fileName, this.funcName)
+
+func (a *traceInfo) ToString() string {
+	return fmt.Sprintf("trace go file[%s] call[%s]\n", a.fileName, a.funcName)
 }
 
 func GetRpcMethodMap(rType reflect.Type, tagName string) map[string]string {
@@ -334,9 +331,3 @@ func GetRpcMethodMap(rType reflect.Type, tagName string) map[string]string {
 
 	return rpcMethod
 }
-
-//ClientSocket 给客户发送消息
-//func (this *Actor) ClientSocket(ctx context.Context) *network.ServerSocketClient {
-//	rpcHead := ctx.Value("rpcHead").(rpc3.RpcHead)
-//	return network.SocketServer.GetClientById(rpcHead.SocketId)
-//}

@@ -5,10 +5,10 @@ import (
 	"context"
 	"encoding/gob"
 	"errors"
+	"reflect"
+
 	"github.com/erDong01/micro-kit/base"
 	"google.golang.org/protobuf/proto"
-	"reflect"
-	"strings"
 )
 
 // rpc UnmarshalHead
@@ -22,7 +22,15 @@ func Unmarshal(buff []byte) (*RpcPacket, RpcHead) {
 	if rpcPacket.RpcHead == nil {
 		rpcPacket.RpcHead = &RpcHead{}
 	}
-	rpcPacket.FuncName = strings.ToLower(rpcPacket.FuncName)
+	// actor funcname
+	/*actorArgs := strings.Split(rpcPacket.FuncName, ".")
+	if len(actorArgs) == 2 {
+		rpcPacket.RpcHead.ActorName = actorArgs[0]
+		rpcPacket.FuncName = actorArgs[1]
+	} else {
+		rpcPacket.FuncName = actorArgs[0]
+	}*/
+
 	return rpcPacket, *(*RpcHead)(rpcPacket.RpcHead)
 }
 

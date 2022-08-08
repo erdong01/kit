@@ -8,6 +8,9 @@ import (
 	"github.com/erDong01/micro-kit/rpc"
 )
 
+// ********************************************************
+// actorpool 管理,不能动态分配
+// ********************************************************
 type (
 	ActorPool struct {
 		MGR       IActor
