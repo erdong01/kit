@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/erDong01/micro-kit/examples/message"
 	"github.com/erDong01/micro-kit/network"
+	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 )
 
@@ -46,7 +47,7 @@ func main() {
 
 func Handler() {
 	// 直到register ok
-	head := rpc.RpcHead{Code: 100, ActorName: "UserPrcoess"}
+	head := rpc3.RpcHead{Code: 100, ActorName: "UserPrcoess"}
 	byteD := rpc.Marshal(head, "C_G_LogoutRequest", "test", 88, 88, 88)
 	CLIENT.Send(head, byteD)
 }

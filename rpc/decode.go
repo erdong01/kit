@@ -5,38 +5,31 @@ import (
 	"context"
 	"encoding/gob"
 	"errors"
-	"reflect"
-
-	"github.com/erDong01/micro-kit/base"
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/tools"
 	"google.golang.org/protobuf/proto"
+	"reflect"
+	"strings"
 )
 
-// rpc UnmarshalHead
-func UnmarshalHead(buff []byte) (*RpcPacket, RpcHead) {
-	nLen := base.Clamp(len(buff), 0, 256)
+//rpc UnmarshalHead
+func UnmarshalHead(buff []byte) (*rpc3.RpcPacket, rpc3.RpcHead) {
+	nLen := tools.Clamp(len(buff), 0, 256)
 	return Unmarshal(buff[:nLen])
 }
-func Unmarshal(buff []byte) (*RpcPacket, RpcHead) {
-	rpcPacket := &RpcPacket{}
+func Unmarshal(buff []byte) (*rpc3.RpcPacket, rpc3.RpcHead) {
+	rpcPacket := &rpc3.RpcPacket{}
 	proto.Unmarshal(buff, rpcPacket)
 	if rpcPacket.RpcHead == nil {
-		rpcPacket.RpcHead = &RpcHead{}
+		rpcPacket.RpcHead = &rpc3.RpcHead{}
 	}
-	// actor funcname
-	/*actorArgs := strings.Split(rpcPacket.FuncName, ".")
-	if len(actorArgs) == 2 {
-		rpcPacket.RpcHead.ActorName = actorArgs[0]
-		rpcPacket.FuncName = actorArgs[1]
-	} else {
-		rpcPacket.FuncName = actorArgs[0]
-	}*/
-
-	return rpcPacket, *(*RpcHead)(rpcPacket.RpcHead)
+	rpcPacket.FuncName = strings.ToLower(rpcPacket.FuncName)
+	return rpcPacket, *(*rpc3.RpcHead)(rpcPacket.RpcHead)
 }
 
-// rpc Unmarshal
-// pFuncType for RegisterCall func
-func UnmarshalBody(rpcPacket *RpcPacket, pFuncType reflect.Type) []interface{} {
+//rpc Unmarshal
+//pFuncType for RegisterCall func
+func UnmarshalBody(rpcPacket *rpc3.RpcPacket, pFuncType reflect.Type) []interface{} {
 	nCurLen := pFuncType.NumIn()
 	params := make([]interface{}, nCurLen)
 	var dec *gob.Decoder
@@ -46,7 +39,7 @@ func UnmarshalBody(rpcPacket *RpcPacket, pFuncType reflect.Type) []interface{} {
 	}
 	for i := 0; i < nCurLen; i++ {
 		if i == 0 {
-			params[0] = context.WithValue(context.Background(), "rpcHead", *(*RpcHead)(rpcPacket.RpcHead))
+			params[0] = context.WithValue(context.Background(), "rpcHead", *(*rpc3.RpcHead)(rpcPacket.RpcHead))
 			continue
 		}
 		if i < int(rpcPacket.ArgLen+1) {
@@ -64,7 +57,7 @@ func UnmarshalBody(rpcPacket *RpcPacket, pFuncType reflect.Type) []interface{} {
 	return params
 }
 
-func UnmarshalBodyCall(rpcPacket *RpcPacket, pFuncType reflect.Type) (error, []interface{}) {
+func UnmarshalBodyCall(rpcPacket *rpc3.RpcPacket, pFuncType reflect.Type) (error, []interface{}) {
 	strErr := ""
 	nCurLen := pFuncType.NumIn()
 	params := make([]interface{}, nCurLen)
@@ -76,7 +69,7 @@ func UnmarshalBodyCall(rpcPacket *RpcPacket, pFuncType reflect.Type) (error, []i
 	}
 	for i := 0; i < nCurLen; i++ {
 		if i == 0 {
-			params[0] = context.WithValue(context.Background(), "rpcHead", *(*RpcHead)(rpcPacket.RpcHead))
+			params[0] = context.WithValue(context.Background(), "rpcHead", *(*rpc3.RpcHead)(rpcPacket.RpcHead))
 			continue
 		}
 

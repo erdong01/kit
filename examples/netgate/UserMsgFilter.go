@@ -1,10 +1,10 @@
 package netgate
 
 import (
-	"github.com/erDong01/micro-kit/base"
+	"github.com/erDong01/micro-kit/tools"
 )
 
-// 消息防火墙
+//消息防火墙
 var (
 	s_clientCheckFilters    map[string]bool //use for no check accountid
 	s_clientCheckFilterInit bool
@@ -13,8 +13,8 @@ var (
 func IsCheckClient(msg string) bool {
 	if !s_clientCheckFilterInit {
 		s_clientCheckFilters = make(map[string]bool)
-		s_clientCheckFilters[base.ToLower("C_A_LoginRequest")] = true
-		s_clientCheckFilters[base.ToLower("C_A_RegisterRequest")] = true
+		s_clientCheckFilters[tools.ToLower("C_A_LoginRequest")] = true
+		s_clientCheckFilters[tools.ToLower("C_A_RegisterRequest")] = true
 		s_clientCheckFilterInit = true
 	}
 

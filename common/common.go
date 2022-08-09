@@ -4,21 +4,18 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/erDong01/micro-kit/base"
-	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/tools"
 )
 
 type (
-	ClusterInfo  rpc.ClusterInfo
+	ClusterInfo  rpc3.ClusterInfo
 	IClusterInfo interface {
 		Id() uint32
 		String() string
-		ServiceType() rpc.SERVICE
+		ServiceType() rpc3.SERVICE
 		IpString() string
 		RaftIp() string
-	}
-	StubMailBox struct {
-		rpc.StubMailBox
 	}
 )
 
@@ -35,17 +32,9 @@ func (clusterInfo *ClusterInfo) String() string {
 }
 
 func (clusterInfo *ClusterInfo) Id() uint32 {
-	return base.ToHash(clusterInfo.IpString())
+	return tools.ToHash(clusterInfo.IpString())
 }
 
-func (clusterInfo *ClusterInfo) ServiceType() rpc.SERVICE {
+func (clusterInfo *ClusterInfo) ServiceType() rpc3.SERVICE {
 	return clusterInfo.Type
-}
-
-func (s *StubMailBox) StubName() string {
-	return s.StubType.String()
-}
-
-func (s *StubMailBox) Key() string {
-	return fmt.Sprintf("%s/%d", s.StubType.String(), s.Id)
 }

@@ -1,7 +1,7 @@
 package message
 
 import (
-	"github.com/erDong01/micro-kit/base"
+	"github.com/erDong01/micro-kit/tools"
 	"google.golang.org/protobuf/proto"
 	"hash/crc32"
 	"strings"
@@ -25,12 +25,12 @@ func GetMessageName(packet proto.Message) string {
 func Encode(packet proto.Message) []byte {
 	packetId := crc32.ChecksumIEEE([]byte(GetMessageName(packet)))
 	buff, _ := proto.Marshal(packet)
-	data := append(base.IntToBytes(int(packetId)), buff...)
+	data := append(tools.IntToBytes(int(packetId)), buff...)
 	return data
 }
 
 func Decode(buff []byte) (uint32, []byte) {
-	packetId := uint32(base.BytesToInt(buff[0:4]))
+	packetId := uint32(tools.BytesToInt(buff[0:4]))
 	return packetId, buff[4:]
 }
 

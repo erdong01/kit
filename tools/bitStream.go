@@ -1,7 +1,5 @@
 package tools
 
-import "github.com/erDong01/micro-kit/base"
-
 const (
 	Bit8              = 8
 	Bit16             = 16
@@ -105,7 +103,7 @@ func (this *BitStream) GetStreamSize() int {
 }
 
 func (this *BitStream) SetPosition(pos int) bool {
-	base.Assert(pos == 0 || this.flagNum == 0, "不正确的setPosition调用")
+	Assert(pos == 0 || this.flagNum == 0, "不正确的setPosition调用")
 	if pos != 0 && this.flagNum != 0 {
 		return false
 	}
@@ -142,7 +140,7 @@ func (this *BitStream) WriteBits(bitPtr []byte, bitCount int) {
 
 	if this.tailFlag {
 		this.error = true
-		base.Assert(false, "Out of range write")
+		Assert(false, "Out of range write")
 		return
 	}
 
@@ -153,7 +151,7 @@ func (this *BitStream) WriteBits(bitPtr []byte, bitCount int) {
 	for bitCount+this.bitNum > this.maxWriteBitNum {
 		if !this.resize() {
 			this.error = true
-			base.Assert(false, "Out of range write")
+			Assert(false, "Out of range write")
 			return
 		}
 	}
@@ -173,7 +171,7 @@ func (this *BitStream) ReadBits(bitCount int) []byte {
 
 	if this.tailFlag {
 		this.error = true
-		base.Assert(false, "Out of range read")
+		Assert(false, "Out of range read")
 		return []byte{}
 	}
 
@@ -184,7 +182,7 @@ func (this *BitStream) ReadBits(bitCount int) []byte {
 	for bitCount+this.bitNum > this.maxReadBitNum {
 		if !this.resize() {
 			this.error = true
-			base.Assert(false, "Out of range read")
+			Assert(false, "Out of range read")
 			return []byte{}
 		}
 	}
@@ -197,13 +195,13 @@ func (this *BitStream) ReadBits(bitCount int) []byte {
 }
 
 func (this *BitStream) WriteInt(value int, bitCount int) {
-	this.WriteBits(base.IntToBytes(value), bitCount)
+	this.WriteBits(IntToBytes(value), bitCount)
 }
 
 func (this *BitStream) ReadInt(bitCount int) int {
 	var ret int
 	buf := this.ReadBits(bitCount)
-	ret = base.BytesToInt(buf)
+	ret = BytesToInt(buf)
 	if bitCount == Bit32 {
 		return int(ret)
 	} else {
@@ -228,7 +226,7 @@ func (this *BitStream) ReadFlag() bool {
 
 	if this.flagNum+1 > this.maxReadBitNum {
 		this.error = true
-		base.Assert(false, "Out of range read")
+		Assert(false, "Out of range read")
 		return false
 	}
 
@@ -255,7 +253,7 @@ func (this *BitStream) WriteFlag(value bool) bool {
 
 	if this.flagNum+1 > this.maxWriteBitNum {
 		this.error = true
-		base.Assert(false, "Out of range write")
+		Assert(false, "Out of range write")
 		return false
 	}
 
@@ -288,13 +286,13 @@ func (this *BitStream) WriteString(value string) {
 }
 
 func (this *BitStream) WriteInt64(value int64, bitCount int) {
-	this.WriteBits(base.Int64ToBytes(value), bitCount)
+	this.WriteBits(Int64ToBytes(value), bitCount)
 }
 
 func (this *BitStream) ReadInt64(bitCount int) int64 {
 	var ret int64
 	buf := this.ReadBits(bitCount)
-	ret = base.BytesToInt64(buf)
+	ret = BytesToInt64(buf)
 	if bitCount == Bit64 {
 		return int64(ret)
 	} else {
@@ -304,25 +302,25 @@ func (this *BitStream) ReadInt64(bitCount int) int64 {
 	return int64(ret)
 }
 func (this *BitStream) WriteFloat(value float32) {
-	this.WriteBits(base.Float32ToByte(value), Bit32)
+	this.WriteBits(Float32ToByte(value), Bit32)
 }
 
 func (this *BitStream) ReadFloat() float32 {
 	var ret float32
 	buf := this.ReadBits(Bit32)
-	ret = base.BytesToFloat32(buf)
+	ret = BytesToFloat32(buf)
 
 	return float32(ret)
 }
 
 func (this *BitStream) WriteFloat64(value float64) {
-	this.WriteBits(base.Float64ToByte(value), Bit64)
+	this.WriteBits(Float64ToByte(value), Bit64)
 }
 
 func (this *BitStream) ReadFloat64() float64 {
 	var ret float64
 	buf := this.ReadBits(Bit64)
-	ret = base.BytesToFloat64(buf)
+	ret = BytesToFloat64(buf)
 
 	return float64(ret)
 }

@@ -1,8 +1,7 @@
 package message
 
 import (
-	"github.com/erDong01/micro-kit/base"
-	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/tools"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -28,7 +27,7 @@ type (
 	}
 )
 
-func BuildPacketHead(id int64, destservertype rpc.SERVICE) *Ipacket {
+func BuildPacketHead(id int64, destservertype rpc3.SERVICE) *Ipacket {
 	ipacket := &Ipacket{
 		Stx:            Default_Ipacket_Stx,
 		DestServerType: SERVICE(destservertype),
@@ -51,12 +50,12 @@ func GetMessageName(packet proto.Message) string {
 func Encode(packet proto.Message) []byte {
 	packetId := tools.GetMessageCode1(GetMessageName(packet))
 	buff, _ := proto.Marshal(packet)
-	data := append(base.IntToBytes(int(packetId)), buff...)
+	data := append(tools.IntToBytes(int(packetId)), buff...)
 	return data
 }
 
 func Decode(buff []byte) (uint32, []byte) {
-	packetId := uint32(base.BytesToInt(buff[0:4]))
+	packetId := uint32(tools.BytesToInt(buff[0:4]))
 	return packetId, buff[4:]
 }
 
@@ -97,7 +96,7 @@ func init() {
 	Packet_CrcNamesMap = make(map[uint32]string)
 }
 
-// 统计crc对应string
+//统计crc对应string
 func initCrcNames() {
 	protoFiles := []protoreflect.MessageDescriptors{}
 	protoFiles = append(protoFiles, File_message_proto.Messages())
@@ -112,25 +111,25 @@ func initCrcNames() {
 	}
 }
 
-// 网关防火墙
+//网关防火墙
 func Init() {
 	initCrcNames()
 	//注册消息
 	//PacketHead 中的 DestServerType 决定转发到那个服务器
-	RegisterPacket(&C_A_LoginRequest{PacketHead: BuildPacketHead(0, rpc.SERVICE_GATESERVER)})
-	RegisterPacket(&C_G_LoginResquest{PacketHead: BuildPacketHead(0, rpc.SERVICE_GATESERVER)})
-	RegisterPacket(&C_A_RegisterRequest{PacketHead: BuildPacketHead(0, rpc.SERVICE_ACCOUNTSERVER)})
-	RegisterPacket(&C_G_LogoutResponse{PacketHead: BuildPacketHead(0, rpc.SERVICE_GATESERVER)})
-	RegisterPacket(&C_W_CreatePlayerRequest{PacketHead: BuildPacketHead(0, rpc.SERVICE_WORLDSERVER)})
-	RegisterPacket(&C_W_Game_LoginRequset{PacketHead: BuildPacketHead(0, rpc.SERVICE_WORLDSERVER)})
-	RegisterPacket(&C_W_ChatMessage{PacketHead: BuildPacketHead(0, rpc.SERVICE_WORLDSERVER)})
+	RegisterPacket(&C_A_LoginRequest{PacketHead: BuildPacketHead(0, rpc3.SERVICE_GATESERVER)})
+	RegisterPacket(&C_G_LoginResquest{PacketHead: BuildPacketHead(0, rpc3.SERVICE_GATESERVER)})
+	RegisterPacket(&C_A_RegisterRequest{PacketHead: BuildPacketHead(0, rpc3.SERVICE_ACCOUNTSERVER)})
+	RegisterPacket(&C_G_LogoutResponse{PacketHead: BuildPacketHead(0, rpc3.SERVICE_GATESERVER)})
+	RegisterPacket(&C_W_CreatePlayerRequest{PacketHead: BuildPacketHead(0, rpc3.SERVICE_WORLDSERVER)})
+	RegisterPacket(&C_W_Game_LoginRequset{PacketHead: BuildPacketHead(0, rpc3.SERVICE_WORLDSERVER)})
+	RegisterPacket(&C_W_ChatMessage{PacketHead: BuildPacketHead(0, rpc3.SERVICE_WORLDSERVER)})
 
-	RegisterPacket(&C_Z_LoginCopyMap{PacketHead: BuildPacketHead(0, rpc.SERVICE_ZONESERVER)})
-	RegisterPacket(&C_Z_Move{PacketHead: BuildPacketHead(0, rpc.SERVICE_ZONESERVER)})
-	RegisterPacket(&C_Z_Skill{PacketHead: BuildPacketHead(0, rpc.SERVICE_ZONESERVER)})
+	RegisterPacket(&C_Z_LoginCopyMap{PacketHead: BuildPacketHead(0, rpc3.SERVICE_ZONESERVER)})
+	RegisterPacket(&C_Z_Move{PacketHead: BuildPacketHead(0, rpc3.SERVICE_ZONESERVER)})
+	RegisterPacket(&C_Z_Skill{PacketHead: BuildPacketHead(0, rpc3.SERVICE_ZONESERVER)})
 }
 
-// client消息回调
+//client消息回调
 func InitClient() {
 	initCrcNames()
 	//注册消息

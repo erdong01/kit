@@ -3,6 +3,8 @@ package network
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/erDong01/micro-kit/tools"
+	"log"
 )
 
 const (
@@ -13,122 +15,115 @@ const (
 
 type (
 	PacketParser struct {
-		packetLen       int
-		maxPacketLen    int
-		littleEndian    bool
-		maxPacketBuffer []byte //max receive buff
-		packetFunc      HandlePacket
+		PacketLen       int
+		MaxPacketLen    int
+		LittleEndian    bool
+		MaxPacketBuffer []byte
+		PacketFunc      HandlePacket
 	}
 
 	PacketConfig struct {
-		MaxPacketLen *int
+		MaxPacketLen int
 		Func         HandlePacket
 	}
 )
 
 func NewPacketParser(conf PacketConfig) PacketParser {
 	p := PacketParser{}
-	p.packetLen = PACKET_LEN_DWORD
-	p.maxPacketLen = base.MAX_PACKET
-	p.littleEndian = true
+	p.PacketLen = PACKET_LEN_DWORD
+	p.MaxPacketLen = tools.MAX_PACKET
+	p.LittleEndian = true
 	if conf.Func != nil {
-		p.packetFunc = conf.Func
+		p.PacketFunc = conf.Func
 	} else {
-		p.packetFunc = func(buff []byte) {
+		p.PacketFunc = func(buff []byte) {
 		}
 	}
 	return p
 }
-
-func (p *PacketParser) readLen(buff []byte) (bool, int) {
+func (this *PacketParser) readLen(buff []byte) (bool, int) {
 	nLen := len(buff)
-	if nLen < p.packetLen {
+	if nLen < this.PacketLen {
 		return false, 0
 	}
-
-	bufMsgLen := buff[:p.packetLen]
-	// parse len
+	bufMsgLen := buff[:this.PacketLen]
 	var msgLen int
-	switch p.packetLen {
+
+	switch this.PacketLen {
 	case PACKET_LEN_BYTE:
 		msgLen = int(bufMsgLen[0])
 	case PACKET_LEN_WORD:
-		if p.littleEndian {
+		if this.LittleEndian {
 			msgLen = int(binary.LittleEndian.Uint16(bufMsgLen))
 		} else {
 			msgLen = int(binary.BigEndian.Uint16(bufMsgLen))
 		}
 	case PACKET_LEN_DWORD:
-		if p.littleEndian {
+		if this.LittleEndian {
 			msgLen = int(binary.LittleEndian.Uint32(bufMsgLen))
 		} else {
 			msgLen = int(binary.BigEndian.Uint32(bufMsgLen))
 		}
-	}
 
-	if msgLen+p.packetLen <= nLen {
-		return true, msgLen + p.packetLen
 	}
-
+	if msgLen+this.PacketLen <= nLen {
+		return true, msgLen + this.PacketLen
+	}
 	return false, 0
 }
-
-func (p *PacketParser) Read(dat []byte) bool {
-	buff := append(p.maxPacketBuffer, dat...)
-	p.maxPacketBuffer = []byte{}
+func (this *PacketParser) Read(dat []byte) bool {
+	buff := append(this.MaxPacketBuffer, dat...)
+	this.MaxPacketBuffer = []byte{}
 	nCurSize := 0
-	//fmt.Println(p.maxPacketBuffer)
-ParsePacekt:
+ParsePacket:
 	nPacketSize := 0
 	nBufferSize := len(buff[nCurSize:])
 	bFindFlag := false
-	bFindFlag, nPacketSize = p.readLen(buff[nCurSize:])
-	//fmt.Println(bFindFlag, nPacketSize, nBufferSize)
+	bFindFlag, nPacketSize = this.readLen(buff[nCurSize:])
+
 	if bFindFlag {
-		if nBufferSize == nPacketSize { //完整包
-			p.packetFunc(buff[nCurSize+p.packetLen : nCurSize+nPacketSize])
+		if nBufferSize == nPacketSize {
+			this.PacketFunc(buff[nCurSize+this.PacketLen : nCurSize+nPacketSize])
 			nCurSize += nPacketSize
 		} else if nBufferSize > nPacketSize {
-			p.packetFunc(buff[nCurSize+p.packetLen : nCurSize+nPacketSize])
+			this.PacketFunc(buff[nCurSize+this.PacketLen : nCurSize+nPacketSize])
 			nCurSize += nPacketSize
-			goto ParsePacekt
+			goto ParsePacket
 		}
-	} else if nBufferSize < p.maxPacketLen {
-		p.maxPacketBuffer = buff[nCurSize:]
+	} else if nBufferSize < this.MaxPacketLen {
+		this.MaxPacketBuffer = buff[nCurSize:]
 	} else {
-		fmt.Println("超出最大包限制，丢弃该包")
+		log.Println("超出最大包限制，丢弃该包")
 		return false
 	}
+
 	return true
 }
 
-func (p *PacketParser) Write(dat []byte) []byte {
-	// get len
+func (this *PacketParser) Write(dat []byte) []byte {
 	msgLen := len(dat)
-	// check len
-	if msgLen+p.packetLen > base.MAX_PACKET {
+
+	if msgLen+this.PacketLen > tools.MAX_PACKET {
 		fmt.Println("write over base.MAX_PACKET")
 	}
+	msg := make([]byte, this.PacketLen+msgLen)
 
-	msg := make([]byte, p.packetLen+msgLen)
-	// write len
-	switch p.packetLen {
+	switch this.PacketLen {
 	case PACKET_LEN_BYTE:
 		msg[0] = byte(msgLen)
 	case PACKET_LEN_WORD:
-		if p.littleEndian {
+		if this.LittleEndian {
 			binary.LittleEndian.PutUint16(msg, uint16(msgLen))
 		} else {
 			binary.BigEndian.PutUint16(msg, uint16(msgLen))
 		}
 	case PACKET_LEN_DWORD:
-		if p.littleEndian {
+		if this.LittleEndian {
 			binary.LittleEndian.PutUint32(msg, uint32(msgLen))
 		} else {
 			binary.BigEndian.PutUint32(msg, uint32(msgLen))
 		}
 	}
-
-	copy(msg[p.packetLen:], dat)
+	copy(msg[this.PacketLen:], dat)
 	return msg
 }
