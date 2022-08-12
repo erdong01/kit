@@ -17,14 +17,12 @@ type info struct {
 }
 
 type Core struct {
-	Db          *gorm.DB
-	Transaction *gorm.DB
-	Config      *config.Config
-	Info        info
-	opts        []Option
-	once        sync.Once
-	Mongo       *mongo.Client
-	Etcd        *clientv3.Client
+	Db     *gorm.DB
+	Config *config.Config
+	Info   *info
+	opts   []Option
+	Mongo  *mongo.Client
+	Etcd   *clientv3.Client
 }
 
 var (
@@ -47,7 +45,5 @@ func Copy() *Core {
 }
 
 func Set(newCore *Core) {
-	once.Do(func() {
-		c = newCore
-	})
+	c = newCore
 }

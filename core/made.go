@@ -22,11 +22,9 @@ type ICore interface {
 
 // Init 启动其他服务
 func (*Core) Init() {
-	New().once.Do(func() {
-		for _, o := range c.opts {
-			o(c)
-		}
-	})
+	for _, o := range c.opts {
+		o(c)
+	}
 }
 
 // GetEnv 获取当前环境
@@ -115,10 +113,13 @@ func Version(version string) Option {
 	}
 }
 
-
-
 func ConfigRegister() Option {
 	return func(c *Core) {
 		config.Init("config")
 	}
 }
+
+func Bind(a interface{}, b interface{}) {
+	a = b
+}
+
