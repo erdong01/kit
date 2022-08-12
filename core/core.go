@@ -51,10 +51,3 @@ func Set(newCore *Core) {
 		c = newCore
 	})
 }
-
-func Close() {
-	if c.Redis != nil {
-		defer c.Redis.Close()
-	}
-
-}
