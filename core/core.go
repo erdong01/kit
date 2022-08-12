@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/erDong01/micro-kit/config"
-	"github.com/go-redis/redis/v8"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
@@ -20,7 +19,6 @@ type info struct {
 type Core struct {
 	Db          *gorm.DB
 	Transaction *gorm.DB
-	Redis       *redis.Client
 	Config      *config.Config
 	Info        info
 	opts        []Option

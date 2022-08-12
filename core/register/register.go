@@ -5,7 +5,6 @@ import (
 	"github.com/erDong01/micro-kit/core"
 	gongDbDrive "github.com/erDong01/micro-kit/db/mongoDB/drive"
 	"github.com/erDong01/micro-kit/db/mysql"
-	"github.com/erDong01/micro-kit/db/redis/drive"
 )
 
 // GlobalInit 全局初始化
@@ -35,12 +34,6 @@ func (r *Register) DbRegister() *Register {
 // MongoRegister 注册Mongo
 func (r *Register) MongoRegister() *Register {
 	core.New().Mongo = gongDbDrive.Init()
-	return r
-}
-
-// RedisRegister 注册 缓存中心
-func (r *Register) RedisRegister() *Register {
-	core.New().Redis = drive.New()
 	return r
 }
 
