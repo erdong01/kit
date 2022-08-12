@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/cespare/xxhash v1.1.0
-	github.com/go-sql-driver/mysql v1.6.0
 	github.com/hashicorp/raft v1.3.10
 	github.com/hashicorp/raft-boltdb v0.0.0-20210409134258-03c10cc3d4ea
 	github.com/joeycumines/go-bigbuff v1.15.0
@@ -17,7 +16,6 @@ require (
 	go.mongodb.org/mongo-driver v1.8.2
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.1
-	gorm.io/driver/mysql v1.2.3
 	gorm.io/gorm v1.23.8
 )
 
