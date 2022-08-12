@@ -4,13 +4,11 @@ import (
 	"github.com/erDong01/micro-kit/config"
 	"github.com/erDong01/micro-kit/core"
 	gongDbDrive "github.com/erDong01/micro-kit/db/mongoDB/drive"
-	"github.com/erDong01/micro-kit/db/mysql"
 )
 
 // GlobalInit 全局初始化
 func GlobalInit() *Register {
 	return new(Register).ConfigRegister().
-		RedisRegister().
 		DbRegister().
 		SetPort(5001)
 }
@@ -22,12 +20,6 @@ type Register struct {
 func (r *Register) ConfigRegister() *Register {
 	config.Init("config")
 	core.New().Config = config.New()
-	return r
-}
-
-// DbRegister 注册 orm
-func (r *Register) DbRegister() *Register {
-	core.New().Db = mysql.New()
 	return r
 }
 

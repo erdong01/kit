@@ -3,7 +3,6 @@ package core
 import (
 	"github.com/erDong01/micro-kit/config"
 	gongDbDrive "github.com/erDong01/micro-kit/db/mongoDB/drive"
-	mysqlDrive "github.com/erDong01/micro-kit/db/mysql/drive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 )
@@ -116,19 +115,7 @@ func Version(version string) Option {
 	}
 }
 
-// DbRegister 设置数据库
-func DbRegister() Option {
-	return func(c *Core) {
-		New().Db = mysqlDrive.New()
-	}
-}
 
-// RedisRegister 设置Redis
-func RedisRegister() Option {
-	return func(c *Core) {
-		New().Redis = redisDrive.New()
-	}
-}
 
 func ConfigRegister() Option {
 	return func(c *Core) {
