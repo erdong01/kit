@@ -63,8 +63,6 @@ enum SERVICE{
   WORLDSERVER = 4;//世界
   ZONESERVER = 5;//地图
   WORLDDBSERVER = 6;//db
-  ServiceWarKings = 7;//王者战记
-  ServiceFruitPark = 8;//db水果乐园
 };
 
 //发送标志

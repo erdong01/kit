@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/cespare/xxhash v1.1.0
-	github.com/go-redis/redis/v8 v8.11.4
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/hashicorp/go-hclog v1.1.0 // indirect
 	github.com/hashicorp/go-msgpack v1.1.5 // indirect
