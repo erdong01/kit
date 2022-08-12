@@ -3,6 +3,22 @@ package config
 type Core struct {
 }
 
+// reids 配置
+type RedisConfig struct {
+	Addr     string
+	Password string
+	DB       int
+}
+
+//reids默认配置
+func GetRedisConfig() *RedisConfig {
+	return &RedisConfig{
+		Addr:     "127.0.0.1:6379",
+		Password: "test",
+		DB:       1,
+	}
+}
+
 // jwt 配置
 type JwtCnf struct {
 	Secret string

@@ -4,6 +4,8 @@ import (
 	"github.com/erDong01/micro-kit/config"
 	gongDbDrive "github.com/erDong01/micro-kit/db/mongoDB/drive"
 	mysqlDrive "github.com/erDong01/micro-kit/db/mysql/drive"
+	redisDrive "github.com/erDong01/micro-kit/db/redis/drive"
+	rds "github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 )
@@ -15,6 +17,7 @@ type ICore interface {
 	GetName() string
 	GetVersion() string
 	GetDb() *gorm.DB
+	GetRedis() *rds.Client
 	GetPort() int
 	ConfigRegister() *config.Config
 	SetConfigFile(file string) *config.Config
@@ -53,6 +56,11 @@ func (*Core) GetDb() *gorm.DB {
 // GetDb 获取当前数据库实例
 func (*Core) GetPort() int {
 	return New().Info.Port
+}
+
+// GetRedis 获取当前Redis实例
+func (*Core) GetRedis() *rds.Client {
+	return New().Redis
 }
 
 // ConfigRegister 注册 配置
@@ -120,6 +128,13 @@ func Version(version string) Option {
 func DbRegister() Option {
 	return func(c *Core) {
 		New().Db = mysqlDrive.New()
+	}
+}
+
+// RedisRegister 设置Redis
+func RedisRegister() Option {
+	return func(c *Core) {
+		New().Redis = redisDrive.New()
 	}
 }
 

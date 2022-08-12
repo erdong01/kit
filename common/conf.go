@@ -15,6 +15,12 @@ type (
 		MaxOpenConns int    `yaml:"maxOpenConns"`
 	}
 
+	Redis struct {
+		OpenFlag bool   `yaml:"open"`
+		Ip       string `yaml:"ip"`
+		Password string `yaml:"password"`
+	}
+
 	Etcd struct {
 		Endpoints []string `yaml:"endpoints"`
 	}
