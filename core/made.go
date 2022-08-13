@@ -1,6 +1,8 @@
 package core
 
 import (
+	"reflect"
+
 	"github.com/erDong01/micro-kit/config"
 	gongDbDrive "github.com/erDong01/micro-kit/db/mongoDB/drive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -119,7 +121,7 @@ func ConfigRegister() Option {
 	}
 }
 
-func Bind(a interface{}, b interface{}) {
-	a = b
+func Bind(a any, b any) {
+	csValue := reflect.ValueOf(a).Elem()
+	csValue.Set(reflect.ValueOf(b))
 }
-
