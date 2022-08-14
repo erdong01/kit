@@ -20,6 +20,7 @@ type ICore interface {
 	ConfigRegister() *config.Config
 	SetConfigFile(file string) *config.Config
 	MongoRegister(Uri ...string) *mongo.Client
+	Bind(a any, b any)
 }
 
 // Init 启动其他服务
@@ -27,6 +28,9 @@ func (*Core) Init() {
 	for _, o := range c.opts {
 		o(c)
 	}
+}
+func (*Core) Bind(a any, b any) {
+	Bind(a, b)
 }
 
 // GetEnv 获取当前环境
