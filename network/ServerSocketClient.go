@@ -36,6 +36,7 @@ type ServerSocketClient struct {
 	ServerSocket *ServerSocket
 	sendChan     chan []byte //对外缓冲队列
 	timerId      *int64
+	Property     any
 }
 
 func handleError(err error) {
@@ -214,4 +215,19 @@ func (this *ServerSocketClient) SendPacket(head rpc3.RpcHead, funcName string, p
 func (this *ServerSocketClient) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
 	buff := rpc.Marshal(head, funcName, params...)
 	return this.Send(head, buff)
+}
+
+// 设置链接属性
+func (this *ServerSocketClient) SetProperty(p any) {
+	this.Property = p
+}
+
+// 获取链接属性
+func (this *ServerSocketClient) GetProperty(key string) (p any) {
+	return this.Property
+}
+
+// 移除链接属性
+func (this *ServerSocketClient) RemoveProperty() {
+	this.Property = nil
 }
