@@ -223,7 +223,7 @@ func (this *ServerSocketClient) SetProperty(p any) {
 }
 
 // 获取链接属性
-func (this *ServerSocketClient) GetProperty(key string) (p any) {
+func (this *ServerSocketClient) GetProperty() (p any) {
 	return this.Property
 }
 
