@@ -1,6 +1,7 @@
 package network
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -10,6 +11,7 @@ import (
 	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/xtaci/kcp-go/v5"
+	"google.golang.org/protobuf/proto"
 )
 
 type IServerSocket interface {
@@ -212,4 +214,19 @@ func (this *ServerSocket) handleConn(tcpConn net.Conn, addr string) bool {
 		return false
 	}
 	return true
+}
+
+func (this *ServerSocket) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) int {
+	client := this.GetClientById(head.SocketId)
+	if client == nil {
+		return 0
+	}
+	buff := rpc.MarshalPacket(head, funcName, packet)
+	return client.Send(rpc3.RpcHead{}, buff)
+}
+
+// ClientSocket 给客户发送消息
+func (this *ServerSocket) ClientSocket(ctx context.Context) *ServerSocketClient {
+	rpcHead := ctx.Value("rpcHead").(rpc3.RpcHead)
+	return this.GetClientById(rpcHead.SocketId)
 }
