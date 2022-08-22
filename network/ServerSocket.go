@@ -2,17 +2,15 @@ package network
 
 import (
 	"fmt"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"github.com/erDong01/micro-kit/rpc"
-	"github.com/xtaci/kcp-go/v5"
-	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
 	"sync"
 	"sync/atomic"
-)
 
-var SocketServer *ServerSocket
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/rpc"
+	"github.com/xtaci/kcp-go/v5"
+)
 
 type IServerSocket interface {
 	ISocket
@@ -55,7 +53,6 @@ func (this *ServerSocket) Init(ip string, port int, params ...OpOption) bool {
 	this.clientLock = &sync.RWMutex{}
 	this.IP = ip
 	this.Port = port
-	SocketServer = this
 	return true
 }
 
@@ -215,13 +212,4 @@ func (this *ServerSocket) handleConn(tcpConn net.Conn, addr string) bool {
 		return false
 	}
 	return true
-}
-
-func (this *ServerSocket) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) int {
-	client := SocketServer.GetClientById(head.SocketId)
-	if client == nil {
-		return 0
-	}
-	buff := rpc.MarshalPacket(head, funcName, packet)
-	return client.Send(rpc3.RpcHead{}, buff)
 }
