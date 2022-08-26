@@ -2,13 +2,14 @@ package cluster
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/cluster/etcdv3"
 	"github.com/erDong01/micro-kit/common"
-	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/rpc"
 	"github.com/nats-io/nats.go"
-	"log"
-	"strings"
 )
 
 type (
@@ -18,21 +19,21 @@ type (
 	PlayerRaft etcdv3.PlayerRaft
 )
 
-//NewService 注册服务器
+// NewService 注册服务器
 func NewService(info *common.ClusterInfo, Endpoints []string) *Service {
 	service := &etcdv3.Service{}
 	service.Init(info, Endpoints)
 	return (*Service)(service)
 }
 
-//NewMaster 监控服务器
+// NewMaster 监控服务器
 func NewMaster(info common.IClusterInfo, Endpoints []string, pActor actor.IActor) *Master {
 	master := &etcdv3.Master{}
 	master.Init(info, Endpoints, pActor)
 	return (*Master)(master)
 }
 
-//NewSnowflake uuid生成器
+// NewSnowflake uuid生成器
 func NewSnowflake(Endpoints []string) *Snowflake {
 	uuid := &etcdv3.Snowflake{}
 	uuid.Init(Endpoints)
@@ -44,11 +45,11 @@ func NewPlayerRaft(Endpoints []string) *PlayerRaft {
 	playerRaft.Init(Endpoints)
 	return (*PlayerRaft)(playerRaft)
 }
-func (this *PlayerRaft) GetPlayer(Id int64) *rpc3.PlayerClusterInfo {
+func (this *PlayerRaft) GetPlayer(Id int64) *rpc.PlayerClusterInfo {
 	return (*etcdv3.PlayerRaft)(this).GetPlayer(Id)
 }
 
-func (this *PlayerRaft) Publish(info *rpc3.PlayerClusterInfo) bool {
+func (this *PlayerRaft) Publish(info *rpc.PlayerClusterInfo) bool {
 	return (*etcdv3.PlayerRaft)(this).Publish(info)
 }
 
@@ -56,14 +57,14 @@ func (this *PlayerRaft) Lease(leaseId int64) error {
 	return (*etcdv3.PlayerRaft)(this).Lease(leaseId)
 }
 
-func GetRpcChannel(head rpc3.RpcHead) string {
+func GetRpcChannel(head rpc.RpcHead) string {
 	return fmt.Sprintf("%s/%s/%d", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
 }
 
-func GetRpcTopicChannel(head rpc3.RpcHead) string {
+func GetRpcTopicChannel(head rpc.RpcHead) string {
 	return fmt.Sprintf("%s/%s", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()))
 }
-func GetRpcCallChannel(head rpc3.RpcHead) string {
+func GetRpcCallChannel(head rpc.RpcHead) string {
 	return fmt.Sprintf("%s/%s/call/%d", etcdv3.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
 }
 

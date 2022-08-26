@@ -9,7 +9,6 @@ import (
 	"github.com/erDong01/micro-kit/cluster/etcdv3"
 	"github.com/erDong01/micro-kit/common"
 	"github.com/erDong01/micro-kit/network"
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools"
 	"github.com/erDong01/micro-kit/tools/vector"
@@ -48,36 +47,36 @@ type (
 		Init(info *common.ClusterInfo, Endpoints []string)
 		AddCluster(info *common.ClusterInfo)
 		DelCluster(info *common.ClusterInfo)
-		GetCluster(rpc3.RpcHead) *ClusterNode
+		GetCluster(rpc.RpcHead) *ClusterNode
 
 		BindPacket(IClusterPacket)
 		BindPacketFunc(network.PacketFunc)
-		SendMsg(rpc3.RpcHead, string, ...interface{}) //发送给集群特定服务器
-		Send(rpc3.RpcHead, []byte)                    //发送给集群特定服务器
+		SendMsg(rpc.RpcHead, string, ...interface{}) //发送给集群特定服务器
+		Send(rpc.RpcHead, []byte)                    //发送给集群特定服务器
 
-		RandomCluster(head rpc3.RpcHead) rpc3.RpcHead ///随机分配
+		RandomCluster(head rpc.RpcHead) rpc.RpcHead ///随机分配
 
-		sendPoint(rpc3.RpcHead, []byte)     //发送给集群特定服务器
-		balanceSend(rpc3.RpcHead, []byte)   //负载给集群特定服务器
-		boardCastSend(rpc3.RpcHead, []byte) //给集群广播
+		sendPoint(rpc.RpcHead, []byte)     //发送给集群特定服务器
+		balanceSend(rpc.RpcHead, []byte)   //负载给集群特定服务器
+		boardCastSend(rpc.RpcHead, []byte) //给集群广播
 	}
 )
 
-//注册服务器
+// 注册服务器
 func NewService(info *common.ClusterInfo, Endpoints []string) *Service {
 	service := &etcdv3.Service{}
 	service.Init(info, Endpoints)
 	return (*Service)(service)
 }
 
-//监控服务器
+// 监控服务器
 func NewMaster(info *common.ClusterInfo, Endpoints []string, pActor actor.IActor) *Master {
 	master := &etcdv3.Master{}
 	master.Init(info, Endpoints, pActor)
 	return (*Master)(master)
 }
 
-//uuid生成器
+// uuid生成器
 func NewSnowflake(Endpoints []string) *Snowflake {
 	uuid := &etcdv3.Snowflake{}
 	uuid.Init(Endpoints)
@@ -152,7 +151,7 @@ func (this *Cluster) DelCluster(info *common.ClusterInfo) {
 	this.m_HashRing.Remove(info.IpString())
 }
 
-func (this *Cluster) GetCluster(head rpc3.RpcHead) *ClusterNode {
+func (this *Cluster) GetCluster(head rpc.RpcHead) *ClusterNode {
 	this.m_ClusterLocker.RLock()
 	pCluster, bEx := this.m_ClusterMap[head.ClusterId]
 	this.m_ClusterLocker.RUnlock()
@@ -170,14 +169,14 @@ func (this *Cluster) BindPacket(packet IClusterPacket) {
 	this.m_Packet = packet
 }
 
-func (this *Cluster) sendPoint(head rpc3.RpcHead, buff []byte) {
+func (this *Cluster) sendPoint(head rpc.RpcHead, buff []byte) {
 	pCluster := this.GetCluster(head)
 	if pCluster != nil {
 		pCluster.Send(head, buff)
 	}
 }
 
-func (this *Cluster) balanceSend(head rpc3.RpcHead, buff []byte) {
+func (this *Cluster) balanceSend(head rpc.RpcHead, buff []byte) {
 	_, head.ClusterId = this.m_HashRing.Get64(head.Id)
 	pClient := this.GetCluster(head)
 	if pClient != nil {
@@ -185,7 +184,7 @@ func (this *Cluster) balanceSend(head rpc3.RpcHead, buff []byte) {
 	}
 }
 
-func (this *Cluster) boardCastSend(head rpc3.RpcHead, buff []byte) {
+func (this *Cluster) boardCastSend(head rpc.RpcHead, buff []byte) {
 	clusterList := []*ClusterNode{}
 	this.m_ClusterLocker.RLock()
 	for _, v := range this.m_ClusterMap {
@@ -197,23 +196,23 @@ func (this *Cluster) boardCastSend(head rpc3.RpcHead, buff []byte) {
 	}
 }
 
-func (this *Cluster) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+func (this *Cluster) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
 	buff := rpc.Marshal(head, funcName, params...)
 	this.Send(head, buff)
 }
 
-func (this *Cluster) Send(head rpc3.RpcHead, buff []byte) {
+func (this *Cluster) Send(head rpc.RpcHead, buff []byte) {
 	switch head.SendType {
-	case rpc3.SEND_BALANCE:
+	case rpc.SEND_BALANCE:
 		this.balanceSend(head, buff)
-	case rpc3.SEND_POINT:
+	case rpc.SEND_POINT:
 		this.sendPoint(head, buff)
 	default:
 		this.boardCastSend(head, buff)
 	}
 }
 
-func (this *Cluster) RandomCluster(head rpc3.RpcHead) rpc3.RpcHead {
+func (this *Cluster) RandomCluster(head rpc.RpcHead) rpc.RpcHead {
 	if head.Id == 0 {
 		head.Id = int64(uint32(tools.RAND.RandI(1, 0xFFFFFFFF)))
 	}

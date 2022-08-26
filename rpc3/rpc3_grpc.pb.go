@@ -35,7 +35,7 @@ func NewTestServiceClient(cc grpc.ClientConnInterface) TestServiceClient {
 
 func (c *testServiceClient) TestSon(ctx context.Context, in *F, opts ...grpc.CallOption) (*T, error) {
 	out := new(T)
-	err := c.cc.Invoke(ctx, "/rpc3.TestService/TestSon", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/rpc.TestService/TestSon", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func _TestService_TestSon_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/rpc3.TestService/TestSon",
+		FullMethod: "/rpc.TestService/TestSon",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TestServiceServer).TestSon(ctx, req.(*F))
@@ -92,7 +92,7 @@ func _TestService_TestSon_Handler(srv interface{}, ctx context.Context, dec func
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TestService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "rpc3.TestService",
+	ServiceName: "rpc.TestService",
 	HandlerType: (*TestServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

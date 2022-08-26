@@ -7,13 +7,19 @@ option go_package = "../rpc";
 
 //服务器类型
 enum SERVICE{
-  NONE= 0;
-  CLIENT= 1;
-  GATE= 2;//网关,转发服务
-  GM=3;//gamemgr
-  GAME=4;//game
-  ZONE=5;//地图
-  DB=6;//db
+  NONE = 0;
+  CLIENT = 1;
+  GATESERVER = 2;//网关,转发服务
+  ACCOUNTSERVER = 3;//账号
+  WORLDSERVER = 4;//世界
+  ZONESERVER = 5;//地图
+  WORLDDBSERVER = 6;//db
+
+  GATE= 7;//网关,转发服务
+  GM=8;//gamemgr
+  GAME=9;//game
+  ZONE=10;//地图
+  DB=11;//db
 };
 
 //发送标志

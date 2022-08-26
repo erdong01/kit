@@ -8,7 +8,6 @@ import (
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/common"
 	"github.com/erDong01/micro-kit/network"
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools"
 )
@@ -33,18 +32,18 @@ type (
 		RegisterClusterCall() //注册集群通用回调
 		AddCluster(info *common.ClusterInfo)
 		DelCluster(info *common.ClusterInfo)
-		GetCluster(rpc3.RpcHead) *common.ClusterInfo
+		GetCluster(rpc.RpcHead) *common.ClusterInfo
 		GetClusterBySocket(uint32) *common.ClusterInfo
 
 		BindServer(*network.ServerSocket)
-		SendMsg(rpc3.RpcHead, string, ...interface{}) //发送给集群特定服务器
-		Send(rpc3.RpcHead, []byte)                    //发送给集群特定服务器
+		SendMsg(rpc.RpcHead, string, ...interface{}) //发送给集群特定服务器
+		Send(rpc.RpcHead, []byte)                    //发送给集群特定服务器
 
-		RandomCluster(head rpc3.RpcHead) rpc3.RpcHead //随机分配
+		RandomCluster(head rpc.RpcHead) rpc.RpcHead //随机分配
 
-		sendPoint(rpc3.RpcHead, []byte)               //发送给集群特定服务器
-		balanceSend(rpc3.RpcHead, []byte)             //负载给集群特定服务器
-		boardCastSend(head rpc3.RpcHead, buff []byte) //给集群广播
+		sendPoint(rpc.RpcHead, []byte)               //发送给集群特定服务器
+		balanceSend(rpc.RpcHead, []byte)             //负载给集群特定服务器
+		boardCastSend(head rpc.RpcHead, buff []byte) //给集群广播
 	}
 )
 
@@ -80,9 +79,9 @@ func (this *ClusterServer) AddCluster(info *common.ClusterInfo) {
 	this.m_ClusterSocketMap[info.SocketId] = info
 	this.m_ClusterLocker.Unlock()
 	this.m_HashRing.Add(info.IpString())
-	this.m_pService.SendMsg(rpc3.RpcHead{SocketId: info.SocketId}, "COMMON_RegisterResponse")
+	this.m_pService.SendMsg(rpc.RpcHead{SocketId: info.SocketId}, "COMMON_RegisterResponse")
 	switch info.Type {
-	case rpc3.SERVICE_GATESERVER:
+	case rpc.SERVICE_GATESERVER:
 		log.Printf("ADD Gate SERVER: [%d]-[%s:%d]", info.SocketId, info.Ip, info.Port)
 	}
 }
@@ -101,12 +100,12 @@ func (this *ClusterServer) DelCluster(info *common.ClusterInfo) {
 	this.m_HashRing.Remove(info.IpString())
 	log.Printf("服务器断开连接socketid[%d]", info.SocketId)
 	switch info.Type {
-	case rpc3.SERVICE_GATESERVER:
+	case rpc.SERVICE_GATESERVER:
 		log.Printf("与Gate服务器断开连接,id[%d]", info.SocketId)
 	}
 }
 
-func (this *ClusterServer) GetCluster(head rpc3.RpcHead) *common.ClusterInfo {
+func (this *ClusterServer) GetCluster(head rpc.RpcHead) *common.ClusterInfo {
 	this.m_ClusterLocker.RLock()
 	defer this.m_ClusterLocker.RUnlock()
 	pClient, bEx := this.m_ClusterMap[head.ClusterId]
@@ -130,7 +129,7 @@ func (this *ClusterServer) BindServer(pService *network.ServerSocket) {
 	this.m_pService = pService
 }
 
-func (this *ClusterServer) sendPoint(head rpc3.RpcHead, buff []byte) {
+func (this *ClusterServer) sendPoint(head rpc.RpcHead, buff []byte) {
 	pCluster := this.GetCluster(head)
 	if pCluster != nil {
 		head.SocketId = pCluster.SocketId
@@ -138,7 +137,7 @@ func (this *ClusterServer) sendPoint(head rpc3.RpcHead, buff []byte) {
 	}
 }
 
-func (this *ClusterServer) balanceSend(head rpc3.RpcHead, buff []byte) {
+func (this *ClusterServer) balanceSend(head rpc.RpcHead, buff []byte) {
 	_, head.ClusterId = this.m_HashRing.Get64(head.Id)
 	pCluster := this.GetCluster(head)
 	if pCluster != nil {
@@ -147,7 +146,7 @@ func (this *ClusterServer) balanceSend(head rpc3.RpcHead, buff []byte) {
 	}
 }
 
-func (this *ClusterServer) boardCastSend(head rpc3.RpcHead, buff []byte) {
+func (this *ClusterServer) boardCastSend(head rpc.RpcHead, buff []byte) {
 	clusterList := []*common.ClusterInfo{}
 	this.m_ClusterLocker.RLock()
 	for _, v := range this.m_ClusterMap {
@@ -160,19 +159,19 @@ func (this *ClusterServer) boardCastSend(head rpc3.RpcHead, buff []byte) {
 	}
 }
 
-func (this *ClusterServer) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+func (this *ClusterServer) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
 	buff := rpc.Marshal(head, funcName, params...)
 	this.Send(head, buff)
 }
 
-func (this *ClusterServer) Send(head rpc3.RpcHead, buff []byte) {
-	if head.DestServerType != rpc3.SERVICE_GATESERVER {
+func (this *ClusterServer) Send(head rpc.RpcHead, buff []byte) {
+	if head.DestServerType != rpc.SERVICE_GATESERVER {
 		this.balanceSend(head, buff)
 	} else {
 		switch head.SendType {
-		case rpc3.SEND_BALANCE:
+		case rpc.SEND_BALANCE:
 			this.balanceSend(head, buff)
-		case rpc3.SEND_POINT:
+		case rpc.SEND_POINT:
 			this.sendPoint(head, buff)
 		default:
 			this.boardCastSend(head, buff)
@@ -180,7 +179,7 @@ func (this *ClusterServer) Send(head rpc3.RpcHead, buff []byte) {
 	}
 }
 
-func (this *ClusterServer) RandomCluster(head rpc3.RpcHead) rpc3.RpcHead {
+func (this *ClusterServer) RandomCluster(head rpc.RpcHead) rpc.RpcHead {
 	if head.Id == 0 {
 		head.Id = int64(uint32(tools.RAND.RandI(1, 0xFFFFFFFF)))
 	}

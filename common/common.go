@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/erDong01/micro-kit/pb/rpc3"
+	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools"
 )
 
 type (
-	ClusterInfo  rpc3.ClusterInfo
+	ClusterInfo  rpc.ClusterInfo
 	IClusterInfo interface {
 		Id() uint32
 		String() string
-		ServiceType() rpc3.SERVICE
+		ServiceType() rpc.SERVICE
 		IpString() string
 		RaftIp() string
 	}
@@ -35,6 +35,6 @@ func (clusterInfo *ClusterInfo) Id() uint32 {
 	return tools.ToHash(clusterInfo.IpString())
 }
 
-func (clusterInfo *ClusterInfo) ServiceType() rpc3.SERVICE {
+func (clusterInfo *ClusterInfo) ServiceType() rpc.SERVICE {
 	return clusterInfo.Type
 }

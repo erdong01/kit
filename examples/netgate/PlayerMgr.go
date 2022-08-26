@@ -2,12 +2,13 @@ package netgate
 
 import (
 	"context"
-	"github.com/erDong01/micro-kit/actor"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"github.com/erDong01/micro-kit/wrong"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/erDong01/micro-kit/actor"
+	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erDong01/micro-kit/wrong"
 )
 
 type (
@@ -63,13 +64,13 @@ func (this *PlayerManager) AddAccountMap(accountId int64, socketId uint32) int {
 	this.ReleaseSocketMap(Id, Id != socketId)
 
 	accountInfo := NewAccountInfo(socketId, accountId)
-	accountInfo.WClusterId = SERVER.GetCluster().RandomCluster(rpc3.RpcHead{Id: accountId, DestServerType: rpc3.SERVICE_WORLDSERVER}).ClusterId
-	accountInfo.ZClusterId = SERVER.GetCluster().RandomCluster(rpc3.RpcHead{Id: accountId, DestServerType: rpc3.SERVICE_ZONESERVER}).ClusterId
+	accountInfo.WClusterId = SERVER.GetCluster().RandomCluster(rpc.RpcHead{Id: accountId, DestServerType: rpc.SERVICE_WORLDSERVER}).ClusterId
+	accountInfo.ZClusterId = SERVER.GetCluster().RandomCluster(rpc.RpcHead{Id: accountId, DestServerType: rpc.SERVICE_ZONESERVER}).ClusterId
 	this.m_Locker.Lock()
 	this.m_AccountMap[accountId] = accountInfo
 	this.m_SocketMap[socketId] = accountId
 	this.m_Locker.Unlock()
-	SERVER.GetCluster().SendMsg(rpc3.RpcHead{ClusterId: accountInfo.WClusterId, DestServerType: rpc3.SERVICE_WORLDSERVER}, "G_W_CLoginRequest", accountId, SERVER.GetCluster().Id(), accountInfo.ZClusterId)
+	SERVER.GetCluster().SendMsg(rpc.RpcHead{ClusterId: accountInfo.WClusterId, DestServerType: rpc.SERVICE_WORLDSERVER}, "G_W_CLoginRequest", accountId, SERVER.GetCluster().Id(), accountInfo.ZClusterId)
 	return wrong.NONE_ERROR
 }
 
@@ -119,7 +120,7 @@ func (this *PlayerManager) Init(num int) {
 	this.RegisterCall("DEL_ACCOUNT", func(ctx context.Context, socketid uint32) {
 		accountId := this.GetAccount(socketid)
 		this.ReleaseSocketMap(socketid, true)
-		SERVER.GetCluster().SendMsg(rpc3.RpcHead{SendType: rpc3.SEND_BOARD_CAST, DestServerType: rpc3.SERVICE_WORLDSERVER}, "G_ClientLost", accountId)
+		SERVER.GetCluster().SendMsg(rpc.RpcHead{SendType: rpc.SEND_BOARD_CAST, DestServerType: rpc.SERVICE_WORLDSERVER}, "G_ClientLost", accountId)
 	})
 
 	//重连世界服务器，账号重新登录

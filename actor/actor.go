@@ -12,7 +12,6 @@ import (
 	"unsafe"
 
 	"github.com/erDong01/micro-kit/common/timer"
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools/mpsc"
 	"github.com/erDong01/micro-kit/wrong"
@@ -47,18 +46,18 @@ type (
 		Start()
 		FindCall(funcName string) *CallFunc
 		RegisterCall(funcName string, call interface{})
-		SendMsg(head rpc3.RpcHead, funcName string, params ...interface{})
-		Send(head rpc3.RpcHead, buff []byte)
-		PacketFunc(packet rpc3.Packet) bool                                       //回调函数
+		SendMsg(head rpc.RpcHead, funcName string, params ...interface{})
+		Send(head rpc.RpcHead, buff []byte)
+		PacketFunc(packet rpc.Packet) bool                                        //回调函数
 		RegisterTimer(duration time.Duration, fun func(), opts ...timer.OpOption) //注册定时器,时间为纳秒 1000 * 1000 * 1000
 		GetId() int64
 		GetState() int32
 		setState(state int32)
-		GetRpcHead(ctx context.Context) rpc3.RpcHead //rpc is safe
+		GetRpcHead(ctx context.Context) rpc.RpcHead //rpc is safe
 	}
 
 	CallIO struct {
-		rpc3.RpcHead
+		rpc.RpcHead
 		Buff []byte
 	}
 	CallFunc struct {
@@ -88,8 +87,8 @@ func (this *Actor) GetId() int64 {
 	return this.id
 }
 
-func (this *Actor) GetRpcHead(ctx context.Context) rpc3.RpcHead {
-	rpcHead := ctx.Value("rpcHead").(rpc3.RpcHead)
+func (this *Actor) GetRpcHead(ctx context.Context) rpc.RpcHead {
+	rpcHead := ctx.Value("rpcHead").(rpc.RpcHead)
 	return rpcHead
 }
 
@@ -123,7 +122,7 @@ func (this *Actor) RegisterTimer(duration time.Duration, fun func(), opts ...tim
 		*this.mTimerId = this.id
 	}
 	timer.RegisterTimer(this.mTimerId, duration, func() {
-		this.SendMsg(rpc3.RpcHead{}, "UpdateTimer", (*int64)(unsafe.Pointer(&fun)))
+		this.SendMsg(rpc.RpcHead{}, "UpdateTimer", (*int64)(unsafe.Pointer(&fun)))
 	}, opts...)
 }
 
@@ -164,12 +163,12 @@ func (this *Actor) RegisterCall(funcName string, call interface{}) {
 	this.CallMap[funcName] = callfunc
 }
 
-func (this *Actor) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+func (this *Actor) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
 	head.SocketId = 0
 	this.Send(head, rpc.Marshal(head, funcName, params...))
 }
 
-func (this *Actor) Send(head rpc3.RpcHead, buff []byte) {
+func (this *Actor) Send(head rpc.RpcHead, buff []byte) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Print(err)
@@ -184,7 +183,7 @@ func (this *Actor) Send(head rpc3.RpcHead, buff []byte) {
 	}
 }
 
-func (this *Actor) PacketFunc(packet rpc3.Packet) bool {
+func (this *Actor) PacketFunc(packet rpc.Packet) bool {
 	rpcPacket, head := rpc.UnmarshalHead(packet.Buff)
 	if this.FindCall(rpcPacket.FuncName) != nil {
 		head.SocketId = packet.Id

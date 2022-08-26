@@ -9,28 +9,27 @@ import (
 	"strings"
 
 	"github.com/erDong01/micro-kit/base"
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"google.golang.org/protobuf/proto"
 )
 
 // rpc UnmarshalHead
-func UnmarshalHead(buff []byte) (*rpc3.RpcPacket, rpc3.RpcHead) {
+func UnmarshalHead(buff []byte) (*RpcPacket, RpcHead) {
 	nLen := base.Clamp(len(buff), 0, 256)
 	return Unmarshal(buff[:nLen])
 }
-func Unmarshal(buff []byte) (*rpc3.RpcPacket, rpc3.RpcHead) {
-	rpcPacket := &rpc3.RpcPacket{}
+func Unmarshal(buff []byte) (*RpcPacket, RpcHead) {
+	rpcPacket := &RpcPacket{}
 	proto.Unmarshal(buff, rpcPacket)
 	if rpcPacket.RpcHead == nil {
-		rpcPacket.RpcHead = &rpc3.RpcHead{}
+		rpcPacket.RpcHead = &RpcHead{}
 	}
 	rpcPacket.FuncName = strings.ToLower(rpcPacket.FuncName)
-	return rpcPacket, *(*rpc3.RpcHead)(rpcPacket.RpcHead)
+	return rpcPacket, *(*RpcHead)(rpcPacket.RpcHead)
 }
 
 // rpc Unmarshal
 // pFuncType for RegisterCall func
-func UnmarshalBody(rpcPacket *rpc3.RpcPacket, pFuncType reflect.Type) []interface{} {
+func UnmarshalBody(rpcPacket *RpcPacket, pFuncType reflect.Type) []interface{} {
 	nCurLen := pFuncType.NumIn()
 	params := make([]interface{}, nCurLen)
 	var dec *gob.Decoder
@@ -40,7 +39,7 @@ func UnmarshalBody(rpcPacket *rpc3.RpcPacket, pFuncType reflect.Type) []interfac
 	}
 	for i := 0; i < nCurLen; i++ {
 		if i == 0 {
-			params[0] = context.WithValue(context.Background(), "rpcHead", *(*rpc3.RpcHead)(rpcPacket.RpcHead))
+			params[0] = context.WithValue(context.Background(), "rpcHead", *(*RpcHead)(rpcPacket.RpcHead))
 			continue
 		}
 		if i < int(rpcPacket.ArgLen+1) {
@@ -58,7 +57,7 @@ func UnmarshalBody(rpcPacket *rpc3.RpcPacket, pFuncType reflect.Type) []interfac
 	return params
 }
 
-func UnmarshalBodyCall(rpcPacket *rpc3.RpcPacket, pFuncType reflect.Type) (error, []interface{}) {
+func UnmarshalBodyCall(rpcPacket *RpcPacket, pFuncType reflect.Type) (error, []interface{}) {
 	strErr := ""
 	nCurLen := pFuncType.NumIn()
 	params := make([]interface{}, nCurLen)
@@ -70,7 +69,7 @@ func UnmarshalBodyCall(rpcPacket *rpc3.RpcPacket, pFuncType reflect.Type) (error
 	}
 	for i := 0; i < nCurLen; i++ {
 		if i == 0 {
-			params[0] = context.WithValue(context.Background(), "rpcHead", *(*rpc3.RpcHead)(rpcPacket.RpcHead))
+			params[0] = context.WithValue(context.Background(), "rpcHead", *(*RpcHead)(rpcPacket.RpcHead))
 			continue
 		}
 

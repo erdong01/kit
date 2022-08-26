@@ -8,7 +8,6 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/xtaci/kcp-go/v5"
 	"google.golang.org/protobuf/proto"
@@ -143,7 +142,7 @@ func (this *ServerSocket) LoadClient() *ServerSocketClient {
 	return &ServerSocketClient{}
 }
 
-func (this *ServerSocket) Send(head rpc3.RpcHead, buff []byte) int {
+func (this *ServerSocket) Send(head rpc.RpcHead, buff []byte) int {
 	client := this.GetClientById(head.SocketId)
 	if client != nil {
 		client.Send(head, buff)
@@ -151,7 +150,7 @@ func (this *ServerSocket) Send(head rpc3.RpcHead, buff []byte) int {
 	return 0
 }
 
-func (this *ServerSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
+func (this *ServerSocket) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) int {
 	client := this.GetClientById(head.SocketId)
 	if client != nil {
 		return client.Send(head, rpc.Marshal(head, funcName, params...))
@@ -216,17 +215,17 @@ func (this *ServerSocket) handleConn(tcpConn net.Conn, addr string) bool {
 	return true
 }
 
-func (this *ServerSocket) SendPacket(head rpc3.RpcHead, funcName string, packet proto.Message) int {
+func (this *ServerSocket) SendPacket(head rpc.RpcHead, funcName string, packet proto.Message) int {
 	client := this.GetClientById(head.SocketId)
 	if client == nil {
 		return 0
 	}
 	buff := rpc.MarshalPacket(head, funcName, packet)
-	return client.Send(rpc3.RpcHead{}, buff)
+	return client.Send(rpc.RpcHead{}, buff)
 }
 
 // ClientSocket 给客户发送消息
 func (this *ServerSocket) ClientSocket(ctx context.Context) *ServerSocketClient {
-	rpcHead := ctx.Value("rpcHead").(rpc3.RpcHead)
+	rpcHead := ctx.Value("rpcHead").(rpc.RpcHead)
 	return this.GetClientById(rpcHead.SocketId)
 }

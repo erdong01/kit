@@ -11,7 +11,6 @@ import (
 
 	"github.com/erDong01/micro-kit/actor"
 	"github.com/erDong01/micro-kit/network"
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools"
 	"github.com/erDong01/micro-kit/tools/vector"
@@ -46,15 +45,15 @@ type (
 		RegisterClusterCall() //注册集群通用回调
 		AddCluster(info *common.ClusterInfo)
 		DelCluster(info *common.ClusterInfo)
-		GetCluster(rpc3.RpcHead) *common.ClusterInfo
-		GetClusters(head rpc3.RpcHead) map[uint32]*common.ClusterInfo
+		GetCluster(rpc.RpcHead) *common.ClusterInfo
+		GetClusters(head rpc.RpcHead) map[uint32]*common.ClusterInfo
 
 		BindPacketFunc(packetFunc network.PacketFunc)
-		SendMsg(rpc3.RpcHead, string, ...interface{})                    //发送给集群特定服务器
-		Send(rpc3.RpcHead, []byte)                                       //发送给集群特定服务器
-		CallMsg(interface{}, rpc3.RpcHead, string, ...interface{}) error //同步给集群特定服务器
+		SendMsg(rpc.RpcHead, string, ...interface{})                    //发送给集群特定服务器
+		Send(rpc.RpcHead, []byte)                                       //发送给集群特定服务器
+		CallMsg(interface{}, rpc.RpcHead, string, ...interface{}) error //同步给集群特定服务器
 
-		RandomCluster(head rpc3.RpcHead) rpc3.RpcHead //随机分配
+		RandomCluster(head rpc.RpcHead) rpc.RpcHead //随机分配
 	}
 
 	EmptyClusterInfo struct {
@@ -89,25 +88,25 @@ func (this *Cluster) Init(info *common.ClusterInfo, Endpoints []string, natsUrl 
 	this.conn = conn
 
 	this.conn.Subscribe(GetChannel(*info), func(msg *nats.Msg) {
-		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
+		this.HandlePacket(rpc.Packet{Buff: msg.Data})
 	})
 
 	this.conn.Subscribe(GetTopicChannel(*info), func(msg *nats.Msg) {
-		this.HandlePacket(rpc3.Packet{Buff: msg.Data})
+		this.HandlePacket(rpc.Packet{Buff: msg.Data})
 	})
 
 	this.conn.Subscribe(GetCallChannel(*info), func(msg *nats.Msg) {
-		this.HandlePacket(rpc3.Packet{Buff: msg.Data, Reply: msg.Reply})
+		this.HandlePacket(rpc.Packet{Buff: msg.Data, Reply: msg.Reply})
 	})
 
 	rpc.GCall = reflect.ValueOf(this.call)
 	this.Actor.Start()
 }
 
-//params[0]:rpc.RpcHead
-//params[1]:error
+// params[0]:rpc.RpcHead
+// params[1]:error
 func (this *Cluster) call(parmas ...interface{}) {
-	head := *parmas[0].(*rpc3.RpcHead)
+	head := *parmas[0].(*rpc.RpcHead)
 	reply := head.Reply
 	head.Reply = ""
 	head.ClusterId = head.SrcClusterId
@@ -164,7 +163,7 @@ func (this *Cluster) DelCluster(info *common.ClusterInfo) {
 	log.Printf("服务器[%s:%s:%d]断开连接", info.String(), info.Ip, info.Port)
 }
 
-func (this *Cluster) GetCluster(head rpc3.RpcHead) *common.ClusterInfo {
+func (this *Cluster) GetCluster(head rpc.RpcHead) *common.ClusterInfo {
 	this.clusterLocker[head.DestServerType].RLock()
 	defer this.clusterLocker[head.DestServerType].RUnlock()
 	client, bEx := this.clusterMap[head.DestServerType][head.ClusterId]
@@ -174,7 +173,7 @@ func (this *Cluster) GetCluster(head rpc3.RpcHead) *common.ClusterInfo {
 	return nil
 }
 
-func (this *Cluster) GetClusters(head rpc3.RpcHead) map[uint32]*common.ClusterInfo {
+func (this *Cluster) GetClusters(head rpc.RpcHead) map[uint32]*common.ClusterInfo {
 	this.clusterLocker[head.DestServerType].RLock()
 	defer this.clusterLocker[head.DestServerType].RUnlock()
 	clusters := this.clusterMap[head.DestServerType]
@@ -185,7 +184,7 @@ func (this *Cluster) BindPacketFunc(callFunc network.PacketFunc) {
 	this.packetFuncList.PushBack(callFunc)
 }
 
-func (this *Cluster) HandlePacket(packet rpc3.Packet) {
+func (this *Cluster) HandlePacket(packet rpc.Packet) {
 	for _, v := range this.packetFuncList.Values() {
 		if v.(network.PacketFunc)(packet) {
 			break
@@ -193,13 +192,13 @@ func (this *Cluster) HandlePacket(packet rpc3.Packet) {
 	}
 }
 
-func (this *Cluster) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+func (this *Cluster) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
 	head.SrcClusterId = this.Id()
 	buff := rpc.Marshal(head, funcName, params...)
 	this.Send(head, buff)
 }
 
-func (this *Cluster) GetBalanceServer(head rpc3.RpcHead) *common.ClusterInfo {
+func (this *Cluster) GetBalanceServer(head rpc.RpcHead) *common.ClusterInfo {
 	_, head.ClusterId = this.hashRing[head.DestServerType].Get64(head.Id)
 	client, bEx := this.clusterMap[head.DestServerType][head.ClusterId]
 	if bEx {
@@ -208,23 +207,23 @@ func (this *Cluster) GetBalanceServer(head rpc3.RpcHead) *common.ClusterInfo {
 	return nil
 }
 
-func (this *Cluster) Send(head rpc3.RpcHead, buff []byte) {
+func (this *Cluster) Send(head rpc.RpcHead, buff []byte) {
 	switch head.SendType {
-	case rpc3.SEND_BALANCE:
+	case rpc.SEND_BALANCE:
 		_, head.ClusterId = this.hashRing[head.DestServerType].Get64(head.Id)
 		this.conn.Publish(GetRpcChannel(head), buff)
-	case rpc3.SEND_POINT:
+	case rpc.SEND_POINT:
 		this.conn.Publish(GetRpcChannel(head), buff)
 	default:
 		this.conn.Publish(GetRpcTopicChannel(head), buff)
 	}
 }
 
-func (this *Cluster) CallMsg(cb interface{}, head rpc3.RpcHead, funcName string, params ...interface{}) error {
+func (this *Cluster) CallMsg(cb interface{}, head rpc.RpcHead, funcName string, params ...interface{}) error {
 	head.SrcClusterId = this.Id()
 	buff := rpc.Marshal(head, funcName, params...)
 	switch head.SendType {
-	case rpc3.SEND_POINT:
+	case rpc.SEND_POINT:
 	default:
 		_, head.ClusterId = this.hashRing[head.DestServerType].Get64(head.Id)
 	}
@@ -255,7 +254,7 @@ func (this *Cluster) CallMsg(cb interface{}, head rpc3.RpcHead, funcName string,
 	return err
 }
 
-func (this *Cluster) RandomCluster(head rpc3.RpcHead) rpc3.RpcHead {
+func (this *Cluster) RandomCluster(head rpc.RpcHead) rpc.RpcHead {
 	if head.Id == 0 {
 		head.Id = int64(uint32(tools.RAND.RandI(1, 0xFFFFFFFF)))
 	}

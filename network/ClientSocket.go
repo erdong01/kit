@@ -2,12 +2,12 @@ package network
 
 import (
 	"fmt"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"github.com/erDong01/micro-kit/rpc"
-	"github.com/erDong01/micro-kit/wrong"
 	"io"
 	"log"
 	"net"
+
+	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erDong01/micro-kit/wrong"
 )
 
 type (
@@ -44,12 +44,12 @@ func (this *ClientSocket) Start() bool {
 	return true
 }
 
-func (this *ClientSocket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) int {
+func (this *ClientSocket) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) int {
 	buff := rpc.Marshal(head, funcName, params...)
 	return this.Send(head, buff)
 }
 
-func (this *ClientSocket) Send(head rpc3.RpcHead, buff []byte) int {
+func (this *ClientSocket) Send(head rpc.RpcHead, buff []byte) int {
 	defer func() {
 		if err := recover(); err != nil {
 			wrong.TraceCode(err)

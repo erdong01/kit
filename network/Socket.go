@@ -4,7 +4,6 @@ import (
 	"net"
 	"sync/atomic"
 
-	"github.com/erDong01/micro-kit/pb/rpc3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/erDong01/micro-kit/tools/vector"
 )
@@ -27,7 +26,7 @@ const (
 type (
 	ClientClose func(id uint32) error
 
-	PacketFunc   func(packet rpc3.Packet) bool //回调函数
+	PacketFunc   func(packet rpc.Packet) bool //回调函数
 	HandlePacket func(buff []byte)
 
 	Op struct {
@@ -75,8 +74,8 @@ type (
 		OnNetFail(int)
 		Clear()
 		Close()
-		SendMsg(rpc3.RpcHead, string, ...interface{})
-		Send(rpc3.RpcHead, []byte) int
+		SendMsg(rpc.RpcHead, string, ...interface{})
+		Send(rpc.RpcHead, []byte) int
 		CallMsg(string, ...interface{}) //回调消息处理
 
 		GetId() uint32
@@ -164,10 +163,10 @@ func (this *Socket) SetState(state int32) {
 	atomic.StoreInt32(&this.state, state)
 }
 
-func (this *Socket) SendMsg(head rpc3.RpcHead, funcName string, params ...interface{}) {
+func (this *Socket) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
 }
 
-func (this *Socket) Send(rpc3.RpcHead, []byte) int {
+func (this *Socket) Send(rpc.RpcHead, []byte) int {
 	return 0
 }
 
@@ -213,12 +212,12 @@ func (this *Socket) BindPacketFunc(callfunc PacketFunc) {
 }
 
 func (this *Socket) CallMsg(funcName string, params ...interface{}) {
-	buff := rpc.Marshal(rpc3.RpcHead{}, funcName, params...)
+	buff := rpc.Marshal(rpc.RpcHead{}, funcName, params...)
 	this.HandlePacket(buff)
 }
 
 func (this *Socket) HandlePacket(buff []byte) {
-	packet := rpc3.Packet{Id: this.clientId, Buff: buff}
+	packet := rpc.Packet{Id: this.clientId, Buff: buff}
 	for _, v := range this.PacketFuncList.Values() {
 		if v.(PacketFunc)(packet) {
 			break
