@@ -1,0 +1,65 @@
+syntax = "proto3";
+import "message.proto";
+package message;
+option go_package = "../message";
+//登录账号
+message LoginAccountRequest{
+  Ipacket PacketHead = 1;
+  string AccountName = 2;
+  string Password = 3;
+  string BuildNo = 5;
+  int64 Key = 6;
+  //uint32 Crc = 7;
+}
+
+//登录账号反馈
+message LoginAccountResponse{
+  Ipacket PacketHead = 1;
+  int32  Error = 2;
+  string AccountName = 4;
+}
+
+//创角
+message CreatePlayerRequest{
+  Ipacket PacketHead = 1;
+  string PlayerName = 2;
+  int32  Sex = 3;
+}
+
+//登录游戏
+message LoginPlayerRequset{
+  Ipacket PacketHead = 1;
+  int64  PlayerId = 2;
+  int64 Key = 3;
+}
+
+//选角反馈
+message SelectPlayerResponse{
+  Ipacket PacketHead = 1;
+  int64 AccountId = 2;
+  int64 Key = 3;
+  repeated PlayerData PlayerData = 5;
+}
+
+//聊天
+message ChatMessageRequest{
+  Ipacket PacketHead = 1;
+  int64  Sender = 2;
+  int64  Recver = 3;
+  int32  MessageType = 4;
+  string  Message = 5;
+}
+
+message ChatMessageResponse{
+  Ipacket PacketHead = 1;
+  int64  Sender = 2;
+  string  SenderName = 3;
+  int64  Recver = 4;
+  string  RecverName = 5;
+  int32  MessageType = 6;
+  string  Message = 7;
+}
+
+message W_C_Test{
+  repeated int32 Recv = 1;
+}

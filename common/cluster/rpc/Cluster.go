@@ -2,11 +2,11 @@ package rpc
 
 import (
 	"context"
+	etcdv32 "github.com/erDong01/micro-kit/common/cluster/etv3"
 	"reflect"
 	"sync"
 
 	"github.com/erDong01/micro-kit/actor"
-	"github.com/erDong01/micro-kit/cluster/etcdv3"
 	"github.com/erDong01/micro-kit/common"
 	"github.com/erDong01/micro-kit/network"
 	"github.com/erDong01/micro-kit/rpc"
@@ -15,10 +15,10 @@ import (
 )
 
 type (
-	Service    etcdv3.Service
-	Master     etcdv3.Master
-	Snowflake  etcdv3.Snowflake
-	PlayerRaft etcdv3.PlayerRaft
+	Service    etcdv32.Service
+	Master     etcdv32.Master
+	Snowflake  etcdv32.Snowflake
+	PlayerRaft etcdv32.PlayerRaft
 	//集群包管理
 	IClusterPacket interface {
 		actor.IActor
@@ -64,21 +64,21 @@ type (
 
 // 注册服务器
 func NewService(info *common.ClusterInfo, Endpoints []string) *Service {
-	service := &etcdv3.Service{}
+	service := &etcdv32.Service{}
 	service.Init(info, Endpoints)
 	return (*Service)(service)
 }
 
 // 监控服务器
 func NewMaster(info *common.ClusterInfo, Endpoints []string, pActor actor.IActor) *Master {
-	master := &etcdv3.Master{}
+	master := &etcdv32.Master{}
 	master.Init(info, Endpoints, pActor)
 	return (*Master)(master)
 }
 
 // uuid生成器
 func NewSnowflake(Endpoints []string) *Snowflake {
-	uuid := &etcdv3.Snowflake{}
+	uuid := &etcdv32.Snowflake{}
 	uuid.Init(Endpoints)
 	return (*Snowflake)(uuid)
 }

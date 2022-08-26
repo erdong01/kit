@@ -1,11 +1,10 @@
 package timer
 
 import (
+	"github.com/erDong01/micro-kit/base"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/erDong01/micro-kit/wrong"
 )
 
 const (
@@ -259,7 +258,7 @@ func (t *Timer) update() {
 func (t *Timer) loop() bool {
 	defer func() {
 		if err := recover(); err != nil {
-			wrong.TraceCode(err)
+			base.TraceCode(err)
 		}
 	}()
 

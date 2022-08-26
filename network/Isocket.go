@@ -18,6 +18,7 @@ const (
 	CLIENT_CONNECT = iota //对外
 	SERVER_CONNECT = iota //对内
 )
+
 const (
 	MAX_SEND_CHAN  = 512
 	HEART_TIME_OUT = 30
@@ -36,12 +37,12 @@ type (
 	OpOption func(*Op)
 
 	Socket struct {
-		Conn              net.Conn
-		Port              int
-		IP                string
+		conn              net.Conn
+		port              int
+		ip                string
 		state             int32
 		connectType       int
-		ReceiveBufferSize int //单次接收缓存
+		receiveBufferSize int //单次接收缓存
 
 		clientId uint32
 		seq      int64
@@ -52,13 +53,13 @@ type (
 
 		sendTimes      int
 		receiveTimes   int
-		PacketFuncList *vector.Vector
+		packetFuncList *vector.Vector //call back
 
-		half         bool
+		isHalf       bool
 		halfSize     int
 		packetParser PacketParser
 		heartTime    int
-		bKcp         bool
+		isKcp        bool
 
 		clientClose ClientClose
 	}
@@ -75,8 +76,8 @@ type (
 		Clear()
 		Close()
 		SendMsg(rpc.RpcHead, string, ...interface{})
-		Send(rpc.RpcHead, []byte) int
-		CallMsg(string, ...interface{}) //回调消息处理
+		Send(rpc.RpcHead, rpc.Packet) int
+		CallMsg(rpc.RpcHead, string, ...interface{}) //回调消息处理
 
 		GetId() uint32
 		GetState() int32
@@ -107,19 +108,20 @@ func WithKcp() OpOption {
 	}
 }
 
+// virtual
 func (this *Socket) Init(ip string, port int, params ...OpOption) bool {
 	op := &Op{}
 	op.applyOpts(params)
-	this.PacketFuncList = vector.NewVector()
-	this.ReceiveBufferSize = 1024
+	this.packetFuncList = vector.NewVector()
 	this.SetState(SSF_NULL)
+	this.receiveBufferSize = 1024
 	this.connectType = SERVER_CONNECT
-	this.half = false
+	this.isHalf = false
 	this.halfSize = 0
 	this.heartTime = 0
 	this.packetParser = NewPacketParser(PacketConfig{Func: this.HandlePacket})
 	if op.kcp {
-		this.bKcp = true
+		this.isKcp = true
 	}
 	return true
 }
@@ -127,12 +129,14 @@ func (this *Socket) Init(ip string, port int, params ...OpOption) bool {
 func (this *Socket) Start() bool {
 	return true
 }
+
 func (this *Socket) Stop() bool {
-	if this.Conn != nil && atomic.CompareAndSwapInt32(&this.state, SSF_RUN, SSF_STOP) {
-		this.Conn.Close()
+	if this.conn != nil && atomic.CompareAndSwapInt32(&this.state, SSF_RUN, SSF_STOP) {
+		this.conn.Close()
 	}
 	return false
 }
+
 func (this *Socket) Run() bool {
 	return true
 }
@@ -144,6 +148,7 @@ func (this *Socket) Restart() bool {
 func (this *Socket) Connect() bool {
 	return true
 }
+
 func (this *Socket) Disconnect(bool) bool {
 	return true
 }
@@ -155,6 +160,7 @@ func (this *Socket) OnNetFail(int) {
 func (this *Socket) GetId() uint32 {
 	return this.clientId
 }
+
 func (this *Socket) GetState() int32 {
 	return atomic.LoadInt32(&this.state)
 }
@@ -166,15 +172,16 @@ func (this *Socket) SetState(state int32) {
 func (this *Socket) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
 }
 
-func (this *Socket) Send(rpc.RpcHead, []byte) int {
+func (this *Socket) Send(rpc.RpcHead, rpc.Packet) int {
 	return 0
 }
 
 func (this *Socket) Clear() {
 	this.SetState(SSF_NULL)
-	this.Conn = nil
-	this.ReceiveBufferSize = 1024
-	this.half = false
+	//this.connectType = CLIENT_CONNECT
+	this.conn = nil
+	this.receiveBufferSize = 1024
+	this.isHalf = false
 	this.halfSize = 0
 	this.heartTime = 0
 }
@@ -182,21 +189,20 @@ func (this *Socket) Clear() {
 func (this *Socket) Close() {
 	this.Clear()
 }
-
 func (this *Socket) GetMaxPacketLen() int {
-	return this.packetParser.MaxPacketLen
+	return this.packetParser.maxPacketLen
 }
 
 func (this *Socket) SetMaxPacketLen(maxReceiveSize int) {
-	this.packetParser.MaxPacketLen = maxReceiveSize
+	this.packetParser.maxPacketLen = maxReceiveSize
 }
 
 func (this *Socket) GetReceiveBufferSize() int {
-	return this.ReceiveBufferSize
+	return this.receiveBufferSize
 }
 
 func (this *Socket) SetReceiveBufferSize(maxSendSize int) {
-	this.ReceiveBufferSize = maxSendSize
+	this.receiveBufferSize = maxSendSize
 }
 
 func (this *Socket) SetConnectType(nType int) {
@@ -204,21 +210,20 @@ func (this *Socket) SetConnectType(nType int) {
 }
 
 func (this *Socket) SetConn(conn net.Conn) {
-	this.Conn = conn
+	this.conn = conn
 }
 
 func (this *Socket) BindPacketFunc(callfunc PacketFunc) {
-	this.PacketFuncList.PushBack(callfunc)
+	this.packetFuncList.PushBack(callfunc)
 }
 
-func (this *Socket) CallMsg(funcName string, params ...interface{}) {
-	buff := rpc.Marshal(rpc.RpcHead{}, funcName, params...)
-	this.HandlePacket(buff)
+func (this *Socket) CallMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
+	this.HandlePacket(rpc.Marshal(&head, &funcName, params...).Buff)
 }
 
 func (this *Socket) HandlePacket(buff []byte) {
 	packet := rpc.Packet{Id: this.clientId, Buff: buff}
-	for _, v := range this.PacketFuncList.Values() {
+	for _, v := range this.packetFuncList.Values() {
 		if v.(PacketFunc)(packet) {
 			break
 		}

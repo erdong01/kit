@@ -1,4 +1,4 @@
-package etcdv3
+package etv3
 
 import (
 	"context"
@@ -77,7 +77,7 @@ func (this *Snowflake) Run() {
 	}
 }
 
-//uuid生成器
+// uuid生成器
 func (this *Snowflake) Init(endpoints []string) {
 	cfg := clientv3.Config{
 		Endpoints: endpoints,
