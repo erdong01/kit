@@ -21,16 +21,16 @@ func Route(head *RpcHead, funcName string) string {
 		switch strings.ToLower(serverArgs[0]) {
 		case "client":
 			head.DestServerType = SERVICE_CLIENT
-		case "gate":
-			head.DestServerType = SERVICE_GATE
-		case "gm":
-			head.DestServerType = SERVICE_GM
-		case "game":
-			head.DestServerType = SERVICE_GAME
-		case "zone":
-			head.DestServerType = SERVICE_ZONE
-		case "db":
-			head.DestServerType = SERVICE_DB
+			// case "gate":
+			// 	head.DestServerType = SERVICE_GATE
+			// case "gm":
+			// 	head.DestServerType = SERVICE_GM
+			// case "game":
+			// 	head.DestServerType = SERVICE_GAME
+			// case "zone":
+			// 	head.DestServerType = SERVICE_ZONE
+			// case "db":
+			// 	head.DestServerType = SERVICE_DB
 		}
 		funcName = serverArgs[1]
 	}
