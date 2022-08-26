@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package rpc;
 
-option go_package = "../rpc3";
+option go_package = "../rpc";
 
 
 //服务器类型

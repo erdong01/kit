@@ -5,16 +5,17 @@ import (
 	"context"
 	"encoding/gob"
 	"errors"
-	"github.com/erDong01/micro-kit/pb/rpc3"
-	"github.com/erDong01/micro-kit/tools"
-	"google.golang.org/protobuf/proto"
 	"reflect"
 	"strings"
+
+	"github.com/erDong01/micro-kit/base"
+	"github.com/erDong01/micro-kit/pb/rpc3"
+	"google.golang.org/protobuf/proto"
 )
 
-//rpc UnmarshalHead
+// rpc UnmarshalHead
 func UnmarshalHead(buff []byte) (*rpc3.RpcPacket, rpc3.RpcHead) {
-	nLen := tools.Clamp(len(buff), 0, 256)
+	nLen := base.Clamp(len(buff), 0, 256)
 	return Unmarshal(buff[:nLen])
 }
 func Unmarshal(buff []byte) (*rpc3.RpcPacket, rpc3.RpcHead) {
@@ -27,8 +28,8 @@ func Unmarshal(buff []byte) (*rpc3.RpcPacket, rpc3.RpcHead) {
 	return rpcPacket, *(*rpc3.RpcHead)(rpcPacket.RpcHead)
 }
 
-//rpc Unmarshal
-//pFuncType for RegisterCall func
+// rpc Unmarshal
+// pFuncType for RegisterCall func
 func UnmarshalBody(rpcPacket *rpc3.RpcPacket, pFuncType reflect.Type) []interface{} {
 	nCurLen := pFuncType.NumIn()
 	params := make([]interface{}, nCurLen)

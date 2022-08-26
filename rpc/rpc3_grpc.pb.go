@@ -4,7 +4,7 @@
 // - protoc             v3.21.4
 // source: rpc3.proto
 
-package rpc3
+package rpc
 
 import (
 	context "context"
