@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package rpc;
+package rpc3;
 
 option go_package = "../rpc3";
 
