@@ -84,7 +84,7 @@ func (this *ServerSocket) Start() bool {
 	//延迟，监听关闭
 	//defer ln.Close()
 	go this.Run()
-	go this.RunKcp()
+	// go this.RunKcp()
 	return true
 }
 
