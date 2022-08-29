@@ -59,8 +59,6 @@ func (s *Service) Run() {
 func (s *Service) Init(info *common.ClusterInfo, endpoints []string) {
 	cfg := client.Config{
 		Endpoints:               endpoints,
-		Transport:               client.DefaultTransport,
-		HeaderTimeoutPerRequest: time.Second,
 	}
 
 	etcdClient, err := client.New(cfg)
