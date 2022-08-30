@@ -9,9 +9,9 @@ import (
 	"gorm.io/gorm"
 )
 
-type info struct {
+type Info struct {
 	Port    int
-	env     string
+	Env     string
 	Name    string
 	version string
 }
@@ -19,7 +19,7 @@ type info struct {
 type Core struct {
 	Db     *gorm.DB
 	Config *config.Config
-	Info   *info
+	Info   *Info
 	opts   []Option
 	Mongo  *mongo.Client
 	Etcd   *clientv3.Client

@@ -35,7 +35,11 @@ func (*Core) Bind(a any, b any) {
 
 // GetEnv 获取当前环境
 func (*Core) GetEnv() string {
-	return New().Info.env
+	return New().Info.Env
+}
+
+func (*Core) SetInfo(info *Info) {
+	New().Info = info
 }
 
 // GetName 获取当前服务名称
@@ -94,7 +98,7 @@ func Make(opts ...Option) ICore {
 // Env 设置环境变量
 func Env(env string) Option {
 	return func(c *Core) {
-		New().Info.env = env
+		New().Info.Env = env
 	}
 }
 
