@@ -66,7 +66,7 @@ type (
 		GetName() string
 		GetActorType() ACTOR_TYPE
 		HasRpc(string) bool
-		Actor() *Actor
+		Acotr() *Actor
 		register(IActor, Op)
 		setState(state int32)
 		bindPool(IActorPool) //ACTOR_TYPE_VIRTUAL,ACTOR_TYPE_POOL

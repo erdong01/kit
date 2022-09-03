@@ -111,7 +111,7 @@ func (a *ActorMgr) SendActor(funcName string, head rpc.RpcHead, packet rpc.Packe
 		if ac.HasRpc(funcName) {
 			switch ac.GetActorType() {
 			case ACTOR_TYPE_SINGLETON:
-				ac.Actor().Send(head, packet)
+				ac.Acotr().Send(head, packet)
 				return true
 			case ACTOR_TYPE_VIRTUAL:
 				return ac.getPool().SendAcotr(head, packet)

@@ -6,13 +6,20 @@ import (
 	"log"
 	"time"
 
-	"github.com/erDong01/micro-kit/tools"
+	"github.com/erDong01/micro-kit/base"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 const (
 	uuid_dir = "uuid/"
-	ttl_time = time.Minute
+	ttl_time = 30 * 60
+)
+
+type STATUS uint32
+
+const (
+	SET STATUS = iota
+	TTL STATUS = iota
 )
 
 type Snowflake struct {
@@ -20,79 +27,77 @@ type Snowflake struct {
 	client  *clientv3.Client
 	lease   clientv3.Lease
 	leaseId clientv3.LeaseID
+	status  STATUS //状态机
 }
 
-func (this *Snowflake) Key() string {
-	return uuid_dir + fmt.Sprintf("%d", this.id)
+func (s *Snowflake) Key() string {
+	return uuid_dir + fmt.Sprintf("%d", s.id)
 }
 
-func (this *Snowflake) Run() {
+func (s *Snowflake) SET() bool {
+	//设置key
+	key := s.Key()
+	tx := s.client.Txn(context.Background())
+	//key no exist
+	leaseResp, err := s.lease.Grant(context.Background(), ttl_time)
+	if err != nil {
+		return false
+	}
+	s.leaseId = leaseResp.ID
+	tx.If(clientv3.Compare(clientv3.CreateRevision(key), "=", 0)).
+		Then(clientv3.OpPut(key, "", clientv3.WithLease(s.leaseId))).
+		Else()
+	txnRes, err := tx.Commit()
+	if err != nil || !txnRes.Succeeded { //抢锁失败
+		s.id = int64(base.RAND.RandI(1, int(base.WorkeridMax)))
+		return false
+	}
+
+	base.UUID.Init(s.id) //设置uuid
+	s.status = TTL
+	return true
+}
+
+func (s *Snowflake) TTL() {
+	//保持ttl
+	_, err := s.lease.KeepAliveOnce(context.Background(), s.leaseId)
+	if err != nil {
+		s.status = SET
+	} else {
+		time.Sleep(ttl_time / 3)
+	}
+}
+
+func (s *Snowflake) Run() {
 	for {
-	TrySET:
-		//设置key
-		key := this.Key()
-		tx := this.client.Txn(context.Background())
-		//key no exist
-		leaseResp, err := this.lease.Grant(context.Background(), 60)
-		if err != nil {
-			goto TrySET
-		}
-		this.leaseId = leaseResp.ID
-		tx.If(clientv3.Compare(clientv3.CreateRevision(key), "=", 0)).
-			Then(clientv3.OpPut(key, "", clientv3.WithLease(this.leaseId))).
-			Else()
-		txnRes, err := tx.Commit()
-		if err != nil || !txnRes.Succeeded { //抢锁失败
-			resp, err := this.client.Get(context.Background(), uuid_dir)
-			if err == nil && (resp != nil && resp.Kvs != nil) {
-				Ids := [tools.WorkeridMax + 1]bool{}
-				for _, v := range resp.Kvs {
-					Id := tools.Int(string(v.Value[len(uuid_dir)+1:]))
-					Ids[Id] = true
-				}
-
-				for i, v := range Ids {
-					if v == false {
-						this.id = int64(i) & tools.WorkeridMax
-						goto TrySET
-					}
-				}
-			}
-			this.id++
-			this.id = this.id & tools.WorkeridMax
-			goto TrySET
-		}
-
-		tools.UUID.Init(this.id) //设置uuid
-
-		//保持ttl
-	TryTTL:
-		_, err = this.lease.KeepAliveOnce(context.Background(), this.leaseId)
-		if err != nil {
-			goto TrySET
-		} else {
-			time.Sleep(time.Second * 10)
-			goto TryTTL
+		switch s.status {
+		case SET:
+			s.SET()
+		case TTL:
+			s.TTL()
 		}
 	}
 }
 
 // uuid生成器
-func (this *Snowflake) Init(endpoints []string) {
+func (s *Snowflake) Init(endpoints []string) {
 	cfg := clientv3.Config{
 		Endpoints: endpoints,
 	}
+
 	etcdClient, err := clientv3.New(cfg)
 	if err != nil {
 		log.Fatal("Error: cannot connec to etcd:", err)
 	}
 	lease := clientv3.NewLease(etcdClient)
-	this.id = 0
-	this.client = etcdClient
-	this.lease = lease
-	this.Start()
+	s.id = int64(base.RAND.RandI(1, int(base.WorkeridMax)))
+	s.client = etcdClient
+	s.lease = lease
+	for !s.SET() {
+	}
+	s.Start()
 }
 
-func (this *Snowflake) Start() {
-	go this.Run()
+func (s *Snowflake) Start() {
+	go s.Run()
 }

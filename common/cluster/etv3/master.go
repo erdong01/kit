@@ -12,44 +12,38 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
+// 监控服务器
 type Master struct {
-	serviceMap map[uint32]*common.ClusterInfo
-	client     *clientv3.Client
-	actor      actor.IActor
+	client *clientv3.Client
 	common.IClusterInfo
 }
 
-func (this *Master) Init(info common.IClusterInfo, Endpoints []string, pActor actor.IActor) {
+// 监控服务器
+func (m *Master) Init(info common.IClusterInfo, Endpoints []string) {
 	cfg := clientv3.Config{
 		Endpoints: Endpoints,
 	}
+
 	etcdClient, err := clientv3.New(cfg)
 	if err != nil {
 		log.Fatal("Error: cannot connec to etcd:", err)
 	}
-	this.serviceMap = make(map[uint32]*common.ClusterInfo)
-	this.client = etcdClient
-	this.BindActor(pActor)
-	this.Start()
-	this.IClusterInfo = info
+
+	m.client = etcdClient
+	m.Start()
+	m.IClusterInfo = info
+	m.InitServices()
+}
+func (m *Master) Start() {
+	go m.Run()
 }
 
-func (this *Master) Start() {
-	go this.Run()
+func (m *Master) addService(info *common.ClusterInfo) {
+	actor.MGR.SendMsg(rpc.RpcHead{}, "Cluster.Cluster_Add", info)
 }
 
-func (this *Master) BindActor(pActor actor.IActor) {
-	this.actor = pActor
-}
-
-func (this *Master) addService(info *common.ClusterInfo) {
-	this.actor.SendMsg(rpc.RpcHead{}, "Cluster_Add", info)
-	this.serviceMap[info.Id()] = info
-}
-
-func (this *Master) delService(info *common.ClusterInfo) {
-	delete(this.serviceMap, info.Id())
-	this.actor.SendMsg(rpc.RpcHead{}, "Cluster_Del", info)
+func (m *Master) delService(info *common.ClusterInfo) {
+	actor.MGR.SendMsg(rpc.RpcHead{}, "Cluster.Cluster_Del", info)
 }
 
 func NodeToService(val []byte) *common.ClusterInfo {
@@ -61,31 +55,27 @@ func NodeToService(val []byte) *common.ClusterInfo {
 	return info
 }
 
-func (this *Master) Run() {
-	wch := this.client.Watch(context.Background(), ETCD_DIR+this.String(), clientv3.WithPrefix(), clientv3.WithPrevKV())
+func (m *Master) Run() {
+	wch := m.client.Watch(context.Background(), ETCD_DIR+m.String(), clientv3.WithPrefix(), clientv3.WithPrevKV())
 	for v := range wch {
 		for _, v1 := range v.Events {
 			if v1.Type.String() == "PUT" {
 				info := NodeToService(v1.Kv.Value)
-				this.addService(info)
+				m.addService(info)
 			} else {
 				info := NodeToService(v1.PrevKv.Value)
-				this.delService(info)
+				m.delService(info)
 			}
 		}
 	}
 }
 
-func (this *Master) GetServices() []*common.ClusterInfo {
-	services := []*common.ClusterInfo{}
-	resp, err := this.client.Get(context.Background(), ETCD_DIR+this.String(), clientv3.WithPrefix(), clientv3.WithPrevKV())
+func (m *Master) InitServices() {
+	resp, err := m.client.Get(context.Background(), ETCD_DIR, clientv3.WithPrefix())
 	if err == nil && (resp != nil && resp.Kvs != nil) {
 		for _, v := range resp.Kvs {
 			info := NodeToService(v.Value)
-			if info.Id() != this.Id() {
-				services = append(services, info)
-			}
+			m.addService(info)
 		}
 	}
-	return services
 }

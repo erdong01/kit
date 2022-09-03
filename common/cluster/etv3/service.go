@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"time"
 
 	"github.com/erDong01/micro-kit/common"
 
@@ -20,53 +21,56 @@ type Service struct {
 	client  *clientv3.Client
 	lease   clientv3.Lease
 	leaseId clientv3.LeaseID
+	status  STATUS //状态机
 }
 
-func (this *Service) Run() {
-	leaseResp, err := this.lease.Grant(context.Background(), 10)
+func (s *Service) SET() {
+	leaseResp, _ := s.lease.Grant(context.Background(), 10)
+	s.leaseId = leaseResp.ID
+	key := ETCD_DIR + s.String() + "/" + s.IpString()
+	data, _ := json.Marshal(s.ClusterInfo)
+	s.client.Put(context.Background(), key, string(data), clientv3.WithLease(s.leaseId))
+	s.status = TTL
+	time.Sleep(time.Second * 3)
+}
+
+func (s *Service) TTL() {
+	//保持ttl
+	_, err := s.lease.KeepAliveOnce(context.Background(), s.leaseId)
 	if err != nil {
-		log.Fatalln(err)
+		s.status = SET
+	} else {
+		time.Sleep(time.Second * 3)
 	}
-	this.leaseId = leaseResp.ID
-	var (
-		keepResp     *clientv3.LeaseKeepAliveResponse
-		keepRespChan <-chan *clientv3.LeaseKeepAliveResponse
-	)
-	if keepRespChan, err = this.lease.KeepAlive(context.TODO(), this.leaseId); err != nil {
-		log.Println(err)
-		return
-	}
-	go func() {
-		for {
-			select {
-			case keepResp = <-keepRespChan:
-				if keepRespChan == nil {
-					log.Println("租约已经失效", keepResp.ID)
-					goto END
-				} else { //每秒会续租一次，所以就会受到一次应答
-					// log.Println("收到自动续租应答:", keepResp.ID)
-				}
-			}
+}
+func (s *Service) Run() {
+	for {
+		switch s.status {
+		case SET:
+			s.SET()
+		case TTL:
+			s.TTL()
 		}
-	END:
-	}()
-	key := ETCD_DIR + this.String() + "/" + this.IpString()
-	data, _ := json.Marshal(this.ClusterInfo)
-	this.client.Put(context.Background(), key, string(data), clientv3.WithLease(this.leaseId))
+	}
 }
 
-func (this *Service) Init(info *common.ClusterInfo, endpoints []string) {
-	cfg := clientv3.Config{Endpoints: endpoints}
+// 注册服务器
+func (s *Service) Init(info *common.ClusterInfo, endpoints []string) {
+	cfg := clientv3.Config{
+		Endpoints: endpoints,
+	}
+
 	etcdClient, err := clientv3.New(cfg)
 	if err != nil {
 		log.Fatal("Error: cannot connec to etcd:", err)
 	}
 	lease := clientv3.NewLease(etcdClient)
-	this.client = etcdClient
-	this.lease = lease
-	this.ClusterInfo = info
-	this.Start()
+	s.client = etcdClient
+	s.lease = lease
+	s.ClusterInfo = info
+	s.Start()
 }
-func (this *Service) Start() {
-	this.Run()
+
+func (s *Service) Start() {
+	go s.Run()
 }
