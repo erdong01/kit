@@ -1,10 +1,11 @@
 package timer
 
 import (
-	"github.com/erDong01/micro-kit/base"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/erDong01/micro-kit/base"
 )
 
 const (

@@ -3,12 +3,13 @@ package common
 import (
 	"bufio"
 	"fmt"
-	"github.com/erDong01/micro-kit/actor"
-	"github.com/erDong01/micro-kit/base"
-	"github.com/erDong01/micro-kit/rpc"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/erDong01/micro-kit/actor"
+	"github.com/erDong01/micro-kit/base"
+	"github.com/erDong01/micro-kit/rpc"
 )
 
 func StartConsole(cmd actor.IActor) {

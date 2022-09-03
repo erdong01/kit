@@ -2,7 +2,7 @@ package common
 
 import "github.com/erDong01/micro-kit/base"
 
-// 状态机
+//状态机
 type (
 	TimerHandle func()
 	State       struct {
@@ -77,7 +77,7 @@ func (this *StateMachine) SetState(state int) {
 	}
 }
 
-// 获取前面的一个状态
+//获取前面的一个状态
 func (this *StateMachine) GetPreState() int {
 	return this.preState
 }

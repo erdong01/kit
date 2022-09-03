@@ -2,8 +2,9 @@ package common
 
 import (
 	"fmt"
-	"github.com/erDong01/micro-kit/base"
 	"strings"
+
+	"github.com/erDong01/micro-kit/base"
 
 	"github.com/erDong01/micro-kit/rpc"
 )
