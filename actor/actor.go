@@ -46,11 +46,17 @@ type (
 		state     int32
 		trace     traceInfo //trace func
 		mailBox   *mpsc.Queue
-		mailIn    [8]int64
-		mailChan  chan bool
-		timerId   *int64
-		pool      IActorPool //ACTOR_TYPE_VIRTUAL,ACTOR_TYPE_POOL
 
+		mailIn [8]int64
+
+		mailChan chan bool
+		timerId  *int64
+		pool     IActorPool //ACTOR_TYPE_VIRTUAL,ACTOR_TYPE_POOL
+
+		mailBox2  *mpsc.Queue
+		mailIn2   int32
+		mailChan2 chan bool
+		CallMap   map[string]*CallFunc
 	}
 
 	IActor interface {
@@ -87,6 +93,13 @@ type (
 		fileName  string
 		filePath  string
 		className string
+	}
+
+	CallFunc struct {
+		Func       interface{}
+		FuncType   reflect.Type
+		FuncVal    reflect.Value
+		FuncParams string
 	}
 )
 
@@ -152,6 +165,11 @@ func (a *Actor) Init() {
 	a.mailChan = make(chan bool, 1)
 	a.mailBox = mpsc.New()
 	a.acotrChan = make(chan int, 1)
+
+	a.mailChan2 = make(chan bool, 1)
+	a.mailBox2 = mpsc.New()
+	a.CallMap = make(map[string]*CallFunc)
+
 	//trance
 	a.trace.Init()
 	if a.id == 0 {
@@ -278,6 +296,8 @@ func (a *Actor) loop() bool {
 	select {
 	case <-a.mailChan:
 		a.consume()
+	case <-a.mailChan2:
+		a.consume2()
 	case msg := <-a.acotrChan:
 		if msg == DESDORY_EVENT {
 			return true
@@ -331,5 +351,86 @@ func GetRpcMethodMap(rType reflect.Type, tagName string) map[string]string {
 	return rpcMethod
 }
 
+func (this *Actor) FindCall(funcName string) *CallFunc {
+	funcName = strings.ToLower(funcName)
+	fun, exist := this.CallMap[funcName]
+	if exist == true {
+		return fun
+	}
+	return nil
+}
 func (this *Actor) RegisterCall(funcName string, call interface{}) {
+	funcName = strings.ToLower(funcName)
+	if this.FindCall(funcName) != nil {
+		log.Fatalf("actor error [%s] 消息重复定义", funcName)
+	}
+
+	callfunc := &CallFunc{Func: call, FuncVal: reflect.ValueOf(call), FuncType: reflect.TypeOf(call), FuncParams: reflect.TypeOf(call).String()}
+	this.CallMap[funcName] = callfunc
+}
+
+func (this *Actor) PacketFunc2(packet rpc.Packet) bool {
+	rpcPacket, head := rpc.UnmarshalHead(packet.Buff)
+	if this.FindCall(rpcPacket.FuncName) != nil {
+		head.SocketId = packet.Id
+		head.Reply = packet.Reply
+		this.Send2(head, packet.Buff)
+		return true
+	}
+	return false
+}
+
+func (this *Actor) Send2(head rpc.RpcHead, buff []byte) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Print(err)
+		}
+	}()
+	var io CallIO
+	io.RpcHead = head
+	io.Buff = buff
+	this.mailBox2.Push(io)
+	if atomic.CompareAndSwapInt32(&this.mailIn2, 0, 1) {
+		this.mailChan <- true
+	}
+}
+
+func (this *Actor) call2(io CallIO) {
+	defer func() {
+		if err := recover(); err != nil {
+			base.TraceCode(this.trace.ToString(), err)
+		}
+	}()
+	rpcPacket, _ := rpc.Unmarshal(io.Buff)
+	head := io.RpcHead
+	funcName := rpcPacket.FuncName
+	pFunc := this.FindCall(funcName)
+	if pFunc != nil {
+		f := pFunc.FuncVal
+		k := pFunc.FuncType
+		rpcPacket.RpcHead.SocketId = io.SocketId
+		params := rpc.UnmarshalBody(rpcPacket, k)
+		if len(params) >= 1 {
+			in := make([]reflect.Value, len(params))
+			for i, param := range params {
+				in[i] = reflect.ValueOf(param)
+			}
+			this.Trace(funcName)
+			ret := f.Call(in)
+			this.Trace("")
+			if ret != nil && head.Reply != "" {
+				ret = append([]reflect.Value{reflect.ValueOf(&head)}, ret...)
+				rpc.GCall.Call(ret)
+			}
+		} else {
+			log.Printf("func [%s] params at least one context", funcName)
+		}
+	}
+}
+
+func (this *Actor) consume2() {
+	atomic.StoreInt32(&this.mailIn2, 0)
+	for data := this.mailBox2.Pop(); data != nil; data = this.mailBox.Pop() {
+		this.call2(data.(CallIO))
+	}
 }
