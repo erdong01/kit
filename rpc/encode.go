@@ -49,7 +49,10 @@ func marshalPacket(head RpcHead, funcName string, packet proto.Message) ([]byte,
 	}()
 
 	rpcPacket := &RpcPacket{FuncName: strings.ToLower(funcName), RpcHead: (*RpcHead)(&head)}
-	buff, _ := proto.Marshal(packet)
+	buff, err := proto.Marshal(packet)
+	if err != nil {
+		log.Println("marshalPacket proto.Marshal(packet)", err)
+	}
 	rpcPacket.RpcBody = buff
 	dat, _ := proto.Marshal(rpcPacket)
 	return dat, rpcPacket
