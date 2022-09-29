@@ -157,7 +157,7 @@ func (a *Actor) HasRpc(funcName string) bool {
 	return bEx
 }
 
-func (a *Actor) Actor() *Actor {
+func (a *Actor) Acotr() *Actor {
 	return a
 }
 
