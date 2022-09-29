@@ -34,6 +34,19 @@ func (c *ClientSocket) Init(ip string, port int, params ...OpOption) bool {
 	return true
 }
 
+func (c *ClientSocket) Start() bool {
+	if c.ip == "" {
+		c.ip = "127.0.0.1"
+	}
+
+	if c.Connect() {
+		go c.Run()
+	}
+	//延迟，监听关闭
+	//defer ln.Close()
+	return true
+}
+
 func (c *ClientSocket) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
 	c.Send(head, rpc.Marshal(&head, &funcName, params...))
 }
@@ -55,6 +68,19 @@ func (c *ClientSocket) Send(head rpc.RpcHead, packet rpc.Packet) int {
 		return n
 	}
 	//c.m_Writer.Flush()
+	return 0
+}
+func (this *ClientSocket) DoSend(buff []byte) int {
+	if this == nil || this.conn == nil {
+		return 0
+	}
+
+	n, err := this.conn.Write(this.packetParser.Write(buff))
+
+	handleError(err)
+	if n > 0 {
+		return n
+	}
 	return 0
 }
 
