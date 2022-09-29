@@ -9,6 +9,7 @@ import (
 	"github.com/erDong01/micro-kit/base"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/xtaci/kcp-go"
+	"google.golang.org/protobuf/proto"
 )
 
 type IClientSocket interface {
@@ -135,4 +136,8 @@ func (c *ClientSocket) Run() bool {
 
 	c.Close()
 	return true
+}
+func (this *ClientSocket) SendPacket(head rpc.RpcHead, funcName string, msg proto.Message) int {
+	packet := rpc.Marshal(&head, &funcName, msg)
+	return this.Send(rpc.RpcHead{}, packet)
 }
