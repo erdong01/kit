@@ -403,7 +403,7 @@ func (this *Actor) call2(io CallIO) {
 			base.TraceCode(this.trace.ToString(), err)
 		}
 	}()
-	rpcPacket, _ := rpc.Unmarshal(io.Buff)
+	rpcPacket, _ := rpc.Unmarshal2(io.Buff)
 	head := io.RpcHead
 	funcName := rpcPacket.FuncName
 	pFunc := this.FindCall(funcName)
@@ -411,7 +411,7 @@ func (this *Actor) call2(io CallIO) {
 		f := pFunc.FuncVal
 		k := pFunc.FuncType
 		rpcPacket.RpcHead.SocketId = io.SocketId
-		params := rpc.UnmarshalBody(rpcPacket, k)
+		params := rpc.UnmarshalBody2(rpcPacket, k)
 		if len(params) >= 1 {
 			in := make([]reflect.Value, len(params))
 			for i, param := range params {
