@@ -189,6 +189,7 @@ func (this *Socket) Clear() {
 func (this *Socket) Close() {
 	this.Clear()
 }
+
 func (this *Socket) GetMaxPacketLen() int {
 	return this.packetParser.maxPacketLen
 }

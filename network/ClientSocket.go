@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
 
 	"github.com/erDong01/micro-kit/base"
 	"github.com/erDong01/micro-kit/rpc"
@@ -100,11 +99,11 @@ func (c *ClientSocket) Connect() bool {
 		c.SetConn(ln)
 		connectStr = "Kcp"
 	} else {
-		tcpAddr, err := net.ResolveTCPAddr("tcp", strRemote)
+		tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
 		if err != nil {
 			log.Printf("%v", err)
 		}
-		ln, err1 := net.DialTCP("tcp", nil, tcpAddr)
+		ln, err1 := net.DialTCP("tcp4", nil, tcpAddr)
 		if err1 != nil {
 			return false
 		}
@@ -127,7 +126,6 @@ func (c *ClientSocket) OnNetFail(int) {
 func (c *ClientSocket) Run() bool {
 	c.SetState(SSF_RUN)
 	var buff = make([]byte, c.receiveBufferSize)
-	io.Copy(os.Stdout, c.conn)
 	loop := func() bool {
 		defer func() {
 			if err := recover(); err != nil {
@@ -165,6 +163,7 @@ func (c *ClientSocket) Run() bool {
 	c.Close()
 	return true
 }
+
 func (this *ClientSocket) SendPacket(head rpc.RpcHead, funcName string, msg proto.Message) int {
 	packet := rpc.Marshal(&head, &funcName, msg)
 	return this.Send(rpc.RpcHead{}, packet)

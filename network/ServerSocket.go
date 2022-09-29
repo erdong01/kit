@@ -80,6 +80,7 @@ func (s *ServerSocket) Start() bool {
 func (s *ServerSocket) AssignClientId() uint32 {
 	return atomic.AddUint32(&s.idSeed, 1)
 }
+
 func (s *ServerSocket) GetClientById(id uint32) *ServerSocketClient {
 	s.clientLocker.RLock()
 	client, exist := s.clientMap[id]
@@ -147,7 +148,6 @@ func (s *ServerSocket) SendMsg(head rpc.RpcHead, funcName string, params ...inte
 		client.Send(head, rpc.Marshal(&head, &funcName, params...))
 	}
 }
-
 func (s *ServerSocket) Restart() bool {
 	return true
 }

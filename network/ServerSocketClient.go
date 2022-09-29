@@ -133,6 +133,7 @@ func (s *ServerSocketClient) Close() {
 		s.server.DelClinet(s)
 	}
 }
+
 func (s *ServerSocketClient) Run() bool {
 	var buff = make([]byte, s.receiveBufferSize)
 	s.SetState(SSF_RUN)
@@ -174,9 +175,11 @@ func (s *ServerSocketClient) Run() bool {
 			break
 		}
 	}
+
 	if s.Socket.clientClose != nil {
 		s.Socket.clientClose(s.clientId)
 	}
+
 	s.Close()
 	fmt.Printf("%s关闭连接;socketId:%d \n", s.ip, s.GetId())
 	return true
@@ -212,6 +215,7 @@ func (s *ServerSocketClient) SendLoop() bool {
 
 	return true
 }
+
 func (this *ServerSocketClient) SendPacket(head rpc.RpcHead, funcName string, msg proto.Message) int {
 	packet := rpc.Marshal(&head, &funcName, msg)
 	return this.Send(rpc.RpcHead{}, packet)
