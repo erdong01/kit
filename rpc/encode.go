@@ -44,9 +44,9 @@ func marshalPB(bitstream *base.BitStream, packet proto.Message) {
 }
 
 // rpc  MarshalPacket
-func MarshalPacket(head RpcHead, funcName string, packet proto.Message) []byte {
-	data, _ := marshalPacket(head, funcName, packet)
-	return data
+func MarshalPacket(head RpcHead, funcName string, packet proto.Message) ([]byte, *RpcPacket) {
+	data, rpcPacket := marshalPacket(head, funcName, packet)
+	return data, rpcPacket
 }
 
 // rpc  marshal
