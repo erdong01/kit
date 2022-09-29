@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 
 	"github.com/erDong01/micro-kit/base"
 	"github.com/erDong01/micro-kit/rpc"
@@ -126,6 +127,7 @@ func (c *ClientSocket) OnNetFail(int) {
 func (c *ClientSocket) Run() bool {
 	c.SetState(SSF_RUN)
 	var buff = make([]byte, c.receiveBufferSize)
+	io.Copy(os.Stdout, c.conn)
 	loop := func() bool {
 		defer func() {
 			if err := recover(); err != nil {
