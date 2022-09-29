@@ -1,7 +1,6 @@
 package network
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/xtaci/kcp-go/v5"
-	"google.golang.org/protobuf/proto"
 )
 
 type IServerSocket interface {
@@ -79,6 +77,16 @@ func (s *ServerSocket) Start() bool {
 
 func (s *ServerSocket) AssignClientId() uint32 {
 	return atomic.AddUint32(&s.idSeed, 1)
+}
+func (s *ServerSocket) GetClientById(id uint32) *ServerSocketClient {
+	s.clientLocker.RLock()
+	client, exist := s.clientMap[id]
+	s.clientLocker.RUnlock()
+	if exist == true {
+		return client
+	}
+
+	return nil
 }
 
 func (s *ServerSocket) AddClinet(conn net.Conn, addr string, connectType int) *ServerSocketClient {
@@ -200,29 +208,4 @@ func (s *ServerSocket) handleConn(tcpConn net.Conn, addr string) bool {
 	}
 
 	return true
-}
-
-func (this *ServerSocket) GetClientById(id uint32) *ServerSocketClient {
-	this.clientLocker.Lock()
-	client, exist := this.clientMap[id]
-	this.clientLocker.Unlock()
-	if exist == true {
-		return client
-	}
-	return nil
-}
-
-func (s *ServerSocket) SendPacket(head rpc.RpcHead, funcName string, packet proto.Message) int {
-	client := s.GetClientById(head.SocketId)
-	if client == nil {
-		return 0
-	}
-	buff := rpc.MarshalPacket(head, funcName, packet)
-	return client.Send(rpc.RpcHead{}, buff)
-}
-
-// ClientSocket 给客户发送消息
-func (s *ServerSocket) ClientSocket(ctx context.Context) *ServerSocketClient {
-	rpcHead := ctx.Value("rpcHead").(rpc.RpcHead)
-	return s.GetClientById(rpcHead.SocketId)
 }
