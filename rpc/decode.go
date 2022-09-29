@@ -57,6 +57,34 @@ func UnmarshalBody(rpcPacket *RpcPacket, pFuncType reflect.Type) []interface{} {
 	}
 	return params
 }
+
+func UnmarshalBodyCall(rpcPacket *RpcPacket, pFuncType reflect.Type) (error, []interface{}) {
+	strErr := ""
+	nCurLen := pFuncType.NumIn()
+	params := make([]interface{}, nCurLen)
+	buf := bytes.NewBuffer(rpcPacket.RpcBody)
+	dec := gob.NewDecoder(buf)
+	dec.Decode(&strErr)
+	if strErr != "" {
+		return errors.New(strErr), params
+	}
+	for i := 0; i < nCurLen; i++ {
+		if i == 0 {
+			params[0] = context.WithValue(context.Background(), "rpcHead", *(*RpcHead)(rpcPacket.RpcHead))
+			continue
+		}
+
+		val := reflect.New(pFuncType.In(i))
+		if i < int(rpcPacket.ArgLen+1) {
+			dec.DecodeValue(val)
+		}
+		params[i] = val.Elem().Interface()
+	}
+	return nil, params
+}
+
+// ------- 旧代码 -------------
+
 func Unmarshal2(buff []byte) (*RpcPacket, RpcHead) {
 	rpcPacket := &RpcPacket{}
 	proto.Unmarshal(buff, rpcPacket)
@@ -66,6 +94,7 @@ func Unmarshal2(buff []byte) (*RpcPacket, RpcHead) {
 	rpcPacket.FuncName = strings.ToLower(rpcPacket.FuncName)
 	return rpcPacket, *(*RpcHead)(rpcPacket.RpcHead)
 }
+
 func UnmarshalBody2(rpcPacket *RpcPacket, pFuncType reflect.Type) []interface{} {
 	nCurLen := pFuncType.NumIn()
 	params := make([]interface{}, nCurLen)
@@ -92,29 +121,4 @@ func UnmarshalBody2(rpcPacket *RpcPacket, pFuncType reflect.Type) []interface{} 
 		}
 	}
 	return params
-}
-
-func UnmarshalBodyCall(rpcPacket *RpcPacket, pFuncType reflect.Type) (error, []interface{}) {
-	strErr := ""
-	nCurLen := pFuncType.NumIn()
-	params := make([]interface{}, nCurLen)
-	buf := bytes.NewBuffer(rpcPacket.RpcBody)
-	dec := gob.NewDecoder(buf)
-	dec.Decode(&strErr)
-	if strErr != "" {
-		return errors.New(strErr), params
-	}
-	for i := 0; i < nCurLen; i++ {
-		if i == 0 {
-			params[0] = context.WithValue(context.Background(), "rpcHead", *(*RpcHead)(rpcPacket.RpcHead))
-			continue
-		}
-
-		val := reflect.New(pFuncType.In(i))
-		if i < int(rpcPacket.ArgLen+1) {
-			dec.DecodeValue(val)
-		}
-		params[i] = val.Elem().Interface()
-	}
-	return nil, params
 }
