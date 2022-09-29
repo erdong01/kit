@@ -393,7 +393,7 @@ func (this *Actor) Send2(head rpc.RpcHead, buff []byte) {
 	io.Buff = buff
 	this.mailBox2.Push(io)
 	if atomic.CompareAndSwapInt32(&this.mailIn2, 0, 1) {
-		this.mailChan <- true
+		this.mailChan2 <- true
 	}
 }
 
