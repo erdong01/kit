@@ -44,22 +44,22 @@ func marshalPB(bitstream *base.BitStream, packet proto.Message) {
 }
 
 // rpc  MarshalPacket
-func MarshalPacket(head RpcHead, funcName string, packet proto.Message) ([]byte, *RpcPacket) {
+func MarshalPacket(head RpcHead, funcName string, packet proto.Message) ([]byte, RpcPacket) {
 	data, rpcPacket := marshalPacket(head, funcName, packet)
 	return data, rpcPacket
 }
 
 // rpc  marshal
-func marshalPacket(head RpcHead, funcName string, packet proto.Message) ([]byte, *RpcPacket) {
+func marshalPacket(head RpcHead, funcName string, packet proto.Message) ([]byte, RpcPacket) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Print(err)
 		}
 	}()
 
-	rpcPacket := &RpcPacket{FuncName: strings.ToLower(funcName), RpcHead: (*RpcHead)(&head)}
+	rpcPacket := RpcPacket{FuncName: strings.ToLower(funcName), RpcHead: (*RpcHead)(&head)}
 	buff, _ := proto.Marshal(packet)
 	rpcPacket.RpcBody = buff
-	dat, _ := proto.Marshal(rpcPacket)
+	dat, _ := proto.Marshal(&rpcPacket)
 	return dat, rpcPacket
 }
