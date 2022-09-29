@@ -99,11 +99,11 @@ func (c *ClientSocket) Connect() bool {
 		c.SetConn(ln)
 		connectStr = "Kcp"
 	} else {
-		tcpAddr, err := net.ResolveTCPAddr("tcp4", strRemote)
+		tcpAddr, err := net.ResolveTCPAddr("tcp", strRemote)
 		if err != nil {
 			log.Printf("%v", err)
 		}
-		ln, err1 := net.DialTCP("tcp4", nil, tcpAddr)
+		ln, err1 := net.DialTCP("tcp", nil, tcpAddr)
 		if err1 != nil {
 			return false
 		}
