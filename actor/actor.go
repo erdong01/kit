@@ -351,6 +351,8 @@ func GetRpcMethodMap(rType reflect.Type, tagName string) map[string]string {
 	return rpcMethod
 }
 
+//-------------旧注册---------------------
+
 func (this *Actor) FindCall(funcName string) *CallFunc {
 	funcName = strings.ToLower(funcName)
 	fun, exist := this.CallMap[funcName]

@@ -1,7 +1,7 @@
 package cluster
 
 import (
-	"fm"
+	"fmt"
 	"sync/atomic"
 	"time"
 
@@ -28,7 +28,7 @@ type (
 	}
 )
 
-const STUB_TTL_TIME = et.STUB_TTL_TIME
+const STUB_TTL_TIME = 30 * time.Second
 
 func (s *Stub) InitStub(stub rpc.STUB) {
 	s.StubMailBox.StubType = stub
@@ -68,6 +68,7 @@ func (s *Stub) publish() {
 func (s *Stub) idle() {
 	if !MGR.IsEnoughStub(s.StubMailBox.StubType) {
 		s.fsm = fsm_publish
+	}
 }
 
 func (s *Stub) updateFsm() {
