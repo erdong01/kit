@@ -53,14 +53,14 @@ func (s *ServerSocketClient) Start() bool {
 		return false
 	}
 
-	if s.connectType == CLIENT_CONNECT {
-		s.sendChan = make(chan []byte, MAX_SEND_CHAN)
-		s.timerId = new(int64)
-		*s.timerId = int64(s.clientId)
-		timer.RegisterTimer(s.timerId, (HEART_TIME_OUT/3)*time.Second, func() {
-			s.Update()
-		})
-	}
+	// if s.connectType == CLIENT_CONNECT {
+	// 	s.sendChan = make(chan []byte, MAX_SEND_CHAN)
+	// 	s.timerId = new(int64)
+	// 	*s.timerId = int64(s.clientId)
+	// 	timer.RegisterTimer(s.timerId, (HEART_TIME_OUT/3)*time.Second, func() {
+	// 		s.Update()
+	// 	})
+	// }
 
 	if s.packetFuncList.Len() == 0 {
 		s.packetFuncList = s.server.packetFuncList
