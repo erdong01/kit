@@ -44,6 +44,14 @@ func handleError(err error) {
 }
 
 func (s *ServerSocketClient) Init(ip string, port int, params ...OpOption) bool {
+	if s.connectType == CLIENT_CONNECT {
+		s.sendChan = make(chan []byte, MAX_SEND_CHAN)
+		s.timerId = new(int64)
+		*s.timerId = int64(s.clientId)
+		timer.RegisterTimer(s.timerId, (HEART_TIME_OUT/3)*time.Second, func() {
+			s.Update()
+		})
+	}
 	s.Socket.Init(ip, port, params...)
 	return true
 }
@@ -52,15 +60,6 @@ func (s *ServerSocketClient) Start() bool {
 	if s.server == nil {
 		return false
 	}
-
-	// if s.connectType == CLIENT_CONNECT {
-	// 	s.sendChan = make(chan []byte, MAX_SEND_CHAN)
-	// 	s.timerId = new(int64)
-	// 	*s.timerId = int64(s.clientId)
-	// 	timer.RegisterTimer(s.timerId, (HEART_TIME_OUT/3)*time.Second, func() {
-	// 		s.Update()
-	// 	})
-	// }
 
 	if s.packetFuncList.Len() == 0 {
 		s.packetFuncList = s.server.packetFuncList
@@ -218,7 +217,7 @@ func (s *ServerSocketClient) SendLoop() bool {
 
 func (this *ServerSocketClient) SendPacket(head rpc.RpcHead, funcName string, msg proto.Message) int {
 	packet := rpc.Marshal(&head, &funcName, msg)
-	return this.Send(rpc.RpcHead{}, packet)
+	return this.Send(head, packet)
 }
 
 func (this *ServerSocketClient) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) int {

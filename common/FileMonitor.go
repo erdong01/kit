@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 	"unsafe"
 
 	"github.com/erDong01/micro-kit/actor"
@@ -34,7 +35,7 @@ type (
 func (f *FileMonitor) Init() {
 	f.Actor.Init()
 	f.filesMap = map[string]*FileInfo{}
-	// f.RegisterTimer(3*time.Second, f.update)
+	f.RegisterTimer(3*time.Second, f.update)
 	actor.MGR.RegisterActor(f)
 	f.Actor.Start()
 }

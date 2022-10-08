@@ -149,6 +149,7 @@ func (s *ServerSocket) SendMsg(head rpc.RpcHead, funcName string, params ...inte
 		client.Send(head, rpc.Marshal(&head, &funcName, params...))
 	}
 }
+
 func (s *ServerSocket) Restart() bool {
 	return true
 }
