@@ -216,7 +216,10 @@ func (s *ServerSocketClient) SendLoop() bool {
 }
 
 func (this *ServerSocketClient) SendPacket(head rpc.RpcHead, funcName string, msg proto.Message) int {
-	packet := rpc.Marshal(&head, &funcName, msg)
+	rpcPacketByte, _ := rpc.MarshalPacket(head, funcName, msg)
+	var packet = rpc.Packet{
+		Buff: rpcPacketByte,
+	}
 	return this.Send(head, packet)
 }
 
