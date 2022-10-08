@@ -334,3 +334,12 @@ func (c *Cluster) Cluster_Del(ctx context.Context, info *common.ClusterInfo) {
 var (
 	MGR Cluster
 )
+
+func (this *Cluster) GetBalanceServer(head rpc.RpcHead) *common.ClusterInfo {
+	_, head.ClusterId = this.hashRing[head.DestServerType].Get64(head.Id)
+	client, bEx := this.clusterMap[head.DestServerType][head.ClusterId]
+	if bEx {
+		return client
+	}
+	return nil
+}
