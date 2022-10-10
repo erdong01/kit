@@ -103,7 +103,6 @@ func (s *ServerSocket) AddClinet(conn net.Conn, addr string, connectType int) *S
 		client.ip = addr
 		client.SetConnectType(connectType)
 		client.SetConn(conn)
-		s.SetClientClose(s.GetClientClose()) //自己加的
 		s.clientLocker.Lock()
 		s.clientMap[client.clientId] = client
 		s.clientLocker.Unlock()

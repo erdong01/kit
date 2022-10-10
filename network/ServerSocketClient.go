@@ -166,6 +166,9 @@ func (s *ServerSocketClient) Run() bool {
 			}
 		}
 		s.heartTime = int(time.Now().Unix()) + HEART_TIME_OUT
+		if s.server.clientClose != nil {
+			s.server.clientClose(s.clientId)
+		}
 		return true
 	}
 
@@ -173,10 +176,6 @@ func (s *ServerSocketClient) Run() bool {
 		if !loop() {
 			break
 		}
-	}
-
-	if s.server.clientClose != nil {
-		s.Socket.clientClose(s.clientId)
 	}
 
 	s.Close()
