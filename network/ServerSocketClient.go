@@ -134,6 +134,11 @@ func (s *ServerSocketClient) Close() {
 }
 
 func (s *ServerSocketClient) Run() bool {
+	defer func() {
+		if err := recover(); err != nil {
+			base.TraceCode(err)
+		}
+	}()
 	var buff = make([]byte, s.receiveBufferSize)
 	s.SetState(SSF_RUN)
 	loop := func() bool {
@@ -166,9 +171,7 @@ func (s *ServerSocketClient) Run() bool {
 			}
 		}
 		s.heartTime = int(time.Now().Unix()) + HEART_TIME_OUT
-		if s.server.clientClose != nil {
-			s.server.clientClose(s.clientId)
-		}
+
 		return true
 	}
 
@@ -177,7 +180,9 @@ func (s *ServerSocketClient) Run() bool {
 			break
 		}
 	}
-
+	if s.server.clientClose != nil {
+		s.server.clientClose(s.clientId)
+	}
 	s.Close()
 	fmt.Printf("%s关闭连接;socketId:%d \n", s.ip, s.GetId())
 	return true
