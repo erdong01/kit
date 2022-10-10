@@ -97,7 +97,6 @@ func (s *ServerSocket) AddClinet(conn net.Conn, addr string, connectType int) *S
 	if client != nil {
 		client.Init("", 0)
 		client.server = s
-		client.clientClose = s.clientClose
 		client.receiveBufferSize = s.receiveBufferSize
 		client.SetMaxPacketLen(s.GetMaxPacketLen())
 		client.clientId = s.AssignClientId()
