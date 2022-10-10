@@ -175,7 +175,7 @@ func (s *ServerSocketClient) Run() bool {
 		}
 	}
 
-	if s.Socket.clientClose != nil {
+	if s.server.clientClose != nil {
 		s.Socket.clientClose(s.clientId)
 	}
 
