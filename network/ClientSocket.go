@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"log"
 	"net"
@@ -138,4 +139,9 @@ func (this *ClientSocket) Run() bool {
 	}
 	this.Close()
 	return true
+}
+
+func (this *ClientSocket) SendPacket(head rpc.RpcHead, funcName string, msg proto.Message) int {
+	packet := rpc.Marshal(head, funcName, msg)
+	return this.Send(rpc.RpcHead{}, packet)
 }
