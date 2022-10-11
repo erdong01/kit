@@ -56,15 +56,21 @@ message ClusterInfo{
 
 //服务器类型
 enum SERVICE{
-  NONE = 0;
-  CLIENT = 1;
-  GATESERVER = 2;//网关,转发服务
-  ACCOUNTSERVER = 3;//账号
-  WORLDSERVER = 4;//世界
-  ZONESERVER = 5;//地图
-  WORLDDBSERVER = 6;//db
-  ServiceWarKings = 7;//王者战记
-  ServiceFruitPark = 8;//db水果乐园
+  NONE= 0;
+  CLIENT= 1;
+  GATE= 2;//网关,转发服务
+  GM=3;//gamemgr
+  GAME=4;//game
+  ZONE=5;//地图
+  DB=6;//db
+
+  GATESERVER = 7;//网关,转发服务
+  ACCOUNTSERVER = 8;//账号
+  WORLDSERVER = 9;//世界
+  ZONESERVER = 10;//地图
+  WORLDDBSERVER = 11;//db
+  ServiceWarKings = 12;//王者战记
+  ServiceFruitPark = 13;//db水果乐园
 };
 
 //发送标志
