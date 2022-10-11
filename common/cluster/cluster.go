@@ -65,6 +65,10 @@ func (this *EmptyClusterInfo) String() string {
 	return ""
 }
 
+func (this *Cluster) InitCluster(info *common.ClusterInfo, Endpoints []string, natsUrl string) {
+	this.Init(info, Endpoints, natsUrl)
+}
+
 func (this *Cluster) Init(info *common.ClusterInfo, Endpoints []string, natsUrl string) {
 	this.Actor.Init()
 	this.RegisterClusterCall()
