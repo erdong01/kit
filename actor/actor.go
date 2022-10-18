@@ -12,9 +12,9 @@ import (
 	"unsafe"
 
 	"github.com/erDong01/micro-kit/base"
+	"github.com/erDong01/micro-kit/base/mpsc"
 	"github.com/erDong01/micro-kit/common/timer"
 	"github.com/erDong01/micro-kit/rpc"
-	"github.com/erDong01/micro-kit/tools/mpsc"
 )
 
 var (
