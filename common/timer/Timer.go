@@ -70,6 +70,10 @@ func (t *TimerNode) LoadId() int64 {
 	return atomic.LoadInt64(t.id)
 }
 
+func StoreTimerId(id *int64, val int64) bool {
+	return atomic.LoadInt64(id) == 0 && atomic.CompareAndSwapInt64(id, 0, val)
+}
+
 func (op *Op) applyOpts(opts []OpOption) {
 	for _, opt := range opts {
 		opt(op)

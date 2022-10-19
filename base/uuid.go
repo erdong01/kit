@@ -152,7 +152,6 @@ var (
 /*var(
 	g_SeedId int32
 )
-
 func Uuid() int64{
 	var uid int64
 	atomic.AddInt32(&g_SeedId,1)

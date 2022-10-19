@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
-	"unsafe"
 
 	"github.com/erDong01/micro-kit/base"
 	"github.com/erDong01/micro-kit/base/mpsc"
@@ -46,12 +45,11 @@ type (
 		state     int32
 		trace     traceInfo //trace func
 		mailBox   *mpsc.Queue
-
-		mailIn [8]int64
-
-		mailChan chan bool
-		timerId  *int64
-		pool     IActorPool //ACTOR_TYPE_VIRTUAL,ACTOR_TYPE_POOL
+		mailIn    [8]int64
+		mailChan  chan bool
+		timerId   *int64
+		pool      IActorPool         //ACTOR_TYPE_VIRTUAL,ACTOR_TYPE_POOL
+		timerMap  map[uintptr]func() //成员方法转func()会是闭包函数,定时器释放会有问题
 
 		mailBox2  *mpsc.Queue
 		mailIn2   int32
@@ -165,6 +163,7 @@ func (a *Actor) Init() {
 	a.mailChan = make(chan bool, 1)
 	a.mailBox = mpsc.New()
 	a.acotrChan = make(chan int, 1)
+	a.timerMap = make(map[uintptr]func())
 
 	a.mailChan2 = make(chan bool, 1)
 	a.mailBox2 = mpsc.New()
@@ -175,6 +174,7 @@ func (a *Actor) Init() {
 	if a.id == 0 {
 		a.id = AssignActorId()
 	}
+	a.timerId = new(int64)
 }
 
 func (a *Actor) register(ac IActor, op Op) {
@@ -183,13 +183,12 @@ func (a *Actor) register(ac IActor, op Op) {
 }
 
 func (a *Actor) RegisterTimer(duration time.Duration, fun func(), opts ...timer.OpOption) {
-	if a.timerId == nil {
-		a.timerId = new(int64)
-		*a.timerId = a.id
-	}
-
+	timer.StoreTimerId(a.timerId, a.id)
+	//&fun这里有问题,会产生一对闭包函数,再释放的释放有问题
+	ptr := uintptr(reflect.ValueOf(fun).Pointer())
+	a.timerMap[ptr] = fun
 	timer.RegisterTimer(a.timerId, duration, func() {
-		a.SendMsg(rpc.RpcHead{ActorName: a.actorName}, "UpdateTimer", (*int64)(unsafe.Pointer(&fun)))
+		a.SendMsg(rpc.RpcHead{ActorName: a.actorName}, "UpdateTimer", ptr)
 	}, opts...)
 }
 
@@ -201,9 +200,12 @@ func (a *Actor) clear() {
 	timer.StopTimer(a.timerId)
 }
 func (a *Actor) Stop() {
-	if atomic.CompareAndSwapInt32(&a.state, ASF_RUN, ASF_STOP) {
-		a.acotrChan <- DESDORY_EVENT
-	}
+	timer.RegisterTimer(a.timerId, timer.TICK_INTERVAL, func() {
+		timer.StopTimer(a.timerId)
+		if atomic.CompareAndSwapInt32(&a.state, ASF_RUN, ASF_STOP) {
+			a.acotrChan <- DESDORY_EVENT
+		}
+	})
 }
 
 func (a *Actor) Start() {
@@ -272,11 +274,13 @@ func (a *Actor) call(io CallIO) {
 	}
 }
 
-func (a *Actor) UpdateTimer(ctx context.Context, p *int64) {
-	func1 := (*func())(unsafe.Pointer(p))
-	a.Trace("timer")
-	(*func1)()
-	a.Trace("")
+func (a *Actor) UpdateTimer(ctx context.Context, ptr uintptr) {
+	fun, isEx := a.timerMap[ptr]
+	if isEx {
+		a.Trace("timer")
+		(fun)()
+		a.Trace("")
+	}
 }
 
 func (a *Actor) consume() {
