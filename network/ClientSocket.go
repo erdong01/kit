@@ -8,7 +8,7 @@ import (
 
 	"github.com/erDong01/micro-kit/base"
 	"github.com/erDong01/micro-kit/rpc"
-	"github.com/xtaci/kcp-go"
+	"github.com/xtaci/kcp-go/v5"
 	"google.golang.org/protobuf/proto"
 )
 
