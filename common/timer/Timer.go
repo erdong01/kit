@@ -163,7 +163,7 @@ func (t *Timer) Add(id *int64, time uint32, handle TimerHandle, opts ...OpOption
 
 // 删除一个定时器
 func (t *Timer) Delete(id *int64) {
-	atomic.StoreInt64(id, 0)
+	atomic.StoreInt64(id, -1)
 }
 
 // 移动某个级别的链表内容
@@ -205,7 +205,7 @@ func (t *Timer) shift() {
 func (t *Timer) dispatch(current *TimerNode) {
 	for current != nil {
 		id := current.LoadId()
-		if id != 0 {
+		if id > 0 {
 			current.handle()
 			if !current.bOnce {
 				t.loop_node = append(t.loop_node, current)
