@@ -2,11 +2,10 @@ package account
 
 import (
 	"database/sql"
+
 	cluster2 "github.com/erDong01/micro-kit/common/cluster"
 
-	"github.com/erDong01/micro-kit/common"
 	"github.com/erDong01/micro-kit/network"
-	"github.com/erDong01/micro-kit/rpc"
 )
 
 var (
@@ -58,7 +57,7 @@ func (this *ServerMgr) Init() bool {
 
 	//本身账号集群管理
 	this.cluster = new(cluster2.Cluster)
-	this.cluster.Init(&common.ClusterInfo{Type: rpc.SERVICE_ACCOUNTSERVER, Ip: userNetIP, Port: int32(port)}, etcdEndpoints, Nats_Cluster)
+	this.cluster.Init()
 	var packet EventProcess
 	packet.Init(1000)
 	this.cluster.BindPacketFunc(packet.PacketFunc)

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/erDong01/micro-kit/tools"
+	"github.com/erDong01/micro-kit/base"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -16,7 +16,7 @@ type SnowflakeT struct {
 	m_Client  *clientv3.Client
 	m_Lease   clientv3.Lease
 	m_LeaseId clientv3.LeaseID
-	m_UUID    tools.Snowflake
+	m_UUID    base.Snowflake
 }
 
 const (
@@ -48,21 +48,21 @@ func (this *SnowflakeT) Run() {
 		if err != nil || !txnRes.Succeeded { //抢锁失败
 			resp, err := this.m_Client.Get(context.Background(), uuid_dir1)
 			if err == nil && (resp != nil && resp.Kvs != nil) {
-				Ids := [tools.WorkeridMax + 1]bool{}
+				Ids := [base.WorkeridMax + 1]bool{}
 				for _, v := range resp.Kvs {
-					Id := tools.Int(string(v.Value[len(uuid_dir1)+1:]))
+					Id := base.Int(string(v.Value[len(uuid_dir1)+1:]))
 					Ids[Id] = true
 				}
 
 				for i, v := range Ids {
 					if v == false {
-						this.m_Id = int64(i) & tools.WorkeridMax
+						this.m_Id = int64(i) & base.WorkeridMax
 						goto TrySET
 					}
 				}
 			}
 			this.m_Id++
-			this.m_Id = this.m_Id & tools.WorkeridMax
+			this.m_Id = this.m_Id & base.WorkeridMax
 			goto TrySET
 		}
 
