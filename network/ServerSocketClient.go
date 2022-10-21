@@ -231,30 +231,30 @@ func (s *ServerSocketClient) SendLoop() bool {
 	return true
 }
 
-func (this *ServerSocketClient) SendPacket(head rpc.RpcHead, funcName string, msg proto.Message) int {
+func (s *ServerSocketClient) SendPacket(head rpc.RpcHead, funcName string, msg proto.Message) int {
 	rpcPacketByte, _ := rpc.MarshalPacket(head, funcName, msg)
 	var packet = rpc.Packet{
 		Buff: rpcPacketByte,
 	}
-	return this.Send(head, packet)
+	return s.Send(head, packet)
 }
 
-func (this *ServerSocketClient) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) int {
+func (s *ServerSocketClient) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) int {
 	buff := rpc.Marshal(&head, &funcName, params...)
-	return this.Send(head, buff)
+	return s.Send(head, buff)
 }
 
 // 设置链接属性
-func (this *ServerSocketClient) SetProperty(p any) {
-	this.Property = p
+func (s *ServerSocketClient) SetProperty(p any) {
+	s.Property = p
 }
 
 // 获取链接属性
-func (this *ServerSocketClient) GetProperty() (p any) {
-	return this.Property
+func (s *ServerSocketClient) GetProperty() (p any) {
+	return s.Property
 }
 
 // 移除链接属性
-func (this *ServerSocketClient) RemoveProperty() {
-	this.Property = nil
+func (s *ServerSocketClient) RemoveProperty() {
+	s.Property = nil
 }
