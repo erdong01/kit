@@ -57,7 +57,7 @@ func (s *ServerSocketClient) Start() bool {
 	}
 	if s.connectType == CLIENT_CONNECT {
 		s.sendChan = make(chan []byte, MAX_SEND_CHAN)
-		// timer.StoreTimerId(s.timerId, int64(s.clientId)+1<<32)
+		timer.StoreTimerId(s.timerId, int64(s.clientId)+1<<32)
 		// timer.RegisterTimer(s.timerId, (HEART_TIME_OUT/3)*time.Second, func() {
 		// 	s.Update()
 		// })
