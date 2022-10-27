@@ -125,6 +125,7 @@ func (s *ServerSocketClient) OnNetFail(error int) {
 func (s *ServerSocketClient) Stop() bool {
 	// timer.RegisterTimer(s.timerId, timer.TICK_INTERVAL, func() {
 	// 	timer.StopTimer(s.timerId)
+	time.Sleep(timer.TICK_INTERVAL)
 	if atomic.CompareAndSwapInt32(&s.state, SSF_RUN, SSF_STOP) {
 		if s.conn != nil {
 			s.conn.Close()
