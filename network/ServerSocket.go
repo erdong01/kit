@@ -101,7 +101,6 @@ func (s *ServerSocket) AddClinet(conn net.Conn, addr string, connectType int) *S
 		client.SetMaxPacketLen(s.GetMaxPacketLen())
 		client.clientId = s.AssignClientId()
 		client.ip = addr
-		client.SetState(SSF_RUN)
 		client.SetConnectType(connectType)
 		client.SetConn(conn)
 		s.clientLocker.Lock()
