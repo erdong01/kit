@@ -58,9 +58,9 @@ func (s *ServerSocketClient) Start() bool {
 	if s.connectType == CLIENT_CONNECT {
 		s.sendChan = make(chan []byte, MAX_SEND_CHAN)
 		timer.StoreTimerId(s.timerId, int64(s.clientId)+1<<32)
-		// timer.RegisterTimer(s.timerId, (HEART_TIME_OUT/3)*time.Second, func() {
-		// 	s.Update()
-		// })
+		timer.RegisterTimer(s.timerId, (HEART_TIME_OUT/2)*time.Second, func() {
+			s.Update()
+		})
 	}
 	if s.packetFuncList.Len() == 0 {
 		s.packetFuncList = s.server.packetFuncList
@@ -204,6 +204,7 @@ func (s *ServerSocketClient) Run() bool {
 // heart
 func (s *ServerSocketClient) Update() {
 	now := int(time.Now().Unix())
+	timer.StopTimer(s.timerId)
 	// timeout
 	if s.heartTime < now {
 		s.OnNetFail(2)

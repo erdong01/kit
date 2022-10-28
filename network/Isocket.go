@@ -21,7 +21,7 @@ const (
 
 const (
 	MAX_SEND_CHAN  = 512
-	HEART_TIME_OUT = 30
+	HEART_TIME_OUT = 60
 )
 
 type (
