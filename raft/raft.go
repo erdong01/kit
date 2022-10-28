@@ -1,13 +1,14 @@
 package raft
 
 import (
-	"github.com/erDong01/micro-kit/common"
 	"net"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/erDong01/micro-kit/tools"
+	"github.com/erDong01/micro-kit/common"
+
+	"github.com/erDong01/micro-kit/base"
 	"github.com/hashicorp/raft"
 	raftBoltdb "github.com/hashicorp/raft-boltdb"
 )
@@ -16,14 +17,14 @@ type (
 	Raft struct {
 		*raft.Raft
 		*common.ClusterInfo
-		hashRing       *tools.HashRing //hash一致性
+		hashRing       *base.HashRing //hash一致性
 		clusterInfoMap map[uint32]*common.ClusterInfo
 	}
 )
 
 func (this *Raft) InitRaft(info *common.ClusterInfo, Endpoints []string, fsm raft.FSM) {
 	this.ClusterInfo = info
-	this.hashRing = tools.NewHashRing()
+	this.hashRing = base.NewHashRing()
 	this.clusterInfoMap = make(map[uint32]*common.ClusterInfo)
 
 	this.Raft, _ = NewRaft(info.IpString(), info.IpString(), "./node", fsm)

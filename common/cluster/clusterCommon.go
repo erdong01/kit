@@ -2,101 +2,88 @@ package cluster
 
 import (
 	"fmt"
-	etcdv32 "github.com/erDong01/micro-kit/common/cluster/etcdv3"
-	"log"
 	"strings"
 
-	"github.com/erDong01/micro-kit/actor"
+	"github.com/erDong01/micro-kit/base"
 	"github.com/erDong01/micro-kit/common"
+	"github.com/erDong01/micro-kit/common/cluster/etv3"
 	"github.com/erDong01/micro-kit/rpc"
 	"github.com/nats-io/nats.go"
 )
 
-type (
-	Service    etcdv32.Service
-	Master     etcdv32.Master
-	Snowflake  etcdv32.Snowflake
-	PlayerRaft etcdv32.PlayerRaft
+const (
+	ETCD_DIR        = "server/"
+	MAILBOX_TL_TIME = etv3.MAILBOX_TL_TIME
 )
 
-// NewService 注册服务器
+type (
+	Service   etv3.Service
+	Master    etv3.Master
+	Snowflake etv3.Snowflake
+)
+
+// 注册服务器
 func NewService(info *common.ClusterInfo, Endpoints []string) *Service {
-	service := &etcdv32.Service{}
+	service := &etv3.Service{}
 	service.Init(info, Endpoints)
 	return (*Service)(service)
 }
 
-// NewMaster 监控服务器
-func NewMaster(info common.IClusterInfo, Endpoints []string, pActor actor.IActor) *Master {
-	master := &etcdv32.Master{}
-	master.Init(info, Endpoints, pActor)
+// 监控服务器
+func NewMaster(info common.IClusterInfo, Endpoints []string) *Master {
+	master := &etv3.Master{}
+	master.Init(info, Endpoints)
 	return (*Master)(master)
 }
 
-// NewSnowflake uuid生成器
+// uuid生成器
 func NewSnowflake(Endpoints []string) *Snowflake {
-	uuid := &etcdv32.Snowflake{}
+	uuid := &etv3.Snowflake{}
 	uuid.Init(Endpoints)
 	return (*Snowflake)(uuid)
 }
 
-func NewPlayerRaft(Endpoints []string) *PlayerRaft {
-	playerRaft := &etcdv32.PlayerRaft{}
-	playerRaft.Init(Endpoints)
-	return (*PlayerRaft)(playerRaft)
-}
-func (this *PlayerRaft) GetPlayer(Id int64) *rpc.PlayerClusterInfo {
-	return (*etcdv32.PlayerRaft)(this).GetPlayer(Id)
+func getChannel(clusterInfo common.ClusterInfo) string {
+	return fmt.Sprintf("%s/%s/%d", ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
 }
 
-func (this *PlayerRaft) Publish(info *rpc.PlayerClusterInfo) bool {
-	return (*etcdv32.PlayerRaft)(this).Publish(info)
+func getTopicChannel(clusterInfo common.ClusterInfo) string {
+	return fmt.Sprintf("%s/%s", ETCD_DIR, clusterInfo.String())
 }
 
-func (this *PlayerRaft) Lease(leaseId int64) error {
-	return (*etcdv32.PlayerRaft)(this).Lease(leaseId)
+func getCallChannel(clusterInfo common.ClusterInfo) string {
+	return fmt.Sprintf("%s/%s/call/%d", ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
 }
 
-func GetRpcChannel(head rpc.RpcHead) string {
-	return fmt.Sprintf("%s/%s/%d", etcdv32.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
+func getRpcChannel(head rpc.RpcHead) string {
+	return fmt.Sprintf("%s/%s/%d", ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
 }
 
-func GetRpcTopicChannel(head rpc.RpcHead) string {
-	return fmt.Sprintf("%s/%s", etcdv32.ETCD_DIR, strings.ToLower(head.DestServerType.String()))
-}
-func GetRpcCallChannel(head rpc.RpcHead) string {
-	return fmt.Sprintf("%s/%s/call/%d", etcdv32.ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
+func getRpcTopicChannel(head rpc.RpcHead) string {
+	return fmt.Sprintf("%s/%s", ETCD_DIR, strings.ToLower(head.DestServerType.String()))
 }
 
-func GetChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s/%d", etcdv32.ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
+func getRpcCallChannel(head rpc.RpcHead) string {
+	return fmt.Sprintf("%s/%s/call/%d", ETCD_DIR, strings.ToLower(head.DestServerType.String()), head.ClusterId)
 }
 
-func GetTopicChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s", etcdv32.ETCD_DIR, clusterInfo.String())
-}
-
-func GetCallChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s/call/%d", etcdv32.ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
-}
-
-func SetupNatsConn(connectString string, appDieChan chan bool, options ...nats.Option) (*nats.Conn, error) {
+func setupNatsConn(connectString string, appDieChan chan bool, options ...nats.Option) (*nats.Conn, error) {
 	natsOptions := append(
 		options,
 		nats.DisconnectHandler(func(_ *nats.Conn) {
-			log.Println("disconnected from nats!")
+			base.LOG.Println("disconnected from nats!")
 		}),
 		nats.ReconnectHandler(func(nc *nats.Conn) {
-			log.Printf("reconnected to nats server %s with address %s in cluster %s!", nc.ConnectedServerId(), nc.ConnectedAddr(), nc.ConnectedUrl())
+			base.LOG.Printf("reconnected to nats server %s with address %s in cluster %s!", nc.ConnectedServerId(), nc.ConnectedAddr(), nc.ConnectedUrl())
 		}),
 		nats.ClosedHandler(func(nc *nats.Conn) {
 			err := nc.LastError()
 			if err == nil {
-				log.Println("nats connection closed with no error.")
+				base.LOG.Println("nats connection closed with no error.")
 				return
 			}
 
-			log.Fatalf("nats connection closed. reason: %q", nc.LastError())
+			base.LOG.Println("nats connection closed. reason: %q", nc.LastError())
 			if appDieChan != nil {
 				appDieChan <- true
 			}

@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/erDong01/micro-kit/wrong"
+	"github.com/erDong01/micro-kit/base"
 )
 
 const (
@@ -68,6 +68,10 @@ var (
 
 func (t *TimerNode) LoadId() int64 {
 	return atomic.LoadInt64(t.id)
+}
+
+func StoreTimerId(id *int64, val int64) bool {
+	return atomic.LoadInt64(id) == 0 && atomic.CompareAndSwapInt64(id, 0, val)
 }
 
 func (op *Op) applyOpts(opts []OpOption) {
@@ -159,7 +163,7 @@ func (t *Timer) Add(id *int64, time uint32, handle TimerHandle, opts ...OpOption
 
 // 删除一个定时器
 func (t *Timer) Delete(id *int64) {
-	atomic.StoreInt64(id, 0)
+	atomic.StoreInt64(id, -1)
 }
 
 // 移动某个级别的链表内容
@@ -201,7 +205,7 @@ func (t *Timer) shift() {
 func (t *Timer) dispatch(current *TimerNode) {
 	for current != nil {
 		id := current.LoadId()
-		if id != 0 {
+		if id > 0 {
 			current.handle()
 			if !current.bOnce {
 				t.loop_node = append(t.loop_node, current)
@@ -259,7 +263,7 @@ func (t *Timer) update() {
 func (t *Timer) loop() bool {
 	defer func() {
 		if err := recover(); err != nil {
-			wrong.TraceCode(err)
+			base.TraceCode(err)
 		}
 	}()
 

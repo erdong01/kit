@@ -5,13 +5,12 @@ import (
 	"hash/crc32"
 	"io"
 	"log"
-	"net"
+	"sync/atomic"
 	"time"
 
+	"github.com/erDong01/micro-kit/base"
 	"github.com/erDong01/micro-kit/common/timer"
 	"github.com/erDong01/micro-kit/rpc"
-	"github.com/erDong01/micro-kit/tools"
-	"github.com/erDong01/micro-kit/wrong"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -32,10 +31,10 @@ type IServerSocketClient interface {
 
 type ServerSocketClient struct {
 	Socket
-	ServerSocket *ServerSocket
-	sendChan     chan []byte //对外缓冲队列
-	timerId      *int64
-	Property     any
+	server   *ServerSocket
+	sendChan chan []byte //对外缓冲队列
+	timerId  *int64
+	Property any
 }
 
 func handleError(err error) {
@@ -44,189 +43,220 @@ func handleError(err error) {
 	}
 	log.Printf("错误：%s\n", err.Error())
 }
-func (this *ServerSocketClient) Init(ip string, port int) bool {
-	if this.connectType == CLIENT_CONNECT {
-		this.sendChan = make(chan []byte, MAX_SEND_CHAN)
-		this.timerId = new(int64)
-		*this.timerId = int64(this.clientId)
-		timer.RegisterTimer(this.timerId, (HEART_TIME_OUT/3)*time.Second, func() {
-			this.Update()
-		})
-	}
-	this.Socket.Init(ip, port)
+
+func (s *ServerSocketClient) Init(ip string, port int, params ...OpOption) bool {
+	s.timerId = new(int64)
+
+	s.Socket.Init(ip, port, params...)
 	return true
 }
 
-func (this *ServerSocketClient) Start() bool {
-	if this.ServerSocket == nil {
+func (s *ServerSocketClient) Start() bool {
+	if s.server == nil {
 		return false
 	}
-	if this.PacketFuncList.Len() == 0 {
-		this.PacketFuncList = this.ServerSocket.PacketFuncList
+	if s.connectType == CLIENT_CONNECT {
+		s.sendChan = make(chan []byte, MAX_SEND_CHAN)
+		timer.StoreTimerId(s.timerId, int64(s.clientId)+1<<32)
+		timer.RegisterTimer(s.timerId, (HEART_TIME_OUT/2)*time.Second, func() {
+			s.Update()
+		})
 	}
-	this.Conn.(*net.TCPConn).SetNoDelay(true)
-	go this.Run()
-	if this.connectType == CLIENT_CONNECT {
-		go this.SendLoop()
+	if s.packetFuncList.Len() == 0 {
+		s.packetFuncList = s.server.packetFuncList
+	}
+	//s.m_Conn.SetKeepAlive(true)
+	//s.m_Conn.SetKeepAlivePeriod(5*time.Second)
+	go s.Run()
+	if s.connectType == CLIENT_CONNECT {
+		go s.SendLoop()
 	}
 	return true
 }
-func (this *ServerSocketClient) Send(head rpc.RpcHead, buff []byte) int {
-	if this == nil {
-		return 0
-	}
+
+func (s *ServerSocketClient) Send(head rpc.RpcHead, packet rpc.Packet) int {
 	defer func() {
 		if err := recover(); err != nil {
-			wrong.TraceCode(err)
+			base.TraceCode(err)
 		}
 	}()
 
-	if this.connectType == CLIENT_CONNECT { //对外链接send不阻塞
+	if s.connectType == CLIENT_CONNECT { //对外链接send不阻塞
 		select {
-		case this.sendChan <- buff:
+		case s.sendChan <- packet.Buff:
 		default: //网络太卡,tcp send缓存满了并且发送队列也满了
-			this.OnNetFail()
+			s.OnNetFail(1)
 		}
 	} else {
-		return this.DoSend(buff)
-
+		return s.DoSend(packet.Buff)
 	}
 	return 0
 }
 
-func (this *ServerSocketClient) DoSend(buff []byte) int {
-	if this == nil || this.Conn == nil {
+func (s *ServerSocketClient) DoSend(buff []byte) int {
+	if s.conn == nil {
 		return 0
 	}
 
-	n, err := this.Conn.Write(this.packetParser.Write(buff))
-
+	n, err := s.conn.Write(s.packetParser.Write(buff))
 	handleError(err)
 	if n > 0 {
 		return n
 	}
+
 	return 0
 }
 
-func (this *ServerSocketClient) OnNetFail() {
-	this.Stop()
-	if this.connectType == CLIENT_CONNECT {
-		stream := tools.NewBitStream(make([]byte, 32), 32)
+func (s *ServerSocketClient) OnNetFail(error int) {
+	s.Stop()
+	if s.connectType == CLIENT_CONNECT { //netgate对外格式统一
+		stream := base.NewBitStream(make([]byte, 32), 32)
 		stream.WriteInt(int(DISCONNECTINT), 32)
-		stream.WriteInt(int(this.clientId), 32)
-		this.HandlePacket(stream.GetBuffer())
+		stream.WriteInt(int(s.clientId), 32)
+		s.HandlePacket(stream.GetBuffer())
 	} else {
-		this.CallMsg("DISCONNECT", this.clientId)
+		s.CallMsg(rpc.RpcHead{}, "DISCONNECT", s.clientId)
 	}
-	if this.ServerSocket != nil {
-		this.ServerSocket.DelClient(this)
-	}
-}
-func (this *ServerSocketClient) Close() {
-	if this.connectType == CLIENT_CONNECT {
-		this.sendChan <- nil
-		timer.StopTimer(this.timerId)
-	}
-	this.Socket.Close()
-	if this.ServerSocket != nil {
-		this.ServerSocket.DelClient(this)
+	if s.server != nil {
+		s.server.DelClinet(s)
 	}
 }
-func (this *ServerSocketClient) Run() bool {
-	var buff = make([]byte, this.ReceiveBufferSize)
-	this.SetState(SSF_RUN)
+
+func (s *ServerSocketClient) Stop() bool {
+	// timer.RegisterTimer(s.timerId, timer.TICK_INTERVAL, func() {
+	// 	timer.StopTimer(s.timerId)
+	time.Sleep(timer.TICK_INTERVAL)
+	if atomic.CompareAndSwapInt32(&s.state, SSF_RUN, SSF_STOP) {
+		if s.conn != nil {
+			s.conn.Close()
+		}
+	}
+	// })
+	return false
+}
+
+func (s *ServerSocketClient) Close() {
+	if s.connectType == CLIENT_CONNECT {
+		s.sendChan <- nil
+		//close(s.sendChan)
+	}
+	s.Socket.Close()
+	if s.server != nil {
+		s.server.DelClinet(s)
+	}
+}
+
+func (s *ServerSocketClient) Run() bool {
+	defer func() {
+		if err := recover(); err != nil {
+			base.TraceCode(err)
+		}
+	}()
+	var buff = make([]byte, s.receiveBufferSize)
+	s.SetState(SSF_RUN)
 	loop := func() bool {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Println(err)
+				base.TraceCode(err)
 			}
 		}()
 
-		if this.Conn == nil {
+		if s.conn == nil {
 			return false
 		}
-		n, err := this.Conn.Read(buff)
+
+		n, err := s.conn.Read(buff)
 		if err == io.EOF {
-			fmt.Printf("远程链接：%s已经关闭！\n", this.Conn.RemoteAddr().String())
-			this.OnNetFail()
+			fmt.Printf("远程链接：%s已经关闭！\n", s.conn.RemoteAddr().String())
+			s.OnNetFail(0)
 			return false
 		}
 		if err != nil {
 			handleError(err)
-			this.OnNetFail()
+			s.OnNetFail(0)
 			return false
 		}
 		if n > 0 {
 			//熔断
-			if !this.packetParser.Read(buff[:n]) && this.connectType == CLIENT_CONNECT {
-				this.OnNetFail()
+			if !s.packetParser.Read(buff[:n]) && s.connectType == CLIENT_CONNECT {
+				s.OnNetFail(1)
 				return false
 			}
 		}
-		this.heartTime = int(time.Now().Unix()) + HEART_TIME_OUT
+		s.heartTime = int(time.Now().Unix()) + HEART_TIME_OUT
+
 		return true
 	}
+
 	for {
 		if !loop() {
 			break
 		}
 	}
-	if this.Socket.clientClose != nil {
-		this.Socket.clientClose(this.clientId)
+	if s.server.clientClose != nil {
+		s.server.clientClose(s.clientId)
 	}
-	this.Close()
-	fmt.Printf("%s关闭连接;socketId:%d \n", this.IP, this.GetId())
+	s.Close()
+	fmt.Printf("%s关闭连接;socketId:%d \n", s.ip, s.GetId())
 	return true
 }
 
-func (this *ServerSocketClient) Update() {
+// heart
+func (s *ServerSocketClient) Update() {
 	now := int(time.Now().Unix())
-	if this.heartTime < now {
-		this.OnNetFail()
+	timer.StopTimer(s.timerId)
+	// timeout
+	if s.heartTime < now {
+		s.OnNetFail(2)
 		return
 	}
 }
 
-func (this *ServerSocketClient) SendLoop() bool {
+func (s *ServerSocketClient) SendLoop() bool {
 	for {
 		defer func() {
 			if err := recover(); err != nil {
-				wrong.TraceCode(err)
+				base.TraceCode(err)
 			}
 		}()
+
 		select {
-		case buff := <-this.sendChan:
-			if buff == nil {
+		case buff := <-s.sendChan:
+			if buff == nil { //信道关闭
 				return false
 			} else {
-				this.DoSend(buff)
+				s.DoSend(buff)
 			}
 		}
 	}
+
 	return true
 }
 
-func (this *ServerSocketClient) SendPacket(head rpc.RpcHead, funcName string, packet proto.Message) int {
-	buff := rpc.MarshalPacket(head, funcName, packet)
-	return this.Send(rpc.RpcHead{}, buff)
+func (s *ServerSocketClient) SendPacket(head rpc.RpcHead, funcName string, msg proto.Message) int {
+	rpcPacketByte, _ := rpc.MarshalPacket(head, funcName, msg)
+	var packet = rpc.Packet{
+		Buff: rpcPacketByte,
+	}
+	return s.Send(head, packet)
 }
 
-func (this *ServerSocketClient) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) int {
-	buff := rpc.Marshal(head, funcName, params...)
-	return this.Send(head, buff)
+func (s *ServerSocketClient) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) int {
+	buff := rpc.Marshal(&head, &funcName, params...)
+	return s.Send(head, buff)
 }
 
 // 设置链接属性
-func (this *ServerSocketClient) SetProperty(p any) {
-	this.Property = p
+func (s *ServerSocketClient) SetProperty(p any) {
+	s.Property = p
 }
 
 // 获取链接属性
-func (this *ServerSocketClient) GetProperty() (p any) {
-	return this.Property
+func (s *ServerSocketClient) GetProperty() (p any) {
+	return s.Property
 }
 
 // 移除链接属性
-func (this *ServerSocketClient) RemoveProperty() {
-	this.Property = nil
+func (s *ServerSocketClient) RemoveProperty() {
+	s.Property = nil
 }

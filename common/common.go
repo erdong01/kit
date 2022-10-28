@@ -4,37 +4,47 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/erDong01/micro-kit/base"
+
 	"github.com/erDong01/micro-kit/rpc"
-	"github.com/erDong01/micro-kit/tools"
 )
 
 type (
-	ClusterInfo  rpc.ClusterInfo
+	//集群信息
+	ClusterInfo rpc.ClusterInfo
+
 	IClusterInfo interface {
 		Id() uint32
 		String() string
 		ServiceType() rpc.SERVICE
 		IpString() string
-		RaftIp() string
+	}
+
+	StubMailBox struct {
+		rpc.StubMailBox
 	}
 )
 
-func (clusterInfo *ClusterInfo) IpString() string {
-	return fmt.Sprintf("%s:%d", clusterInfo.Ip, clusterInfo.Port)
+func (c *ClusterInfo) IpString() string {
+	return fmt.Sprintf("%s:%d", c.Ip, c.Port)
 }
 
-func (clusterInfo *ClusterInfo) RaftIp() string {
-	return fmt.Sprintf("%s:%d", clusterInfo.Ip, clusterInfo.Port+10000)
+func (c *ClusterInfo) String() string {
+	return strings.ToLower(c.Type.String())
 }
 
-func (clusterInfo *ClusterInfo) String() string {
-	return strings.ToLower(clusterInfo.Type.String())
+func (c *ClusterInfo) Id() uint32 {
+	return base.ToHash(c.IpString())
 }
 
-func (clusterInfo *ClusterInfo) Id() uint32 {
-	return tools.ToHash(clusterInfo.IpString())
+func (c *ClusterInfo) ServiceType() rpc.SERVICE {
+	return c.Type
 }
 
-func (clusterInfo *ClusterInfo) ServiceType() rpc.SERVICE {
-	return clusterInfo.Type
+func (s *StubMailBox) StubName() string {
+	return s.StubType.String()
+}
+
+func (s *StubMailBox) Key() string {
+	return fmt.Sprintf("%s/%d", s.StubType.String(), s.Id)
 }

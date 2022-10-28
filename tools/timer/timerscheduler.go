@@ -69,6 +69,10 @@ func (ts *TimerScheduler) CreateTimerAfter(df *DelayFunc, duration time.Duration
 	return ts.IDGen, ts.tw.AddTimer(ts.IDGen, NewTimerAfter(df, duration))
 }
 
+func (ts *TimerScheduler) AddTimer(tID uint32, df *DelayFunc, duration time.Duration) error {
+	return ts.tw.AddTimer(tID, NewTimerAfter(df, duration))
+}
+
 // CancelTimer 删除timer
 func (ts *TimerScheduler) CancelTimer(tID uint32) {
 	ts.Lock()
