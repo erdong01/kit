@@ -30,7 +30,7 @@ func TestNewTimerScheduler(t *testing.T) {
 		f := NewDelayFunc(foo, []interface{}{i, i * 3})
 		tID, err := timerScheduler.CreateTimerAfter(f, time.Duration(3*i)*time.Millisecond)
 		if err != nil {
-			fmt.Println("create timer error", tID, err)
+			log.Println("create timer error", tID, err)
 			break
 		}
 	}
@@ -52,12 +52,11 @@ func TestNewAutoExecTimerScheduler(t *testing.T) {
 	autoTS := NewAutoExecTimerScheduler()
 
 	//给调度器添加Timer
-	for i := 0; i < 2; i++ {
-		fmt.Println("i", i)
+	for i := 0; i < 2000; i++ {
 		f := NewDelayFunc(foo, []interface{}{i, i * 3})
-		tID, err := autoTS.CreateTimerAfter(f, time.Duration(10*i)*time.Second)
+		tID, err := autoTS.CreateTimerAfter(f, time.Duration(3*i)*time.Millisecond)
 		if err != nil {
-			fmt.Println("create timer error", tID, err)
+			log.Println("create timer error", tID, err)
 			break
 		}
 	}
@@ -84,4 +83,36 @@ func TestCancelTimerScheduler(t *testing.T) {
 
 	//阻塞等待
 	select {}
+}
+
+var timerScheduler *TimerScheduler
+var TID uint32
+var TID2 uint32
+
+func TAddTimer(v ...interface{}) {
+	i := v[0].(int)
+	fmt.Println(i)
+	i++
+	f1 := NewDelayFunc(TAddTimer, []interface{}{i, 1})
+	timerScheduler.AddTimer(TID, f1, time.Duration(10)*time.Millisecond)
+}
+
+func TAddTimer2(v ...interface{}) {
+	i := v[0].(int)
+	fmt.Println(i)
+	i += 10
+	f1 := NewDelayFunc(TAddTimer2, []interface{}{i, 1})
+	timerScheduler.AddTimer(TID2, f1, time.Duration(10)*time.Microsecond)
+
+}
+
+// 采用自动调度器运转时间轮
+func TestAddTimer(t *testing.T) {
+	timerScheduler = NewAutoExecTimerScheduler()
+	f1 := NewDelayFunc(TAddTimer, []interface{}{1})
+	TID, _ = timerScheduler.CreateTimerAfter(f1, time.Duration(2)*time.Second)
+	f2 := NewDelayFunc(TAddTimer2, []interface{}{10})
+	TID2, _ = timerScheduler.CreateTimerAfter(f2, time.Duration(2)*time.Second)
+	time.Sleep(time.Second * 100)
+	//阻塞等待
 }
