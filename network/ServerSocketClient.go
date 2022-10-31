@@ -253,6 +253,9 @@ func (s *ServerSocketClient) SetProperty(p any) {
 
 // 获取链接属性
 func (s *ServerSocketClient) GetProperty() (p any) {
+	if s.Property == nil {
+		return nil
+	}
 	return s.Property
 }
 
