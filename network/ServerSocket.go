@@ -73,7 +73,7 @@ func (s *ServerSocket) Start() bool {
 	//延迟，监听关闭
 	//defer ln.Close()
 	go s.Run()
-	// go s.RunKcp()
+	go s.RunKcp()
 	return true
 }
 
