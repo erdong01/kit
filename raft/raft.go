@@ -10,7 +10,7 @@ import (
 
 	"github.com/erDong01/micro-kit/base"
 	"github.com/hashicorp/raft"
-	raftBoltdb "github.com/hashicorp/raft-boltdb"
+	raftBoltdb "github.com/hashicorp/raft-boltdb/v2"
 )
 
 type (
