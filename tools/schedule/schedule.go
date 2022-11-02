@@ -25,15 +25,15 @@ type (
 	// 定时时间精确到秒，不精确管理goroutine的退出
 	// 主要逻辑只不过是对标准库Timer、Ticker封装管理而已
 	Schedule struct {
-		IDGen  int
+		IDGen  uint64
 		mutex  sync.Mutex
-		events map[int]*event
+		events map[uint64]*event
 	}
 )
 
 func New() *Schedule {
 	return &Schedule{
-		events: make(map[int]*event),
+		events: make(map[uint64]*event),
 	}
 }
 func (s *Schedule) Run(ctx context.Context) {
@@ -94,7 +94,7 @@ func (s *event) expire() bool {
 }
 
 // Add 添加
-func (s *Schedule) Add(scheduler Scheduler, duration time.Duration, persistence bool) (TID int) {
+func (s *Schedule) Add(scheduler Scheduler, duration time.Duration, persistence bool) (TID uint64) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.IDGen++
@@ -113,7 +113,7 @@ func (s *Schedule) Add(scheduler Scheduler, duration time.Duration, persistence 
 }
 
 // Remove 移除
-func (s *Schedule) Remove(id int) {
+func (s *Schedule) Remove(id uint64) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	if ev, ok := s.events[id]; ok {
@@ -128,7 +128,7 @@ func (s *Schedule) Remove(id int) {
 }
 
 // Surplus 剩余
-func (s *Schedule) Surplus(id int) (duration time.Duration) {
+func (s *Schedule) Surplus(id uint64) (duration time.Duration) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	if ev, ok := s.events[id]; ok {
