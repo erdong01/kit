@@ -10,14 +10,14 @@ import (
 
 type (
 	event struct {
-		timer     *time.Timer
-		ticker    *time.Ticker
-		endTime   time.Time
-		duration  time.Duration
-		scheduler Scheduler
+		timer        *time.Timer
+		ticker       *time.Ticker
+		endTime      time.Time
+		duration     time.Duration
+		delayHandler DelayHandler
 	}
 	// Scheduler 调度程序
-	Scheduler interface {
+	DelayHandler interface {
 		OnTimer()
 	}
 	// Schedule 时间表
@@ -50,14 +50,14 @@ func (s *Schedule) Start(ctx context.Context) {
 			s.mutex.Lock()
 			for k, v := range s.events {
 				if v.expire() {
-					go func(s Scheduler) {
+					go func(d DelayHandler) {
 						defer func() {
 							if err := recover(); err != nil {
 								base.TraceCode(err)
 							}
 						}()
-						s.OnTimer()
-					}(s.events[k].scheduler)
+						d.OnTimer()
+					}(s.events[k].delayHandler)
 					if v.timer != nil {
 						delete(s.events, k)
 					}
@@ -94,7 +94,7 @@ func (s *event) expire() bool {
 }
 
 // Add 添加
-func (s *Schedule) Add(scheduler Scheduler, duration time.Duration, persistence bool) (TID uint64) {
+func (s *Schedule) Add(delayHandler DelayHandler, duration time.Duration, persistence bool) (TID uint64) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.IDGen++
@@ -106,7 +106,7 @@ func (s *Schedule) Add(scheduler Scheduler, duration time.Duration, persistence 
 		ev.ticker = time.NewTicker(duration)
 	}
 	ev.duration = duration
-	ev.scheduler = scheduler
+	ev.delayHandler = delayHandler
 	ev.endTime = time.Now().Add(duration)
 	s.events[s.IDGen] = &ev
 	return
