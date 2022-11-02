@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 	"time"
+
+	"github.com/erDong01/micro-kit/base"
 )
 
 type (
@@ -40,7 +42,7 @@ func (s *Schedule) Run(ctx context.Context) {
 
 // Start 开始
 func (s *Schedule) Start(ctx context.Context) {
-	timer := time.NewTimer(1 * time.Second)
+	var timer = time.NewTimer(1 * time.Second)
 	for {
 		timer.Reset(1 * time.Second)
 		select {
@@ -48,7 +50,14 @@ func (s *Schedule) Start(ctx context.Context) {
 			s.mutex.Lock()
 			for k, v := range s.events {
 				if v.expire() {
-					go s.events[k].scheduler.OnTimer()
+					go func(s Scheduler) {
+						defer func() {
+							if err := recover(); err != nil {
+								base.TraceCode(err)
+							}
+						}()
+						s.OnTimer()
+					}(s.events[k].scheduler)
 					if v.timer != nil {
 						delete(s.events, k)
 					}
