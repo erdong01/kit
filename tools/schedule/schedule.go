@@ -16,7 +16,7 @@ type (
 		duration     time.Duration
 		delayHandler DelayHandler
 	}
-	// Scheduler 调度程序
+	// DelayHandler 调度程序 需要传递参数通过 struct 传递
 	DelayHandler interface {
 		OnTimer()
 	}
@@ -36,6 +36,7 @@ func New() *Schedule {
 		events: make(map[uint64]*event),
 	}
 }
+
 func (s *Schedule) Run(ctx context.Context) {
 	go s.Start(ctx)
 }
@@ -58,6 +59,7 @@ func (s *Schedule) Start(ctx context.Context) {
 						}()
 						d.OnTimer()
 					}(s.events[k].delayHandler)
+
 					if v.timer != nil {
 						delete(s.events, k)
 					}
@@ -89,7 +91,6 @@ func (s *event) expire() bool {
 		default:
 		}
 	}
-
 	return false
 }
 
@@ -99,7 +100,7 @@ func (s *Schedule) Add(delayHandler DelayHandler, duration time.Duration, persis
 	defer s.mutex.Unlock()
 	s.IDGen++
 	TID = s.IDGen
-	ev := event{}
+	var ev event
 	if !persistence {
 		ev.timer = time.NewTimer(duration)
 	} else {
