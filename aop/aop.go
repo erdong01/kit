@@ -5,9 +5,10 @@ import (
 )
 
 type Aop struct {
-	I           IAop
 	beforeSlice []IAop
 	afterSlice  []IAop
+	Ctx         context.Context
+	I           IAop
 }
 
 type IAop interface {
@@ -25,12 +26,12 @@ func New(Ctx context.Context, I IAop) *Aop {
 	return aop
 }
 
-func (a *Aop) Before(I ...IAop) *Aop {
+func (a *Aop) SetBefore(I ...IAop) *Aop {
 	a.beforeSlice = I
 	return a
 }
 
-func (a *Aop) After(I ...IAop) *Aop {
+func (a *Aop) SetAfter(I ...IAop) *Aop {
 	a.afterSlice = I
 	return a
 }
@@ -54,25 +55,22 @@ func (a *Aop) Run() {
 	}
 }
 
-type Base struct {
-	Ctx context.Context
-	End bool
-}
+func (b *Aop) Before()  {}
+func (b *Aop) Handler() {}
+func (b *Aop) After()   {}
 
-func (b *Base) Before()  {}
-func (b *Base) Handler() {}
-func (b *Base) After()   {}
-func (b *Base) Context(ctx context.Context) {
+func (b *Aop) Context(ctx context.Context) {
 	b.Ctx = ctx
 }
-func (b *Base) GetContext() context.Context {
+
+func (b *Aop) GetContext() context.Context {
 	return b.Ctx
 }
 
-func (b *Base) Set(key, vale any) {
+func (b *Aop) Set(key, vale any) {
 	b.Ctx = context.WithValue(b.Ctx, key, vale)
 }
 
-func (b *Base) Get(key any) any {
+func (b *Aop) Get(key any) any {
 	return b.Ctx.Value(key)
 }
