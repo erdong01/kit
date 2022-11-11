@@ -4,7 +4,7 @@
 
 ###文档：
 
-[core](docs/aop.md)
+[Aop](docs/aop.md)
 
 
 [项目工程化]( https://github.com/golang-standards/project-layout)

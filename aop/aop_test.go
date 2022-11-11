@@ -2,9 +2,22 @@ package aop
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 )
+
+type Goods struct {
+	Aop
+	GoodsNo int
+}
+
+func (g *Goods) Handler() {
+	if g.GoodsNo <= 0 {
+		g.Break(errors.New("商品不存在"))
+	}
+	fmt.Println("商品存在")
+}
 
 type Order struct {
 	Aop
@@ -18,7 +31,10 @@ func (o *Order) Handler() {
 	o.Set("order_no", o.OrderNo)
 }
 func (o *Order) After() {
+	order_no := o.Get("order_no")
+	fmt.Println("Order order_no", order_no)
 	fmt.Println("status", o.Status)
+	o.Break(errors.New("错了"))
 }
 
 type Pay struct {
@@ -28,14 +44,11 @@ type Pay struct {
 }
 
 func (o *Pay) Handler() {
-	o.Get("order_no")
-	// fmt.Println("order_no", order_no)
+	order_no := o.Get("order_no")
+	fmt.Println("Pay order_no", order_no)
 }
-func (o *Pay) After() {
-	// fmt.Println("status", o.Status)
-}
-func TestXxx(t *testing.T) {
-	New(context.Background(), &Order{OrderNo: 22}).Run()
+func TestOrder(t *testing.T) {
+	New(context.Background(), &Order{OrderNo: 22}).SetBefore(&Goods{}).SetAfter(&Pay{}).Run()
 	// Add()
 }
 
