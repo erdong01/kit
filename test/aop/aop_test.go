@@ -5,50 +5,56 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/erDong01/micro-kit/aop"
 )
 
+type Form struct {
+	GoodsNo  int //商品编号
+	GoodsNum int //商品数量
+}
+
 type Goods struct {
-	Aop
-	GoodsNo int
+	aop.Aop
+	form Form
 }
 
 func (g *Goods) Handler() {
-	if g.GoodsNo <= 0 {
+	if g.form.GoodsNo <= 0 {
 		g.Break(errors.New("商品不存在"))
+		return
 	}
 	fmt.Println("商品存在")
 }
 
 type Order struct {
-	Aop
+	aop.Aop
+	form    Form
 	OrderNo int
 	Status  int8
 }
 
 func (o *Order) Handler() {
+	o.OrderNo = 123456
 	o.Status = 1
-	fmt.Println("order_no", o.OrderNo)
-	o.Set("order_no", o.OrderNo)
+	fmt.Println("创建订单")
 }
 func (o *Order) After() {
-	order_no := o.Get("order_no")
-	fmt.Println("Order order_no", order_no)
-	fmt.Println("status", o.Status)
-	o.Break(errors.New("错了"))
+	o.Set("order_no", o.OrderNo)
 }
 
 type Pay struct {
-	Aop
-	OrderNo int
-	Status  int8
+	aop.Aop
 }
 
 func (o *Pay) Handler() {
 	order_no := o.Get("order_no")
-	fmt.Println("Pay order_no", order_no)
+	fmt.Println("为订单号：", order_no, "创建支付订单")
 }
 func TestOrder(t *testing.T) {
-	New(context.Background(), &Order{OrderNo: 22}).SetBefore(&Goods{}).SetAfter(&Pay{}).Run()
+	aop.New(context.Background(), &Order{}).SetBefore(&Goods{
+		form: Form{GoodsNo: 11, GoodsNum: 1},
+	}).SetAfter(&Pay{}).Run()
 	// Add()
 }
 
