@@ -64,17 +64,15 @@ func (o *Pay) Handler() {
 	fmt.Println("为订单号：", order_no, "创建支付订单")
 }
 
+// 测试
 func TestOrder(t *testing.T) {
-	aop.New(context.Background(), &Order{}).SetBefore(&Goods{
+    
+	aop.New(context.Background(), &Order{}).
+    SetBefore(&Goods{
 		form: Form{GoodsNo: 11, GoodsNum: 1},
-	}).SetAfter(&Pay{}).Run()
-	// Add()
-}
-
-func Add() {
-	var ctx context.Context = context.Background()
-	ctx = context.WithValue(ctx, "order_no", 11)
-	ctx.Value("order_no")
+	}).
+    SetAfter(&Pay{}).Run()
+	
 }
 
 ```
