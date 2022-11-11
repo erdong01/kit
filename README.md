@@ -4,8 +4,7 @@
 
 ###文档：
 
-[core](docs/core.md)
+[core](docs/aop.md)
 
-[mongo](docs/mongo.md)
 
 [项目工程化]( https://github.com/golang-standards/project-layout)
