@@ -32,7 +32,7 @@ type Goods struct {
 
 func (g *Goods) Handler() {
 	if g.form.GoodsNo <= 0 {
-		g.Break(errors.New("商品不存在"))
+		g.Break(errors.New("商品不存在")) //结束执行
 		return
 	}
 	fmt.Println("商品存在")
@@ -50,23 +50,26 @@ func (o *Order) Handler() {
 	o.Status = 1
 	fmt.Println("创建订单")
 }
-
 func (o *Order) After() {
 	o.Set("order_no", o.OrderNo)
 }
 
 type Pay struct {
 	aop.Aop
+	OrderNo int
 }
 
-func (o *Pay) Handler() {
-	order_no := o.Get("order_no")
-	fmt.Println("为订单号：", order_no, "创建支付订单")
+func (p *Pay) Before() {
+	p.OrderNo = p.Get("order_no").(int)
+}
+
+func (p *Pay) Handler() {
+	fmt.Println("为订单号：", p.OrderNo, "创建支付订单")
 }
 
 // 测试
 func TestOrder(t *testing.T) {
-    
+
 	aop.New(context.Background(), &Order{}).
     SetBefore(&Goods{
 		form: Form{GoodsNo: 11, GoodsNum: 1},
