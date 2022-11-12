@@ -24,7 +24,7 @@ func (g *Goods) Handler() {
 		g.Break(errors.New("商品不存在")) //结束执行
 		return
 	}
-	fmt.Println("商品存在")
+	// fmt.Println("商品存在")
 }
 
 type Order struct {
@@ -37,7 +37,7 @@ type Order struct {
 func (o *Order) Handler() {
 	o.OrderNo = 123456
 	o.Status = 1
-	fmt.Println("创建订单")
+	// fmt.Println("创建订单")
 }
 func (o *Order) After() {
 	o.Set("order_no", o.OrderNo)
@@ -53,17 +53,46 @@ func (p *Pay) Before() {
 }
 
 func (p *Pay) Handler() {
-	fmt.Println("为订单号：", p.OrderNo, "创建支付订单")
-}
-func TestOrder(t *testing.T) {
-	aop.New(context.Background(), &Order{}).SetBefore(&Goods{
-		form: Form{GoodsNo: 11, GoodsNum: 1},
-	}).SetAfter(&Pay{}).Run()
-	// Add()
+	// fmt.Println("为订单号：", p.OrderNo, "创建支付订单")
 }
 
-func Add() {
+type Stock struct {
+	aop.Aop
+	form Form
+}
+
+func (s *Stock) Handler() {
+	// fmt.Println("减去库存数量：", s.form.GoodsNum)
+}
+
+func TestOrder(t *testing.T) {
+	form := Form{GoodsNo: 11, GoodsNum: 1}
+	for i := 0; i < 100000000; i++ {
+		err := aop.New(context.Background(), &Order{}).SetBefore(&Goods{
+			form: form,
+		}).SetAfter(&Pay{}, &Stock{form: form}).Run()
+		if err != nil {
+			// fmt.Println("订单创建失败")
+		}
+	}
+	fmt.Println("订单创建成功")
+	// Create()
+}
+
+func Create(form Form) {
 	var ctx context.Context = context.Background()
-	ctx = context.WithValue(ctx, "order_no", 11)
-	ctx.Value("order_no")
+
+	goods := Goods{
+		Aop:  aop.Aop{Ctx: ctx},
+		form: form,
+	}
+	goods.Handler()
+	order := Order{Aop: goods.Aop, form: form}
+	order.Handler()
+	order.After()
+	pay := Pay{Aop: order.Aop}
+	pay.Before()
+	pay.Handler()
+	stock := Stock{form: form}
+	stock.Handler()
 }

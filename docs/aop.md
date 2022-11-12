@@ -67,15 +67,26 @@ func (p *Pay) Handler() {
 	fmt.Println("为订单号：", p.OrderNo, "创建支付订单")
 }
 
-// 测试
-func TestOrder(t *testing.T) {
-
-	aop.New(context.Background(), &Order{}).
-    SetBefore(&Goods{
-		form: Form{GoodsNo: 11, GoodsNum: 1},
-	}).
-    SetAfter(&Pay{}).Run()
-	
+type Stock struct {
+	aop.Aop
+	form Form
 }
+
+func (s *Stock) Handler() {
+	fmt.Println("减去库存数量：", s.form.GoodsNum)
+}
+
+func TestOrder(t *testing.T) {
+	reqForm := Form{GoodsNo: 11, GoodsNum: 1}
+	err := aop.New(context.Background(), &Order{}).SetBefore(&Goods{
+		form: reqForm,
+	}).SetAfter(&Pay{}, &Stock{form: reqForm}).Run()
+	if err != nil {
+		fmt.Println("订单创建失败")
+	}
+	fmt.Println("订单创建成功")
+	// Add()
+}
+
 
 ```
