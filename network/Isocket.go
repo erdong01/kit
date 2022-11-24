@@ -4,8 +4,8 @@ import (
 	"net"
 	"sync/atomic"
 
-	"github.com/erDong01/micro-kit/base/vector"
-	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erdong01/kit/base/vector"
+	"github.com/erdong01/kit/rpc"
 )
 
 const (

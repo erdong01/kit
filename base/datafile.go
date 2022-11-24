@@ -7,7 +7,7 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/erDong01/micro-kit/base/vector"
+	"github.com/erdong01/kit/base/vector"
 )
 
 const (

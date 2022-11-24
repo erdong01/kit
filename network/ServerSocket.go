@@ -8,7 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erdong01/kit/rpc"
 	"github.com/xtaci/kcp-go/v5"
 	"google.golang.org/protobuf/proto"
 )

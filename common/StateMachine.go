@@ -1,6 +1,6 @@
 package common
 
-import "github.com/erDong01/micro-kit/base"
+import "github.com/erdong01/kit/base"
 
 //状态机
 type (

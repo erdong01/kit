@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/erDong01/micro-kit/base"
+	"github.com/erdong01/kit/base"
 
-	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erdong01/kit/rpc"
 )
 
 type (

@@ -2,7 +2,7 @@ package raft
 
 import (
 	"fmt"
-	"github.com/erDong01/micro-kit/actor"
+	"github.com/erdong01/kit/actor"
 	"github.com/hashicorp/raft"
 	jsoniter "github.com/json-iterator/go"
 	"io"

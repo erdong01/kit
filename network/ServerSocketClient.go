@@ -8,9 +8,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/erDong01/micro-kit/base"
-	"github.com/erDong01/micro-kit/common/timer"
-	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erdong01/kit/base"
+	"github.com/erdong01/kit/common/timer"
+	"github.com/erdong01/kit/rpc"
 	"google.golang.org/protobuf/proto"
 )
 

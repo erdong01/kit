@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/erDong01/micro-kit/base/containers"
+	"github.com/erdong01/kit/base/containers"
 )
 
 func TestIntComparator(t *testing.T) {

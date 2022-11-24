@@ -1,4 +1,4 @@
-module github.com/erDong01/micro-kit
+module github.com/erdong01/kit
 
 go 1.18
 

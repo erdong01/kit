@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/erDong01/micro-kit/base/vector"
+	"github.com/erdong01/kit/base/vector"
 
-	"github.com/erDong01/micro-kit/base"
+	"github.com/erdong01/kit/base"
 )
 
 const (

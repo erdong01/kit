@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/erDong01/micro-kit/base/maps"
+	"github.com/erdong01/kit/base/maps"
 )
 
 const (

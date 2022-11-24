@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/erDong01/micro-kit/base"
+	"github.com/erdong01/kit/base"
 	"google.golang.org/protobuf/proto"
 )
 

@@ -1,6 +1,6 @@
 package vector
 
-import "github.com/erDong01/micro-kit/base/containers"
+import "github.com/erdong01/kit/base/containers"
 
 func assertIteratorImplementation() {
 	var _ containers.ReverseIteratorWithIndex = (*Iterator)(nil)

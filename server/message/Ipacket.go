@@ -1,8 +1,8 @@
 package message
 
 import (
-	"github.com/erDong01/micro-kit/base"
-	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erdong01/kit/base"
+	"github.com/erdong01/kit/rpc"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"reflect"

@@ -3,8 +3,8 @@ package core
 import (
 	"reflect"
 
-	"github.com/erDong01/micro-kit/config"
-	gongDbDrive "github.com/erDong01/micro-kit/db/mongoDB/drive"
+	"github.com/erdong01/kit/config"
+	gongDbDrive "github.com/erdong01/kit/db/mongoDB/drive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 )

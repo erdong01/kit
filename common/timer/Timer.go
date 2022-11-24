@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/erDong01/micro-kit/base"
+	"github.com/erdong01/kit/base"
 )
 
 const (

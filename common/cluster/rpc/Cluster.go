@@ -5,13 +5,13 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/erDong01/micro-kit/actor"
-	"github.com/erDong01/micro-kit/base"
-	"github.com/erDong01/micro-kit/base/vector"
-	"github.com/erDong01/micro-kit/common"
-	"github.com/erDong01/micro-kit/common/cluster/etv3"
-	"github.com/erDong01/micro-kit/network"
-	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erdong01/kit/actor"
+	"github.com/erdong01/kit/base"
+	"github.com/erdong01/kit/base/vector"
+	"github.com/erdong01/kit/common"
+	"github.com/erdong01/kit/common/cluster/etv3"
+	"github.com/erdong01/kit/network"
+	"github.com/erdong01/kit/rpc"
 )
 
 type (

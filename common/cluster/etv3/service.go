@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/erDong01/micro-kit/common"
+	"github.com/erdong01/kit/common"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )

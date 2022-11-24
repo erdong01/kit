@@ -1,10 +1,10 @@
 package game
 
 import (
-	"github.com/erDong01/micro-kit/base"
-	"github.com/erDong01/micro-kit/common"
-	"github.com/erDong01/micro-kit/common/cluster"
-	"github.com/erDong01/micro-kit/network"
+	"github.com/erdong01/kit/base"
+	"github.com/erdong01/kit/common"
+	"github.com/erdong01/kit/common/cluster"
+	"github.com/erdong01/kit/network"
 )
 
 type (

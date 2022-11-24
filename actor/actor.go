@@ -10,10 +10,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/erDong01/micro-kit/base"
-	"github.com/erDong01/micro-kit/base/mpsc"
-	"github.com/erDong01/micro-kit/common/timer"
-	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erdong01/kit/base"
+	"github.com/erdong01/kit/base/mpsc"
+	"github.com/erdong01/kit/common/timer"
+	"github.com/erdong01/kit/rpc"
 )
 
 var (

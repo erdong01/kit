@@ -1,6 +1,6 @@
 package common
 
-import "github.com/erDong01/micro-kit/rpc"
+import "github.com/erdong01/kit/rpc"
 
 type (
 	Server struct {

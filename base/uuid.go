@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/erDong01/micro-kit/base/vector"
+	"github.com/erdong01/kit/base/vector"
 )
 
 /*

@@ -2,7 +2,7 @@ package drive
 
 import (
 	"context"
-	"github.com/erDong01/micro-kit/config"
+	"github.com/erdong01/kit/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"

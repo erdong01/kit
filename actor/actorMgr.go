@@ -4,9 +4,9 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/erDong01/micro-kit/base"
-	"github.com/erDong01/micro-kit/network"
-	"github.com/erDong01/micro-kit/rpc"
+	"github.com/erdong01/kit/base"
+	"github.com/erdong01/kit/network"
+	"github.com/erdong01/kit/rpc"
 )
 
 type ACTOR_TYPE uint32

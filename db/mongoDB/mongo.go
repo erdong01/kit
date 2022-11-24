@@ -1,7 +1,7 @@
 package mongoDB
 
 import (
-	"github.com/erDong01/micro-kit/core"
+	"github.com/erdong01/kit/core"
 	"go.mongodb.org/mongo-driver/mongo"
 	"reflect"
 	"strings"

@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/erDong01/micro-kit/base/containers"
+	"github.com/erdong01/kit/base/containers"
 )
 
 func TestSortInts(t *testing.T) {

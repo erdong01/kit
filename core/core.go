@@ -3,7 +3,7 @@ package core
 import (
 	"sync"
 
-	"github.com/erDong01/micro-kit/config"
+	"github.com/erdong01/kit/config"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
