@@ -14,7 +14,7 @@ func TestDel(t *testing.T) {
 	fmt.Println("data", data)
 }
 
-// 通过切片下表删除
+// 通过切片下标删除
 func TestDelByIndex(t *testing.T) {
 	var data = []int{1, 2, 3, 4, 5}
 	slice.DelByIndex(&data, 2)
