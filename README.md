@@ -5,6 +5,6 @@
 ### 文档：
 
 [Aop](docs/aop.md)
-
+[Slice](docs/slice.md)
 
 [项目工程化]( https://github.com/golang-standards/project-layout)
