@@ -1,7 +1,5 @@
 package slice
 
-import "fmt"
-
 func Del[T comparable](s *[]T, val T) {
 	temp := *s
 	if len(temp) == 0 {
@@ -27,7 +25,6 @@ func DelByIndex[T any](s *[]T, index int) {
 	var i int = index
 	for index < count {
 		index++
-		fmt.Println("index", index)
 		temp[i] = temp[index]
 		i++
 	}
