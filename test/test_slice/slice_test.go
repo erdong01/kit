@@ -20,3 +20,18 @@ func TestDelByIndex(t *testing.T) {
 	slice.DelByIndex(&data, 2)
 	fmt.Println("data", data)
 }
+
+type Ball struct {
+	Name string
+	Id   int
+}
+
+func TestUnique(t *testing.T) {
+	var data = []int{1, 2, 2, 3, 3, 4, 5}
+	slice.Unique(&data)
+	fmt.Println("data", data)
+
+	var users = []Ball{Ball{Name: "红", Id: 1}, Ball{Name: "红", Id: 1}, Ball{Name: "绿", Id: 2}, Ball{Name: "黄", Id: 3}}
+	slice.Unique(&users)
+	fmt.Println("users", users)
+}
