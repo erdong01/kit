@@ -1,4 +1,4 @@
-### Golang 组件
+### Golang 工具
 
 安装: go get  github.com/erdong01/kit
 
