@@ -15,8 +15,8 @@ import (
 
 // 通过查找切片元素删除
 func TestDel(t *testing.T) {
-	var data = []int{1, 2, 3, 4, 5}
-	slice.Del(&data,3)
+	var data = []int{1, 2, 3,3, 4, 5}
+	slice.Del(&data,3) //删除为3元素
 	fmt.Println("data", data)
 }
 
@@ -25,10 +25,23 @@ func TestDel(t *testing.T) {
 // 通过切片下标删除
 func TestDelByIndex(t *testing.T) {
 	var data = []int{1, 2, 3, 4, 5}
-	slice.DelByIndex(&data, 2)
+	slice.DelByIndex(&data, 2) //删除下标2的元素
 	fmt.Println("data", data)
 }
 //输出：data [1 2 4 5]
+
+
+// 删除切片多个元素
+func TestDelFunc(t *testing.T) {
+	var data = []int{1, 2, 3, 4, 5}           //数据
+	var term = map[int]struct{}{2: {}, 3: {}} //条件
+	slice.DelFunc(&data, func(i int) bool {
+		_, ok := term[data[i]]
+		return ok
+	})
+	fmt.Println("data", data)
+}
+//输出: data [1 4 5]
 ```
 
 
