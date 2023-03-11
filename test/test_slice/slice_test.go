@@ -21,6 +21,15 @@ func TestDelByIndex(t *testing.T) {
 	fmt.Println("data", data)
 }
 
+// 通过切片下标删除
+func TestDelFunc(t *testing.T) {
+	var data = []int{1, 2, 3, 4, 5}
+	slice.DelFunc(&data, func(i int) bool {
+		return data[i] == 2
+	})
+	fmt.Println("data", data)
+}
+
 type Ball struct {
 	Name string
 	Id   int

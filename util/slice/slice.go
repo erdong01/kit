@@ -17,7 +17,21 @@ func Del[T comparable](s *[]T, val T) {
 		}
 	}
 	*s = temp[:i]
+}
 
+func DelFunc[T comparable](s *[]T, f func(i int) bool) {
+	temp := *s
+	if len(temp) == 0 {
+		return
+	}
+	var i int
+	for key := range temp {
+		if !f(key) {
+			temp[i] = temp[key]
+			i++
+		}
+	}
+	*s = temp[:i]
 }
 
 func DelByIndex[T any](s *[]T, index int) {
