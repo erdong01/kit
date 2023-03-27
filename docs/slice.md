@@ -1,5 +1,58 @@
 切片
 ===
+### 连个切片是否相等/差集
+```go
+import (
+	"fmt"
+	"testing"
+
+	"github.com/erdong01/kit/slice"
+)
+
+func TestEqual(t *testing.T) {
+	var data1 = []int{1, 2, 3, 4, 5, 6}
+	var data2 = []int{1, 2, 3, 4, 5}
+	b := slice.Equal(data1, data2)
+	fmt.Println(b)
+}
+//输出： false
+
+
+func TestDiff(t *testing.T) {
+	var data1 = []int{ 1, 2, 3, 4, 5, 6}
+	var data2 = []int{1, 2, 3, 4, 5}
+	data := slice.Diff(data1, data2)
+	fmt.Println("data",data)
+}
+//输出：  data [6]
+
+```
+### 在切片头部/任意位置插入元素
+```go
+import (
+	"fmt"
+	"testing"
+
+	"github.com/erdong01/kit/slice"
+)
+
+func TestPrepend(t *testing.T) {
+	var data = []int{ 3, 4, 5}
+	slice.Prepend(&data,2)
+	slice.Prepend(&data,1)
+	fmt.Println("data", data)
+}
+//输出：  data [1 2 3 4 5]
+
+// 任意位置插入元素
+func TestInsert(t *testing.T) {
+	var data = []int{1, 3, 4, 5}
+	slice.Insert(&data, 1, 2)
+	fmt.Println("data", data)
+}
+//输出：  data [1 2 3 4 5]
+
+```
 
 ### 删除切片中元素
 
@@ -10,7 +63,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/erdong01/kit/util/slice"
+	"github.com/erdong01/kit/slice"
 )
 
 // 通过查找切片元素删除
@@ -54,7 +107,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/erdong01/kit/util/slice"
+	"github.com/erdong01/kit/slice"
 )
 
 type Ball struct {

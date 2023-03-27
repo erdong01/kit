@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/erdong01/kit/util/slice"
+	"github.com/erdong01/kit/slice"
 )
 
 // 通过查找切片元素删除
@@ -45,4 +45,31 @@ func TestUnique(t *testing.T) {
 	var users = []Ball{Ball{Name: "红", Id: 1}, Ball{Name: "红", Id: 1}, Ball{Name: "绿", Id: 2}, Ball{Name: "黄", Id: 3}}
 	slice.Unique(&users)
 	fmt.Println("users", users)
+}
+
+func TestPrepend(t *testing.T) {
+	var data = []int{3, 4, 5}
+	slice.Prepend(&data, 2)
+	slice.Prepend(&data, 1)
+	fmt.Println("data", data)
+}
+
+func TestInsert(t *testing.T) {
+	var data = []int{1, 3, 4, 5}
+	slice.Insert(&data, 1, 2)
+	fmt.Println("data", data)
+}
+
+func TestEqual(t *testing.T) {
+	var data1 = []int{1, 2, 3, 4, 5, 6}
+	var data2 = []int{1, 2, 3, 4, 5}
+	b := slice.Equal(data1, data2)
+	fmt.Println(b)
+}
+
+func TestDiff(t *testing.T) {
+	var data1 = []int{1, 2, 3, 4, 5, 6}
+	var data2 = []int{1, 2, 3, 4, 5}
+	data := slice.Diff(data1, data2)
+	fmt.Println("data", data)
 }

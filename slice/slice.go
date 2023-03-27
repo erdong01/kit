@@ -65,3 +65,44 @@ func Unique[T comparable](s *[]T) {
 	}
 	*s = temp[:k]
 }
+
+func Prepend[T any](s *[]T, val T) {
+	*s = append([]T{val}, *s...)
+}
+
+func Insert[T any](s *[]T, index int, val T) {
+	var temp = *s
+	temp = append(temp, val)
+	copy(temp[index+1:], temp[index:])
+	temp[index] = val
+	*s = temp
+}
+
+func Diff[T comparable](a, b []T) (deff []any) {
+	bm := make(map[T]struct{}, len(b))
+	for k := range b {
+		bm[b[k]] = struct{}{}
+	}
+	for k := range a {
+		if _, ok := bm[a[k]]; !ok {
+			deff = append(deff, a[k])
+		}
+	}
+	return
+}
+
+func Equal[T comparable](a, b []T) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	if (a == nil) != (b == nil) {
+		return false
+	}
+	b = b[:len(a)]
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
+}
