@@ -131,6 +131,8 @@ func (a *ActorMgr) PacketFunc(packet rpc.Packet) bool {
 	return a.SendActor(rpcPacket.FuncName, head, packet)
 }
 
+
+
 var (
 	MGR *ActorMgr
 )

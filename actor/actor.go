@@ -2,6 +2,7 @@ package actor
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"reflect"
@@ -10,6 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/erdong01/kit/api"
 	"github.com/erdong01/kit/base"
 	"github.com/erdong01/kit/base/mpsc"
 	"github.com/erdong01/kit/common/timer"
@@ -438,5 +440,99 @@ func (this *Actor) consume2() {
 	atomic.StoreInt32(&this.mailIn2, 0)
 	for data := this.mailBox2.Pop(); data != nil; data = this.mailBox2.Pop() {
 		this.call2(data.(CallIO))
+	}
+}
+
+// -------------json注册---------------------
+type CallIOJson struct {
+	api.JsonHead
+	*api.JsonPacket
+	Buff []byte
+}
+
+func (this *Actor) FindCallJson(funcName string) *CallFunc {
+	funcName = strings.ToLower(funcName)
+	fun, exist := this.CallMap[funcName]
+	if exist == true {
+		return fun
+	}
+	return nil
+}
+func (this *Actor) RegisterCallJson(funcName string, call interface{}) {
+	funcName = strings.ToLower(funcName)
+	if this.FindCall(funcName) != nil {
+		log.Fatalf("actor error [%s] 消息重复定义", funcName)
+	}
+
+	callfunc := &CallFunc{Func: call, FuncVal: reflect.ValueOf(call), FuncType: reflect.TypeOf(call), FuncParams: reflect.TypeOf(call).String()}
+	this.CallMap[funcName] = callfunc
+}
+
+func (this *Actor) PacketFuncJson(packet api.Packet) bool {
+	var jsonPacket api.JsonPacket
+	json.Unmarshal(packet.Buff, &jsonPacket)
+	head := jsonPacket.JsonHead
+	// rpcPacket, head := rpc.UnmarshalHead(packet.Buff)
+	if this.FindCall(jsonPacket.FuncName) != nil {
+		head.SocketId = packet.Id
+		head.Reply = packet.Reply
+		this.SendJson(*head, packet.Buff)
+		return true
+	}
+	return false
+}
+
+func (this *Actor) SendJson(head api.JsonHead, buff []byte) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Print(err)
+		}
+	}()
+	var io CallIOJson
+	io.JsonHead = head
+	io.Buff = buff
+	this.mailBox2.Push(io)
+	if atomic.CompareAndSwapInt32(&this.mailIn2, 0, 1) {
+		this.mailChan2 <- true
+	}
+}
+
+func (this *Actor) callJson(io CallIOJson) {
+	defer func() {
+		if err := recover(); err != nil {
+			base.TraceCode(this.trace.ToString(), err)
+		}
+	}()
+	rpcPacket, _ := rpc.Unmarshal2(io.Buff)
+	head := io.JsonHead
+	funcName := rpcPacket.FuncName
+	pFunc := this.FindCall(funcName)
+	if pFunc != nil {
+		f := pFunc.FuncVal
+		k := pFunc.FuncType
+		rpcPacket.RpcHead.SocketId = io.SocketId
+		params := rpc.UnmarshalBody2(rpcPacket, k)
+		if len(params) >= 1 {
+			in := make([]reflect.Value, len(params))
+			for i, param := range params {
+				in[i] = reflect.ValueOf(param)
+			}
+			this.Trace(funcName)
+			ret := f.Call(in)
+			this.Trace("")
+			if ret != nil && head.Reply != "" {
+				ret = append([]reflect.Value{reflect.ValueOf(&head)}, ret...)
+				rpc.GCall.Call(ret)
+			}
+		} else {
+			log.Printf("func [%s] params at least one context", funcName)
+		}
+	}
+}
+
+func (this *Actor) consumeJson() {
+	atomic.StoreInt32(&this.mailIn2, 0)
+	for data := this.mailBox2.Pop(); data != nil; data = this.mailBox2.Pop() {
+		this.callJson(data.(CallIOJson))
 	}
 }
