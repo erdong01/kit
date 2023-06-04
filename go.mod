@@ -1,6 +1,6 @@
 module github.com/erdong01/kit
 
-go 1.18
+go 1.20
 
 require (
 	github.com/hashicorp/raft v1.3.11
