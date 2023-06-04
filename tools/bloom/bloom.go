@@ -42,18 +42,12 @@ func New(size uint64, k uint64, race bool) *Filter {
 	return filter
 }
 
-func (f *Filter) Add(data[]byte)*Filter{
-	
+func (f *Filter) Add(data []byte) *Filter {
+
 	return f
 }
 
+func baseHash(data []byte) []uint64 {
 
-func baseHash(data []byte) []uint64{
-
-	a1 := []byte{1} 
-	hasher:= murmur3.New123()
-
-	return []uint64{
-		v1,v2,v3,v4,
-	}
+	return []uint64{}
 }
