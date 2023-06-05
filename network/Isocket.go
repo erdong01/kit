@@ -242,6 +242,15 @@ func (this *Socket) HandlePacket(buff []byte) {
 	}
 }
 
+func (this *Socket) HandlePacketJson(buff []byte) {
+	packet := api.Packet{Id: this.clientId, Buff: buff}
+	for _, v := range this.packetFuncList.Values() {
+		if v.(func(packet api.Packet) bool)(packet) {
+			break
+		}
+	}
+}
+
 func (this *Socket) SetClientClose(c ClientClose) {
 	this.clientClose = c
 }
