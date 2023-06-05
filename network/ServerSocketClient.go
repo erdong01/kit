@@ -1,6 +1,7 @@
 package network
 
 import (
+	"encoding/json"
 	"fmt"
 	"hash/crc32"
 	"io"
@@ -8,6 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/erdong01/kit/api"
 	"github.com/erdong01/kit/base"
 	"github.com/erdong01/kit/common/timer"
 	"github.com/erdong01/kit/rpc"
@@ -267,6 +269,16 @@ func (s *ServerSocketClient) SendPacket(head rpc.RpcHead, funcName string, msg p
 func (s *ServerSocketClient) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) int {
 	buff := rpc.Marshal(&head, &funcName, params...)
 	return s.Send(head, buff)
+}
+
+func (s *ServerSocketClient) SendJson(head rpc.RpcHead, funcName string, params ...interface{}) int {
+	paramsBuff, _ := json.Marshal(params)
+	rpcPacket := &api.JsonPacket{FuncName: funcName, Data: string(paramsBuff)}
+	buff, _ := json.Marshal(rpcPacket)
+	var packet = rpc.Packet{
+		Buff: buff,
+	}
+	return s.Send(head, packet)
 }
 
 // 设置链接属性
