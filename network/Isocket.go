@@ -4,6 +4,7 @@ import (
 	"net"
 	"sync/atomic"
 
+	"github.com/erdong01/kit/api"
 	"github.com/erdong01/kit/base/vector"
 	"github.com/erdong01/kit/rpc"
 )
@@ -222,6 +223,10 @@ func (this *Socket) SetConn(conn net.Conn) {
 
 func (this *Socket) BindPacketFunc(callfunc PacketFunc) {
 	this.packetFuncList.PushBack(callfunc)
+}
+
+func (s *Socket) BindPacketFuncJson(callfunc func(packet api.Packet) bool) {
+	s.packetFuncList.PushBack(callfunc)
 }
 
 func (this *Socket) CallMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
