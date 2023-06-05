@@ -32,7 +32,7 @@ type (
 	}
 )
 
-func NewPacketParser(conf PacketConfig) PacketParser {
+func NewPacketParser(conf PacketConfig) *PacketParser {
 	p := PacketParser{}
 	p.packetLen = PACKET_LEN_DWORD
 	p.maxPacketLen = base.MAX_PACKET
@@ -43,7 +43,7 @@ func NewPacketParser(conf PacketConfig) PacketParser {
 		p.packetFunc = func(buff []byte) {
 		}
 	}
-	return p
+	return &p
 }
 
 func (p *PacketParser) readLen(buff []byte) (bool, int) {
