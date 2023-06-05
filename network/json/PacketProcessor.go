@@ -82,7 +82,7 @@ func (p *PacketParser) readLen(buff []byte) (bool, int) {
 func (p *PacketParser) Read(buff []byte) bool {
 	//fmt.Println(p.maxPacketBuffer)
 	//fmt.Println(bFindFlag, nPacketSize, nBufferSize)
-			p.packetFunc(buff)
+	p.packetFunc(buff)
 	return true
 }
 
@@ -115,4 +115,11 @@ func (p *PacketParser) Write(dat []byte) []byte {
 
 	copy(msg[p.packetLen:], dat)
 	return msg
+}
+
+func (p *PacketParser) GetMaxPacketLen() int {
+	return p.maxPacketLen
+}
+func (p *PacketParser) SetMaxPacketLen(val int) {
+	p.maxPacketLen = val
 }
