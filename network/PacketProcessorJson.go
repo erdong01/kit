@@ -1,39 +1,27 @@
-package json
+package network
 
 import (
 	"encoding/binary"
 	"fmt"
 
 	"github.com/erdong01/kit/base"
-	"github.com/erdong01/kit/network"
-)
-
-const (
-	PACKET_LEN_BYTE  = 1
-	PACKET_LEN_WORD  = 2
-	PACKET_LEN_DWORD = 4
 )
 
 // --------------
 // | len | data |
 // --------------
 type (
-	PacketParser struct {
+	PacketParserJson struct {
 		packetLen       int
 		maxPacketLen    int
 		littleEndian    bool
 		maxPacketBuffer []byte //max receive buff
-		packetFunc      network.HandlePacket
-	}
-
-	PacketConfig struct {
-		MaxPacketLen *int
-		Func         network.HandlePacket
+		packetFunc      HandlePacket
 	}
 )
 
-func NewPacketParser(conf PacketConfig) *PacketParser {
-	p := PacketParser{}
+func NewPacketParserJson(conf PacketConfig) *PacketParserJson {
+	p := PacketParserJson{}
 	p.packetLen = PACKET_LEN_DWORD
 	p.maxPacketLen = base.MAX_PACKET
 	p.littleEndian = true
@@ -46,7 +34,7 @@ func NewPacketParser(conf PacketConfig) *PacketParser {
 	return &p
 }
 
-func (p *PacketParser) readLen(buff []byte) (bool, int) {
+func (p *PacketParserJson) readLen(buff []byte) (bool, int) {
 	nLen := len(buff)
 	if nLen < p.packetLen {
 		return false, 0
@@ -79,14 +67,14 @@ func (p *PacketParser) readLen(buff []byte) (bool, int) {
 	return false, 0
 }
 
-func (p *PacketParser) Read(buff []byte) bool {
+func (p *PacketParserJson) Read(buff []byte) bool {
 	//fmt.Println(p.maxPacketBuffer)
 	//fmt.Println(bFindFlag, nPacketSize, nBufferSize)
 	p.packetFunc(buff)
 	return true
 }
 
-func (p *PacketParser) Write(dat []byte) []byte {
+func (p *PacketParserJson) Write(dat []byte) []byte {
 	// get len
 	msgLen := len(dat)
 	// check len
@@ -117,9 +105,10 @@ func (p *PacketParser) Write(dat []byte) []byte {
 	return msg
 }
 
-func (p *PacketParser) GetMaxPacketLen() int {
+func (p *PacketParserJson) GetMaxPacketLen() int {
 	return p.maxPacketLen
 }
-func (p *PacketParser) SetMaxPacketLen(val int) {
+
+func (p *PacketParserJson) SetMaxPacketLen(val int) {
 	p.maxPacketLen = val
 }
