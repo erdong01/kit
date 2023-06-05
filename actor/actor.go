@@ -56,6 +56,7 @@ type (
 		mailBox2  *mpsc.Queue
 		mailIn2   int32
 		mailChan2 chan bool
+		mailChanJson chan bool
 		CallMap   map[string]*CallFunc
 	}
 
@@ -168,6 +169,7 @@ func (a *Actor) Init() {
 	a.timerMap = make(map[uintptr]func())
 
 	a.mailChan2 = make(chan bool, 1)
+	a.mailChanJson = make(chan bool, 1)
 	a.mailBox2 = mpsc.New()
 	a.CallMap = make(map[string]*CallFunc)
 
@@ -304,6 +306,8 @@ func (a *Actor) loop() bool {
 		a.consume()
 	case <-a.mailChan2:
 		a.consume2()
+	case <-a.mailChanJson:
+		a.consumeJson()
 	case msg := <-a.acotrChan:
 		if msg == DESDORY_EVENT {
 			return true
@@ -471,12 +475,12 @@ func (this *Actor) RegisterCallJson(funcName string, call interface{}) {
 func (this *Actor) PacketFuncJson(packet api.Packet) bool {
 	var jsonPacket api.JsonPacket
 	json.Unmarshal(packet.Buff, &jsonPacket)
-	head := jsonPacket.JsonHead
+	var head api.JsonHead
 	// rpcPacket, head := rpc.UnmarshalHead(packet.Buff)
 	if this.FindCall(jsonPacket.FuncName) != nil {
 		head.SocketId = packet.Id
 		head.Reply = packet.Reply
-		this.SendJson(*head, packet.Buff)
+		this.SendJson(head, packet.Buff)
 		return true
 	}
 	return false
@@ -493,7 +497,7 @@ func (this *Actor) SendJson(head api.JsonHead, buff []byte) {
 	io.Buff = buff
 	this.mailBox2.Push(io)
 	if atomic.CompareAndSwapInt32(&this.mailIn2, 0, 1) {
-		this.mailChan2 <- true
+		this.mailChanJson <- true
 	}
 }
 
