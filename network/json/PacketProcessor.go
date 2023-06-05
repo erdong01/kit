@@ -1,10 +1,11 @@
-package network
+package json
 
 import (
 	"encoding/binary"
 	"fmt"
 
 	"github.com/erdong01/kit/base"
+	"github.com/erdong01/kit/network"
 )
 
 const (
@@ -22,24 +23,16 @@ type (
 		maxPacketLen    int
 		littleEndian    bool
 		maxPacketBuffer []byte //max receive buff
-		packetFunc      HandlePacket
+		packetFunc      network.HandlePacket
 	}
 
 	PacketConfig struct {
 		MaxPacketLen *int
-		Func         HandlePacket
-	}
-
-	IPacketParser interface {
-		readLen(buff []byte) (bool, int)
-		Read(dat []byte) bool
-		Write(dat []byte) []byte
-		GetMaxPacketLen() int
-		SetMaxPacketLen(val int)
+		Func         network.HandlePacket
 	}
 )
 
-func NewPacketParser(conf PacketConfig) *PacketParser {
+func NewPacketParser(conf PacketConfig) PacketParser {
 	p := PacketParser{}
 	p.packetLen = PACKET_LEN_DWORD
 	p.maxPacketLen = base.MAX_PACKET
@@ -50,7 +43,7 @@ func NewPacketParser(conf PacketConfig) *PacketParser {
 		p.packetFunc = func(buff []byte) {
 		}
 	}
-	return &p
+	return p
 }
 
 func (p *PacketParser) readLen(buff []byte) (bool, int) {
@@ -86,32 +79,10 @@ func (p *PacketParser) readLen(buff []byte) (bool, int) {
 	return false, 0
 }
 
-func (p *PacketParser) Read(dat []byte) bool {
-	buff := append(p.maxPacketBuffer, dat...)
-	p.maxPacketBuffer = []byte{}
-	nCurSize := 0
+func (p *PacketParser) Read(buff []byte) bool {
 	//fmt.Println(p.maxPacketBuffer)
-ParsePacekt:
-	nPacketSize := 0
-	nBufferSize := len(buff[nCurSize:])
-	bFindFlag := false
-	bFindFlag, nPacketSize = p.readLen(buff[nCurSize:])
 	//fmt.Println(bFindFlag, nPacketSize, nBufferSize)
-	if bFindFlag {
-		if nBufferSize == nPacketSize { //完整包
-			p.packetFunc(buff[nCurSize+p.packetLen : nCurSize+nPacketSize])
-			nCurSize += nPacketSize
-		} else if nBufferSize > nPacketSize {
-			p.packetFunc(buff[nCurSize+p.packetLen : nCurSize+nPacketSize])
-			nCurSize += nPacketSize
-			goto ParsePacekt
-		}
-	} else if nBufferSize < p.maxPacketLen {
-		p.maxPacketBuffer = buff[nCurSize:]
-	} else {
-		fmt.Println("超出最大包限制，丢弃该包")
-		return false
-	}
+			p.packetFunc(buff)
 	return true
 }
 
@@ -144,11 +115,4 @@ func (p *PacketParser) Write(dat []byte) []byte {
 
 	copy(msg[p.packetLen:], dat)
 	return msg
-}
-
-func (p *PacketParser) GetMaxPacketLen() int {
-	return p.maxPacketLen
-}
-func (p *PacketParser) SetMaxPacketLen(val int) {
-	p.maxPacketLen = val
 }

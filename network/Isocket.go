@@ -57,7 +57,7 @@ type (
 
 		isHalf       bool
 		halfSize     int
-		packetParser PacketParser
+		packetParser IPacketParser
 		heartTime    int
 		isKcp        bool
 
@@ -193,11 +193,15 @@ func (this *Socket) Close() {
 }
 
 func (this *Socket) GetMaxPacketLen() int {
-	return this.packetParser.maxPacketLen
+	return this.packetParser.GetMaxPacketLen()
 }
 
 func (this *Socket) SetMaxPacketLen(maxReceiveSize int) {
-	this.packetParser.maxPacketLen = maxReceiveSize
+	this.packetParser.SetMaxPacketLen(maxReceiveSize)
+}
+
+func (this *Socket) SetPacketParser(IPP IPacketParser) {
+	this.packetParser = IPP
 }
 
 func (this *Socket) GetReceiveBufferSize() int {

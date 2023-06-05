@@ -161,6 +161,44 @@ func (w *WebSocketClient) Run() bool {
 	return true
 }
 
+func (w *WebSocketClient) RunJson() bool {
+	var buff = make([]byte, w.receiveBufferSize)
+	w.SetState(SSF_RUN)
+	loop := func() bool {
+		defer func() {
+			if err := recover(); err != nil {
+				base.TraceCode(err)
+			}
+		}()
+		if w.conn == nil {
+			return false
+		}
+		n, err := w.conn.Read(buff)
+		if err == io.EOF {
+			fmt.Printf("远程链接：%s已经关闭！\n", w.conn.RemoteAddr().String())
+			w.OnNetFail(0)
+			return false
+		}
+		if err != nil {
+			handleError(err)
+			w.OnNetFail(0)
+			return false
+		}
+		if n > 0 {
+			w.packetParser.Read(buff[:n])
+		}
+		w.heartTime = int(time.Now().Unix()) + HEART_TIME_OUT
+		return true
+	}
+	for {
+		if !loop() {
+			break
+		}
+	}
+	w.Close()
+	fmt.Printf("%s关闭连接", w.ip)
+	return true
+}
 // heart
 func (w *WebSocketClient) Update() bool {
 	now := int(time.Now().Unix())
