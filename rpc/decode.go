@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 
+	"github.com/erdong01/kit/api"
 	"github.com/erdong01/kit/base"
+	"github.com/erdong01/kit/tools/mapstructure"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -34,6 +38,40 @@ func Unmarshal(buff []byte) (*RpcPacket, RpcHead) {
 	}*/
 
 	return rpcPacket, *(*RpcHead)(rpcPacket.RpcHead)
+}
+
+func UnmarshalBodyJson(jsonPacket api.JsonPacket, pFuncType reflect.Type) []interface{} {
+	nCurLen := pFuncType.NumIn()
+	params := make([]interface{}, nCurLen)
+	if jsonPacket.JsonHead != nil {
+		params[1] = context.WithValue(context.Background(), "rpcHead", *(*api.JsonHead)(jsonPacket.JsonHead))
+	} else {
+		params[1] = context.Background()
+	}
+	fmt.Println(" jsonPacket.Data", jsonPacket.Data)
+
+	buff, _ := json.Marshal(jsonPacket.Data)
+	buf := bytes.NewBufferString(string(buff))
+
+	dec := gob.NewDecoder(buf)
+
+	fmt.Println("buff", buff)
+	fmt.Println("buf", buf)
+	for i := 1; i < nCurLen; i++ {
+		if i == 0 {
+			continue
+		}
+		val := reflect.New(pFuncType.In(i))
+		fmt.Println("valvalvalval", val)
+		dec.DecodeValue(val)
+		var ii = val.Elem().Interface()
+		json.Unmarshal(buff, &ii)
+		mapstructure.Decode(jsonPacket.Data, &ii)
+		fmt.Println("ii", ii)
+		fmt.Println(" val.Elem().Interface()", val.Elem().Interface())
+		params[i] = ii
+	}
+	return params
 }
 
 // rpc Unmarshal

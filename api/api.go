@@ -9,7 +9,7 @@ type Packet struct {
 type JsonPacket struct {
 	FuncName string
 	JsonHead *JsonHead
-	Data     string
+	Data     interface{}
 }
 type JsonHead struct {
 	Id             int64

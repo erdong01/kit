@@ -53,11 +53,11 @@ type (
 		pool      IActorPool         //ACTOR_TYPE_VIRTUAL,ACTOR_TYPE_POOL
 		timerMap  map[uintptr]func() //成员方法转func()会是闭包函数,定时器释放会有问题
 
-		mailBox2  *mpsc.Queue
-		mailIn2   int32
-		mailChan2 chan bool
+		mailBox2     *mpsc.Queue
+		mailIn2      int32
+		mailChan2    chan bool
 		mailChanJson chan bool
-		CallMap   map[string]*CallFunc
+		CallMap      map[string]*CallFunc
 	}
 
 	IActor interface {
@@ -507,30 +507,37 @@ func (this *Actor) callJson(io CallIOJson) {
 			base.TraceCode(this.trace.ToString(), err)
 		}
 	}()
-	rpcPacket, _ := rpc.Unmarshal2(io.Buff)
-	head := io.JsonHead
-	funcName := rpcPacket.FuncName
+	fmt.Println("io.Buff", io.Buff)
+	var jsonPacket api.JsonPacket
+	json.Unmarshal(io.Buff, &jsonPacket)
+	fmt.Println("jsonPacket", jsonPacket)
+	// head := io.JsonHead
+	funcName := jsonPacket.FuncName
+	fmt.Println("funcName", funcName)
 	pFunc := this.FindCall(funcName)
 	if pFunc != nil {
-		f := pFunc.FuncVal
+		// f := pFunc.FuncVal
 		k := pFunc.FuncType
-		rpcPacket.RpcHead.SocketId = io.SocketId
-		params := rpc.UnmarshalBody2(rpcPacket, k)
-		if len(params) >= 1 {
-			in := make([]reflect.Value, len(params))
-			for i, param := range params {
-				in[i] = reflect.ValueOf(param)
-			}
-			this.Trace(funcName)
-			ret := f.Call(in)
-			this.Trace("")
-			if ret != nil && head.Reply != "" {
-				ret = append([]reflect.Value{reflect.ValueOf(&head)}, ret...)
-				rpc.GCall.Call(ret)
-			}
-		} else {
-			log.Printf("func [%s] params at least one context", funcName)
+		if jsonPacket.JsonHead != nil {
+			jsonPacket.JsonHead.SocketId = io.SocketId
 		}
+		params := rpc.UnmarshalBodyJson(jsonPacket, k)
+		fmt.Println("params", params)
+		// if len(params) >= 1 {
+		// 	in := make([]reflect.Value, len(params))
+		// 	for i, param := range params {
+		// 		in[i] = reflect.ValueOf(param)
+		// 	}
+		// 	this.Trace(funcName)
+		// 	ret := f.Call(in)
+		// 	this.Trace("")
+		// 	if ret != nil && head.Reply != "" {
+		// 		ret = append([]reflect.Value{reflect.ValueOf(&head)}, ret...)
+		// 		rpc.GCall.Call(ret)
+		// 	}
+		// } else {
+		// 	log.Printf("func [%s] params at least one context", funcName)
+		// }
 	}
 }
 

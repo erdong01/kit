@@ -96,3 +96,4 @@ func Create(form Form) {
 	stock := Stock{form: form}
 	stock.Handler()
 }
+
