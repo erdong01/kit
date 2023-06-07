@@ -181,3 +181,17 @@ func (w *WebSocket) AddClinetJson(tcpConn *websocket.Conn, addr string, connectT
 	w.clientLocker.Unlock()
 	return client
 }
+
+type serverWs struct {
+	WebSocket *WebSocket
+}
+
+func ServerWs(w http.ResponseWriter, r *http.Request, webSocket *WebSocket) {
+	var sw = serverWs{WebSocket: webSocket}
+	websocket.Server{Handler: sw.Handler}.ServeHTTP(w, r)
+}
+
+func (sw *serverWs) Handler(ws *websocket.Conn) {
+	webSocketClient := sw.WebSocket.AddClinetJson(ws, "", 0)
+	webSocketClient.Start()
+}
