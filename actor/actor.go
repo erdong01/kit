@@ -507,37 +507,33 @@ func (this *Actor) callJson(io CallIOJson) {
 			base.TraceCode(this.trace.ToString(), err)
 		}
 	}()
-	fmt.Println("io.Buff", io.Buff)
 	var jsonPacket api.JsonPacket
 	json.Unmarshal(io.Buff, &jsonPacket)
-	fmt.Println("jsonPacket", jsonPacket)
-	// head := io.JsonHead
+	head := io.JsonHead
 	funcName := jsonPacket.FuncName
-	fmt.Println("funcName", funcName)
 	pFunc := this.FindCall(funcName)
 	if pFunc != nil {
-		// f := pFunc.FuncVal
+		f := pFunc.FuncVal
 		k := pFunc.FuncType
 		if jsonPacket.JsonHead != nil {
 			jsonPacket.JsonHead.SocketId = io.SocketId
 		}
 		params := rpc.UnmarshalBodyJson(jsonPacket, k)
-		fmt.Println("params", params)
-		// if len(params) >= 1 {
-		// 	in := make([]reflect.Value, len(params))
-		// 	for i, param := range params {
-		// 		in[i] = reflect.ValueOf(param)
-		// 	}
-		// 	this.Trace(funcName)
-		// 	ret := f.Call(in)
-		// 	this.Trace("")
-		// 	if ret != nil && head.Reply != "" {
-		// 		ret = append([]reflect.Value{reflect.ValueOf(&head)}, ret...)
-		// 		rpc.GCall.Call(ret)
-		// 	}
-		// } else {
-		// 	log.Printf("func [%s] params at least one context", funcName)
-		// }
+		if len(params) >= 1 {
+			in := make([]reflect.Value, len(params))
+			for i, param := range params {
+				in[i] = reflect.ValueOf(param)
+			}
+			this.Trace(funcName)
+			ret := f.Call(in)
+			this.Trace("")
+			if ret != nil && head.Reply != "" {
+				ret = append([]reflect.Value{reflect.ValueOf(&head)}, ret...)
+				rpc.GCall.Call(ret)
+			}
+		} else {
+			log.Printf("func [%s] params at least one context", funcName)
+		}
 	}
 }
 

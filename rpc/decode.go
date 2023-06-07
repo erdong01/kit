@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/gob"
 	"errors"
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -53,10 +52,11 @@ func UnmarshalBodyJson(jsonPacket api.JsonPacket, pFuncType reflect.Type) []inte
 		}
 		val := reflect.New(pFuncType.In(i))
 		var ii = val.Elem().Interface()
-		// json.Unmarshal(buff, &ii)
-		mapstructure.Decode(jsonPacket.Data, &ii)
-		fmt.Println("ii", ii)
-		fmt.Println(" val.Elem().Interface()", val.Elem().Interface())
+		if nCurLen == 2 {
+			mapstructure.Decode(jsonPacket.Data, &ii)
+		} else if Data, ok := jsonPacket.Data.([]interface{}); ok && len(Data) >= (nCurLen-1) {
+			mapstructure.Decode(Data[i-1], &ii)
+		}
 		params[i] = ii
 	}
 	return params
