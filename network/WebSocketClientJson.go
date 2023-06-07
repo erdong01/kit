@@ -153,7 +153,7 @@ func (w *WebSocketClientJson) Run() bool {
 		}
 		n, err := w.conn.Read(buff)
 		if err == io.EOF {
-			fmt.Printf("远程链接：%s已经关闭！\n")
+			fmt.Printf("远程链接：已经关闭！\n")
 			w.OnNetFail(0)
 			return false
 		}
