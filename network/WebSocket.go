@@ -85,6 +85,7 @@ func (w *WebSocket) AddClinet(tcpConn *websocket.Conn, addr string, connectType 
 		w.clientMap[client.clientId] = client
 		w.clientCount++
 		w.clientLocker.Unlock()
+		client.Start()
 		return client
 	} else {
 		log.Printf("%s", "无法创建客户端连接对象")
