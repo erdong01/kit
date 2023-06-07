@@ -68,8 +68,6 @@ func (p *PacketParserJson) readLen(buff []byte) (bool, int) {
 }
 
 func (p *PacketParserJson) Read(buff []byte) bool {
-	//fmt.Println(p.maxPacketBuffer)
-	//fmt.Println(bFindFlag, nPacketSize, nBufferSize)
 	p.packetFunc(buff)
 	return true
 }

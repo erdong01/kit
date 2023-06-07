@@ -15,7 +15,7 @@ type IWebSocket interface {
 	ISocket
 
 	AssignClientId() uint32
-	GetClientById(uint32) *WebSocketClient
+	GetClientById(uint32) IWebSocketClient
 }
 
 type WebSocket struct {
@@ -24,14 +24,14 @@ type WebSocket struct {
 	maxClient    int
 	minClient    int
 	idSeed       uint32
-	clientMap    map[uint32]*WebSocketClient
+	clientMap    map[uint32]IWebSocketClient
 	clientLocker *sync.RWMutex
 	lock         sync.Mutex
 }
 
 func (w *WebSocket) Init(ip string, port int, params ...OpOption) bool {
 	w.Socket.Init(ip, port, params...)
-	w.clientMap = make(map[uint32]*WebSocketClient)
+	w.clientMap = make(map[uint32]IWebSocketClient)
 	w.clientLocker = &sync.RWMutex{}
 	w.ip = ip
 	w.port = port
@@ -60,7 +60,7 @@ func (w *WebSocket) AssignClientId() uint32 {
 	return atomic.AddUint32(&w.idSeed, 1)
 }
 
-func (w *WebSocket) GetClientById(id uint32) *WebSocketClient {
+func (w *WebSocket) GetClientById(id uint32) IWebSocketClient {
 	w.clientLocker.RLock()
 	client, exist := w.clientMap[id]
 	w.clientLocker.RUnlock()
@@ -93,9 +93,9 @@ func (w *WebSocket) AddClinet(tcpConn *websocket.Conn, addr string, connectType 
 	return nil
 }
 
-func (w *WebSocket) DelClient(client *WebSocketClient) bool {
+func (w *WebSocket) DelClient(client IWebSocketClient) bool {
 	w.clientLocker.Lock()
-	delete(w.clientMap, client.clientId)
+	delete(w.clientMap, client.GetId())
 	w.clientLocker.Unlock()
 	return true
 }
@@ -162,4 +162,21 @@ func (w *WebSocket) handleConn(tcpConn *websocket.Conn, addr string) bool {
 
 	client.Start()
 	return true
+}
+
+func (w *WebSocket) AddClinetJson(tcpConn *websocket.Conn, addr string, connectType int) IServerSocketClient {
+	client := &WebSocketClientJson{}
+	client.Init("", 0)
+	client.server = w
+	client.receiveBufferSize = w.receiveBufferSize
+	client.SetMaxPacketLen(w.GetMaxPacketLen())
+	client.clientId = w.AssignClientId()
+	client.ip = addr
+	client.SetConn(tcpConn)
+	client.SetConnectType(connectType)
+	w.clientLocker.Lock()
+	w.clientMap[client.clientId] = client
+	w.clientCount++
+	w.clientLocker.Unlock()
+	return client
 }

@@ -94,6 +94,7 @@ type (
 
 		SetClientClose(ClientClose)
 		GetClientClose() ClientClose
+		SendJson(head api.JsonHead, funcName string, params ...interface{}) int
 	}
 )
 
@@ -256,4 +257,8 @@ func (this *Socket) SetClientClose(c ClientClose) {
 }
 func (this *Socket) GetClientClose() ClientClose {
 	return this.clientClose
+}
+
+func (this *Socket) SendJson(head api.JsonHead, funcName string, params ...interface{}) int {
+	return 0
 }

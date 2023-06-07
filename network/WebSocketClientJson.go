@@ -6,29 +6,26 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/erdong01/kit/api"
 	"github.com/erdong01/kit/base"
 	"github.com/erdong01/kit/common/timer"
 	"github.com/erdong01/kit/rpc"
 )
 
-type IWebSocketClient interface {
-	ISocket
-}
-
-type WebSocketClient struct {
+type WebSocketClientJson struct {
 	Socket
 	server   *WebSocket
-	sendChan chan []byte //对外缓冲队列
+	sendChan chan []byte
 	timerId  *int64
 }
 
-func (w *WebSocketClient) Init(ip string, port int, params ...OpOption) bool {
+func (w *WebSocketClientJson) Init(ip string, port int, params ...OpOption) bool {
 	w.Socket.Init(ip, port, params...)
 	w.timerId = new(int64)
 	return true
 }
 
-func (w *WebSocketClient) Start() bool {
+func (w *WebSocketClientJson) Start() bool {
 	if w.server == nil {
 		return false
 	}
@@ -40,21 +37,21 @@ func (w *WebSocketClient) Start() bool {
 			w.Update()
 		})
 	}
-
 	if w.packetFuncList.Len() == 0 {
 		w.packetFuncList = w.server.packetFuncList
 	}
 	if w.connectType == CLIENT_CONNECT {
 		go w.SendLoop()
+
 	}
 	w.Run()
 	return true
 }
 
-func (w *WebSocketClient) Stop() bool {
+func (w *WebSocketClientJson) Stop() bool {
 	timer.RegisterTimer(w.timerId, timer.TICK_INTERVAL, func() {
 		timer.StopTimer(w.timerId)
-		if atomic.CompareAndSwapInt32(&w.state, SSF_RUN, SSF_STOP) {
+		if atomic.CompareAndSwapInt32(&w.state, SSF_NULL, SSF_STOP) {
 			if w.conn != nil {
 				w.conn.Close()
 			}
@@ -63,7 +60,7 @@ func (w *WebSocketClient) Stop() bool {
 	return false
 }
 
-func (w *WebSocketClient) Send(head rpc.RpcHead, packet rpc.Packet) int {
+func (w *WebSocketClientJson) Send(head rpc.RpcHead, packet rpc.Packet) int {
 	defer func() {
 		if err := recover(); err != nil {
 			base.TraceCode(err)
@@ -82,12 +79,12 @@ func (w *WebSocketClient) Send(head rpc.RpcHead, packet rpc.Packet) int {
 	return 0
 }
 
-func (w *WebSocketClient) DoSend(buff []byte) int {
+func (w *WebSocketClientJson) DoSend(buff []byte) int {
 	if w.conn == nil {
 		return 0
 	}
 
-	n, err := w.conn.Write(w.packetParser.Write(buff))
+	n, err := w.conn.Write(buff)
 	handleError(err)
 	if n > 0 {
 		return n
@@ -96,7 +93,26 @@ func (w *WebSocketClient) DoSend(buff []byte) int {
 	return 0
 }
 
-func (w *WebSocketClient) OnNetFail(error int) {
+func (s *WebSocketClientJson) SendJson(head api.JsonHead, funcName string, params ...interface{}) int {
+	defer func() {
+		if err := recover(); err != nil {
+			base.TraceCode(err)
+		}
+	}()
+	packet := rpc.MarshalJson(head, funcName, params...)
+	if s.connectType == CLIENT_CONNECT { //对外链接send不阻塞
+		select {
+		case s.sendChan <- packet.Buff:
+		default: //网络太卡,tcp send缓存满了并且发送队列也满了
+			s.OnNetFail(1)
+		}
+	} else {
+		return s.DoSend(packet.Buff)
+	}
+	return 0
+}
+
+func (w *WebSocketClientJson) OnNetFail(error int) {
 	w.Stop()
 
 	if w.connectType == CLIENT_CONNECT { //netgate对外格式统一
@@ -112,7 +128,7 @@ func (w *WebSocketClient) OnNetFail(error int) {
 	}
 }
 
-func (w *WebSocketClient) Close() {
+func (w *WebSocketClientJson) Close() {
 	if w.connectType == CLIENT_CONNECT {
 		//close(w.sendChan)
 	}
@@ -122,7 +138,7 @@ func (w *WebSocketClient) Close() {
 	}
 }
 
-func (w *WebSocketClient) Run() bool {
+func (w *WebSocketClientJson) Run() bool {
 	var buff = make([]byte, w.receiveBufferSize)
 	w.SetState(SSF_RUN)
 	loop := func() bool {
@@ -131,11 +147,9 @@ func (w *WebSocketClient) Run() bool {
 				base.TraceCode(err)
 			}
 		}()
-
 		if w.conn == nil {
 			return false
 		}
-
 		n, err := w.conn.Read(buff)
 		if err == io.EOF {
 			fmt.Printf("远程链接：%s已经关闭！\n", w.conn.RemoteAddr().String())
@@ -153,20 +167,18 @@ func (w *WebSocketClient) Run() bool {
 		w.heartTime = int(time.Now().Unix()) + HEART_TIME_OUT
 		return true
 	}
-
 	for {
 		if !loop() {
 			break
 		}
 	}
-
 	w.Close()
 	fmt.Printf("%s关闭连接", w.ip)
 	return true
 }
 
 // heart
-func (w *WebSocketClient) Update() bool {
+func (w *WebSocketClientJson) Update() bool {
 	now := int(time.Now().Unix())
 	if w.heartTime < now {
 		w.OnNetFail(2)
@@ -175,7 +187,7 @@ func (w *WebSocketClient) Update() bool {
 	return true
 }
 
-func (w *WebSocketClient) SendLoop() bool {
+func (w *WebSocketClientJson) SendLoop() bool {
 	for {
 		defer func() {
 			if err := recover(); err != nil {
@@ -184,6 +196,12 @@ func (w *WebSocketClient) SendLoop() bool {
 		}()
 
 		select {
+		case buff := <-w.sendChan:
+			if buff == nil { //信道关闭
+				return false
+			} else {
+				w.DoSend(buff)
+			}
 		case buff := <-w.sendChan:
 			if buff == nil { //信道关闭
 				return false
