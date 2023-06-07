@@ -507,7 +507,7 @@ func (this *Actor) callJson(io CallIOJson) {
 			base.TraceCode(this.trace.ToString(), err)
 		}
 	}()
-	var jsonPacket api.JsonPacket
+	var jsonPacket = api.JsonPacket{Head: &api.JsonHead{}}
 	json.Unmarshal(io.Buff, &jsonPacket)
 	head := io.JsonHead
 	funcName := jsonPacket.FuncName
