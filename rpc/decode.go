@@ -41,8 +41,8 @@ func Unmarshal(buff []byte) (*RpcPacket, RpcHead) {
 func UnmarshalBodyJson(jsonPacket api.JsonPacket, pFuncType reflect.Type) []interface{} {
 	nCurLen := pFuncType.NumIn()
 	params := make([]interface{}, nCurLen)
-	if jsonPacket.JsonHead != nil {
-		params[0] = context.WithValue(context.Background(), "rpcHead", *(*api.JsonHead)(jsonPacket.JsonHead))
+	if jsonPacket.Head != nil {
+		params[0] = context.WithValue(context.Background(), "rpcHead", *(*api.JsonHead)(jsonPacket.Head))
 	} else {
 		params[0] = context.Background()
 	}
