@@ -113,6 +113,7 @@ func (s *WebSocketClientJson) SendJson(head api.JsonHead, funcName string, param
 }
 
 func (w *WebSocketClientJson) OnNetFail(error int) {
+	w.SetState(SSF_NULL)
 	w.Stop()
 
 	if w.connectType == CLIENT_CONNECT { //netgate对外格式统一
