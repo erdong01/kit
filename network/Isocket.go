@@ -95,6 +95,9 @@ type (
 		SetClientClose(ClientClose)
 		GetClientClose() ClientClose
 		SendJson(head api.JsonHead, funcName string, params ...interface{}) int
+		BindPacketFuncJson(callfunc func(packet api.Packet) bool)
+		SetPacketParser(I IPacketParser)
+		HandlePacketJson(buff []byte)
 	}
 )
 
@@ -202,8 +205,8 @@ func (this *Socket) SetMaxPacketLen(maxReceiveSize int) {
 	this.packetParser.SetMaxPacketLen(maxReceiveSize)
 }
 
-func (this *Socket) SetPacketParser(IPP IPacketParser) {
-	this.packetParser = IPP
+func (this *Socket) SetPacketParser(I IPacketParser) {
+	this.packetParser = I
 }
 
 func (this *Socket) GetReceiveBufferSize() int {
