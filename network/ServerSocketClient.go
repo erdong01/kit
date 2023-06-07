@@ -8,7 +8,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/erdong01/kit/api"
 	"github.com/erdong01/kit/base"
 	"github.com/erdong01/kit/common/timer"
 	"github.com/erdong01/kit/rpc"
@@ -96,25 +95,6 @@ func (s *ServerSocketClient) Start() bool {
 		go s.SendLoop()
 	}
 	return true
-}
-
-func (s *ServerSocketClient) SendJson(head api.JsonHead, funcName string, params ...interface{}) int {
-	defer func() {
-		if err := recover(); err != nil {
-			base.TraceCode(err)
-		}
-	}()
-	packet := rpc.MarshalJson(head, funcName, params...)
-	if s.connectType == CLIENT_CONNECT { //对外链接send不阻塞
-		select {
-		case s.sendChan <- packet.Buff:
-		default: //网络太卡,tcp send缓存满了并且发送队列也满了
-			s.OnNetFail(1)
-		}
-	} else {
-		return s.DoSend(packet.Buff)
-	}
-	return 0
 }
 
 func (s *ServerSocketClient) Send(head rpc.RpcHead, packet rpc.Packet) int {
