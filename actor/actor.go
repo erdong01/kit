@@ -515,8 +515,8 @@ func (this *Actor) callJson(io CallIOJson) {
 	if pFunc != nil {
 		f := pFunc.FuncVal
 		k := pFunc.FuncType
-		if jsonPacket.JsonHead != nil {
-			jsonPacket.JsonHead.SocketId = io.SocketId
+		if jsonPacket.Head != nil {
+			jsonPacket.Head.SocketId = io.SocketId
 		}
 		params := rpc.UnmarshalBodyJson(jsonPacket, k)
 		if len(params) >= 1 {

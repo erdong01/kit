@@ -8,7 +8,7 @@ type Packet struct {
 }
 type JsonPacket struct {
 	FuncName string
-	JsonHead *JsonHead
+	Head     *JsonHead
 	Data     interface{}
 }
 type JsonHead struct {

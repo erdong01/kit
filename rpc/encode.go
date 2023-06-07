@@ -3,12 +3,25 @@ package rpc
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/json"
 	"log"
 	"strings"
 
+	"github.com/erdong01/kit/api"
 	"github.com/erdong01/kit/base"
 	"google.golang.org/protobuf/proto"
 )
+
+func MarshalJson(head api.JsonHead, funcName string, params ...interface{}) (packet api.Packet) {
+	jsonPacket := api.JsonPacket{
+		Head:     &head,
+		FuncName: funcName,
+		Data:     params,
+	}
+	buf, _ := json.Marshal(jsonPacket)
+	packet.Buff = buf
+	return packet
+}
 
 // rpc  Marshal
 func Marshal(head *RpcHead, funcName *string, params ...interface{}) Packet {

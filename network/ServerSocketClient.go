@@ -1,7 +1,6 @@
 package network
 
 import (
-	"encoding/json"
 	"fmt"
 	"hash/crc32"
 	"io"
@@ -97,6 +96,25 @@ func (s *ServerSocketClient) Start() bool {
 		go s.SendLoop()
 	}
 	return true
+}
+
+func (s *ServerSocketClient) SendJson(head api.JsonHead, funcName string, params ...interface{}) int {
+	defer func() {
+		if err := recover(); err != nil {
+			base.TraceCode(err)
+		}
+	}()
+	packet := rpc.MarshalJson(head, funcName, params...)
+	if s.connectType == CLIENT_CONNECT { //对外链接send不阻塞
+		select {
+		case s.sendChan <- packet.Buff:
+		default: //网络太卡,tcp send缓存满了并且发送队列也满了
+			s.OnNetFail(1)
+		}
+	} else {
+		return s.DoSend(packet.Buff)
+	}
+	return 0
 }
 
 func (s *ServerSocketClient) Send(head rpc.RpcHead, packet rpc.Packet) int {
@@ -269,16 +287,6 @@ func (s *ServerSocketClient) SendPacket(head rpc.RpcHead, funcName string, msg p
 func (s *ServerSocketClient) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) int {
 	buff := rpc.Marshal(&head, &funcName, params...)
 	return s.Send(head, buff)
-}
-
-func (s *ServerSocketClient) SendJson(head rpc.RpcHead, funcName string, params ...interface{}) int {
-	paramsBuff, _ := json.Marshal(params)
-	rpcPacket := &api.JsonPacket{FuncName: funcName, Data: string(paramsBuff)}
-	buff, _ := json.Marshal(rpcPacket)
-	var packet = rpc.Packet{
-		Buff: buff,
-	}
-	return s.Send(head, packet)
 }
 
 // 设置链接属性
