@@ -191,16 +191,11 @@ func (s *WebSocket) SendJson(head api.JsonHead, funcName string, params ...inter
 	return client.SendJson(head, funcName, params...)
 }
 
-type serverWs struct {
-	WebSocket *WebSocket
+func (ws *WebSocket) ServerWs(w http.ResponseWriter, r *http.Request, webSocket *WebSocket) {
+	websocket.Server{Handler: ws.Handler}.ServeHTTP(w, r)
 }
 
-func ServerWs(w http.ResponseWriter, r *http.Request, webSocket *WebSocket) {
-	var sw = serverWs{WebSocket: webSocket}
-	websocket.Server{Handler: sw.Handler}.ServeHTTP(w, r)
-}
-
-func (sw *serverWs) Handler(ws *websocket.Conn) {
-	webSocketClient := sw.WebSocket.AddClinetJson(ws, "", 0)
+func (sw *WebSocket) Handler(ws *websocket.Conn) {
+	webSocketClient := sw.AddClinetJson(ws, "", 0)
 	webSocketClient.Start()
 }
