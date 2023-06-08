@@ -7,6 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/erdong01/kit/api"
 	"github.com/erdong01/kit/rpc"
 	"golang.org/x/net/websocket"
 )
@@ -180,6 +181,14 @@ func (w *WebSocket) AddClinetJson(tcpConn *websocket.Conn, addr string, connectT
 	w.clientCount++
 	w.clientLocker.Unlock()
 	return client
+}
+
+func (s *WebSocket) SendJson(head api.JsonHead, funcName string, params ...interface{}) int {
+	client := s.GetClientById(head.SocketId)
+	if client == nil {
+		return 0
+	}
+	return client.SendJson(head, funcName, params...)
 }
 
 type serverWs struct {
