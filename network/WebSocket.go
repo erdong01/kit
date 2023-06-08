@@ -191,7 +191,7 @@ func (s *WebSocket) SendJson(head api.JsonHead, funcName string, params ...inter
 	return client.SendJson(head, funcName, params...)
 }
 
-func (ws *WebSocket) ServerWs(w http.ResponseWriter, r *http.Request, webSocket *WebSocket) {
+func (ws *WebSocket) ServerWs(w http.ResponseWriter, r *http.Request) {
 	websocket.Server{Handler: ws.Handler}.ServeHTTP(w, r)
 }
 
