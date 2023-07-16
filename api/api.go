@@ -9,7 +9,7 @@ type Packet struct {
 type JsonPacket struct {
 	FuncName string      `json:"FuncName,omitempty"`
 	Head     *JsonHead   `json:"Head,omitempty"`
-	Data     interface{} `json:"Data,omitempty"`
+	Data     interface{} `json:"Data,omitempty"` // TODO json.RawMessage
 }
 type JsonHead struct {
 	Id             int64  `json:"Id,omitempty"`
