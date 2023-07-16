@@ -10,7 +10,6 @@ import (
 
 	"github.com/erdong01/kit/api"
 	"github.com/erdong01/kit/base"
-	"github.com/erdong01/kit/tools/mapstructure"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -50,14 +49,11 @@ func UnmarshalBodyJson(jsonPacket api.JsonPacket, pFuncType reflect.Type) []inte
 		if i == 0 {
 			continue
 		}
-		val := reflect.New(pFuncType.In(i))
-		var ii = val.Elem().Interface()
 		if nCurLen == 2 {
-			mapstructure.Decode(jsonPacket.Data, &ii)
+			params[i] = jsonPacket.Data
 		} else if Data, ok := jsonPacket.Data.([]interface{}); ok && len(Data) >= (nCurLen-1) {
-			mapstructure.Decode(Data[i-1], &ii)
+			params[i] = Data[i-1]
 		}
-		params[i] = ii
 	}
 	return params
 }

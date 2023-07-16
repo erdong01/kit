@@ -515,6 +515,9 @@ func (this *Actor) callJson(io CallIOJson) {
 	if pFunc != nil {
 		f := pFunc.FuncVal
 		k := pFunc.FuncType
+		val := reflect.New(k.In(1))
+		var jsonPacket = api.JsonPacket{Head: &api.JsonHead{}, Data: val.Interface()}
+		json.Unmarshal(io.Buff, &jsonPacket)
 		if jsonPacket.Head != nil {
 			jsonPacket.Head.SocketId = io.SocketId
 		}

@@ -10,6 +10,7 @@ import (
 	"github.com/erdong01/kit/base"
 	"github.com/erdong01/kit/common/timer"
 	"github.com/erdong01/kit/rpc"
+	"golang.org/x/net/websocket"
 )
 
 type WebSocketClientJson struct {
@@ -195,7 +196,6 @@ func (w *WebSocketClientJson) SendLoop() bool {
 				base.TraceCode(err)
 			}
 		}()
-
 		select {
 		case buff := <-w.sendChan:
 			if buff == nil { //信道关闭
