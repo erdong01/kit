@@ -10,7 +10,6 @@ import (
 	"github.com/erdong01/kit/base"
 	"github.com/erdong01/kit/common/timer"
 	"github.com/erdong01/kit/rpc"
-	"golang.org/x/net/websocket"
 )
 
 type WebSocketClientJson struct {
