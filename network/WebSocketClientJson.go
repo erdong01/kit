@@ -31,11 +31,11 @@ func (w *WebSocketClientJson) Start() bool {
 	}
 
 	if w.connectType == CLIENT_CONNECT {
-		w.sendChan = make(chan []byte, MAX_SEND_CHAN)
-		timer.StoreTimerId(w.timerId, int64(w.clientId)+1<<32)
-		timer.RegisterTimer(w.timerId, (HEART_TIME_OUT/3)*time.Second, func() {
-			w.Update()
-		})
+		// w.sendChan = make(chan []byte, MAX_SEND_CHAN)
+		// timer.StoreTimerId(w.timerId, int64(w.clientId)+1<<32)
+		// timer.RegisterTimer(w.timerId, (HEART_TIME_OUT/3)*time.Second, func() {
+		// 	w.Update()
+		// })
 	}
 	if w.packetFuncList.Len() == 0 {
 		w.packetFuncList = w.server.packetFuncList
