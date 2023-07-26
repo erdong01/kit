@@ -173,6 +173,9 @@ func (w *WebSocketClientJson) Run() bool {
 			break
 		}
 	}
+	if w.server.clientClose != nil {
+		w.server.clientClose(w.clientId)
+	}
 	w.Close()
 	fmt.Printf("%s关闭连接", w.ip)
 	return true
