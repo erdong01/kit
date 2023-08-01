@@ -3,12 +3,10 @@ package etv3
 import (
 	"context"
 	"encoding/json"
+	"github.com/erdong01/kit/rpc"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"log"
 	"time"
-
-	"github.com/erdong01/kit/common"
-
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 const (
@@ -17,7 +15,7 @@ const (
 
 // 注册服务器
 type Service struct {
-	*common.ClusterInfo
+	*rpc.ClusterInfo
 	client  *clientv3.Client
 	lease   clientv3.Lease
 	leaseId clientv3.LeaseID
@@ -27,7 +25,7 @@ type Service struct {
 func (s *Service) SET() {
 	leaseResp, _ := s.lease.Grant(context.Background(), 10)
 	s.leaseId = leaseResp.ID
-	key := ETCD_DIR + s.String() + "/" + s.IpString()
+	key := ETCD_DIR + s.ServiceName() + "/" + s.IpString()
 	data, _ := json.Marshal(s.ClusterInfo)
 	s.client.Put(context.Background(), key, string(data), clientv3.WithLease(s.leaseId))
 	s.status = TTL
@@ -43,6 +41,7 @@ func (s *Service) TTL() {
 		time.Sleep(time.Second * 3)
 	}
 }
+
 func (s *Service) Run() {
 	for {
 		switch s.status {
@@ -55,7 +54,7 @@ func (s *Service) Run() {
 }
 
 // 注册服务器
-func (s *Service) Init(info *common.ClusterInfo, endpoints []string) {
+func (s *Service) Init(info *rpc.ClusterInfo, endpoints []string) {
 	cfg := clientv3.Config{
 		Endpoints: endpoints,
 	}

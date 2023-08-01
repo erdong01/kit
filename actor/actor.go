@@ -14,7 +14,7 @@ import (
 	"github.com/erdong01/kit/api"
 	"github.com/erdong01/kit/base"
 	"github.com/erdong01/kit/base/mpsc"
-	"github.com/erdong01/kit/common/timer"
+	"github.com/erdong01/kit/base/timer"
 	"github.com/erdong01/kit/rpc"
 )
 

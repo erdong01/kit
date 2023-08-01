@@ -2,15 +2,13 @@ package etv3
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"log"
-	"sync"
-
 	"github.com/erdong01/kit/actor"
-	"github.com/erdong01/kit/common"
 	"github.com/erdong01/kit/rpc"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"google.golang.org/protobuf/proto"
+	"log"
+	"sync"
 )
 
 const (
@@ -21,7 +19,7 @@ const (
 // publish
 type (
 	MailBox struct {
-		*common.ClusterInfo
+		*rpc.ClusterInfo
 		client        *clientv3.Client
 		lease         clientv3.Lease
 		mailBoxLocker *sync.RWMutex
@@ -30,7 +28,7 @@ type (
 )
 
 // 初始化pub
-func (m *MailBox) Init(endpoints []string, info *common.ClusterInfo) {
+func (m *MailBox) Init(endpoints []string, info *rpc.ClusterInfo) {
 	cfg := clientv3.Config{
 		Endpoints: endpoints,
 	}
@@ -46,7 +44,6 @@ func (m *MailBox) Init(endpoints []string, info *common.ClusterInfo) {
 	m.mailBoxLocker = &sync.RWMutex{}
 	m.mailBoxMap = map[int64]*rpc.MailBox{}
 	m.Start()
-	m.getAll()
 }
 
 func (m *MailBox) Start() {
@@ -59,7 +56,7 @@ func (m *MailBox) Create(info *rpc.MailBox) bool {
 		leaseId := leaseResp.ID
 		info.LeaseId = int64(leaseId)
 		key := MAILBOX_DIR + fmt.Sprintf("%d", info.Id)
-		data, _ := json.Marshal(info)
+		data, _ := proto.Marshal(info)
 		//设置key
 		tx := m.client.Txn(context.Background())
 		tx.If(clientv3.Compare(clientv3.CreateRevision(key), "=", 0)).
@@ -118,6 +115,7 @@ func (m *MailBox) Get(Id int64) *rpc.MailBox {
 // subscribe
 func (m *MailBox) Run() {
 	wch := m.client.Watch(context.Background(), MAILBOX_DIR, clientv3.WithPrefix(), clientv3.WithPrevKV())
+	m.getAll()
 	for v := range wch {
 		for _, v1 := range v.Events {
 			if v1.Type.String() == "PUT" {
@@ -142,10 +140,10 @@ func (m *MailBox) getAll() {
 }
 
 func nodeToMailBox(val []byte) *rpc.MailBox {
-	info := &rpc.MailBox{}
-	err := json.Unmarshal([]byte(val), info)
+	mail := &rpc.MailBox{}
+	err := proto.Unmarshal([]byte(val), mail)
 	if err != nil {
 		log.Print(err)
 	}
-	return info
+	return mail
 }

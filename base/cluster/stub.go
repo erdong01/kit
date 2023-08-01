@@ -2,13 +2,11 @@ package cluster
 
 import (
 	"fmt"
-	"sync/atomic"
-	"time"
-
 	"github.com/erdong01/kit/actor"
 	"github.com/erdong01/kit/base"
-	"github.com/erdong01/kit/common"
 	"github.com/erdong01/kit/rpc"
+	"sync/atomic"
+	"time"
 )
 
 type fsm_type uint32
@@ -23,7 +21,7 @@ type (
 	//stub容器
 	Stub struct {
 		fsm         fsm_type //状态机
-		StubMailBox common.StubMailBox
+		StubMailBox rpc.StubMailBox
 		isRegister  int32
 	}
 )

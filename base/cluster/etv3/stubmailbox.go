@@ -4,12 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"sync"
-
-	"github.com/erdong01/kit/common"
 	"github.com/erdong01/kit/rpc"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"log"
+	"sync"
 )
 
 const (
@@ -19,9 +17,9 @@ const (
 
 // publish
 type (
-	StubMailBoxMap map[int64]*common.StubMailBox
+	StubMailBoxMap map[int64]*rpc.StubMailBox
 	StubMailBox    struct {
-		*common.ClusterInfo
+		*rpc.ClusterInfo
 		client            *clientv3.Client
 		lease             clientv3.Lease
 		stubMailBoxMap    [rpc.STUB_END]StubMailBoxMap
@@ -30,7 +28,7 @@ type (
 )
 
 // 初始化pub
-func (s *StubMailBox) Init(endpoints []string, info *common.ClusterInfo) {
+func (s *StubMailBox) Init(endpoints []string, info *rpc.ClusterInfo) {
 	cfg := clientv3.Config{
 		Endpoints: endpoints,
 	}
@@ -48,14 +46,13 @@ func (s *StubMailBox) Init(endpoints []string, info *common.ClusterInfo) {
 		s.stubMailBoxMap[i] = make(StubMailBoxMap)
 	}
 	s.Start()
-	s.getAll()
 }
 
 func (s *StubMailBox) Start() {
 	go s.Run()
 }
 
-func (s *StubMailBox) Create(info *common.StubMailBox) bool {
+func (s *StubMailBox) Create(info *rpc.StubMailBox) bool {
 	leaseResp, err := s.lease.Grant(context.Background(), STUB_TTL_TIME)
 	if err == nil {
 		leaseId := leaseResp.ID
@@ -73,12 +70,12 @@ func (s *StubMailBox) Create(info *common.StubMailBox) bool {
 	return false
 }
 
-func (s *StubMailBox) Lease(info *common.StubMailBox) error {
+func (s *StubMailBox) Lease(info *rpc.StubMailBox) error {
 	_, err := s.lease.KeepAliveOnce(context.Background(), clientv3.LeaseID(info.LeaseId))
 	return err
 }
 
-func (s *StubMailBox) add(info *common.StubMailBox) {
+func (s *StubMailBox) add(info *rpc.StubMailBox) {
 	s.stubMailBoxLocker[info.StubType].Lock()
 	stub, bOk := s.stubMailBoxMap[info.StubType][info.Id]
 	if !bOk {
@@ -89,13 +86,13 @@ func (s *StubMailBox) add(info *common.StubMailBox) {
 	s.stubMailBoxLocker[info.StubType].Unlock()
 }
 
-func (s *StubMailBox) del(info *common.StubMailBox) {
+func (s *StubMailBox) del(info *rpc.StubMailBox) {
 	s.stubMailBoxLocker[info.StubType].Lock()
 	delete(s.stubMailBoxMap[info.StubType], info.Id)
 	s.stubMailBoxLocker[info.StubType].Unlock()
 }
 
-func (s *StubMailBox) Get(stubType rpc.STUB, Id int64) *common.StubMailBox {
+func (s *StubMailBox) Get(stubType rpc.STUB, Id int64) *rpc.StubMailBox {
 	s.stubMailBoxLocker[stubType].RLock()
 	stub, bEx := s.stubMailBoxMap[stubType][Id]
 	s.stubMailBoxLocker[stubType].RUnlock()
@@ -115,6 +112,7 @@ func (s *StubMailBox) Count(stubType rpc.STUB) int64 {
 // subscribe
 func (s *StubMailBox) Run() {
 	wch := s.client.Watch(context.Background(), STUB_DIR, clientv3.WithPrefix(), clientv3.WithPrevKV())
+	s.getAll()
 	for v := range wch {
 		for _, v1 := range v.Events {
 			if v1.Type.String() == "PUT" {
@@ -138,8 +136,8 @@ func (s *StubMailBox) getAll() {
 	}
 }
 
-func nodeToStubMailBox(val []byte) *common.StubMailBox {
-	info := &common.StubMailBox{}
+func nodeToStubMailBox(val []byte) *rpc.StubMailBox {
+	info := &rpc.StubMailBox{}
 	err := json.Unmarshal([]byte(val), info)
 	if err != nil {
 		log.Print(err)

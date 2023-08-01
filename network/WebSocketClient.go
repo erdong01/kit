@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/erdong01/kit/base"
-	"github.com/erdong01/kit/common/timer"
+	"github.com/erdong01/kit/base/timer"
 	"github.com/erdong01/kit/rpc"
 )
 

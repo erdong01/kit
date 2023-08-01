@@ -2,16 +2,14 @@ package rpc
 
 import (
 	"context"
-	"reflect"
-	"sync"
-
 	"github.com/erdong01/kit/actor"
 	"github.com/erdong01/kit/base"
+	"github.com/erdong01/kit/base/cluster/etv3"
 	"github.com/erdong01/kit/base/vector"
-	"github.com/erdong01/kit/common"
-	"github.com/erdong01/kit/common/cluster/etv3"
 	"github.com/erdong01/kit/network"
 	"github.com/erdong01/kit/rpc"
+	"reflect"
+	"sync"
 )
 
 type (
@@ -27,7 +25,7 @@ type (
 
 	ClusterNode struct {
 		*network.ClientSocket
-		*common.ClusterInfo
+		*rpc.ClusterInfo
 	}
 
 	//集群客户端
@@ -38,15 +36,15 @@ type (
 		packet          IClusterPacket
 		master          *Master
 		hashRing        *base.HashRing //hash一致性
-		clusterInfoMapg map[uint32]*common.ClusterInfo
-		packetFuncList  *vector.Vector //call back
+		clusterInfoMapg map[uint32]*rpc.ClusterInfo
+		packetFuncList  *vector.Vector[network.PacketFunc] //call back
 	}
 
 	ICluster interface {
 		actor.IActor
-		InitCluster(info *common.ClusterInfo, Endpoints []string)
-		AddCluster(info *common.ClusterInfo)
-		DelCluster(info *common.ClusterInfo)
+		InitCluster(info *rpc.ClusterInfo, Endpoints []string)
+		AddCluster(info *rpc.ClusterInfo)
+		DelCluster(info *rpc.ClusterInfo)
 		GetCluster(rpc.RpcHead) *ClusterNode
 
 		BindPacket(IClusterPacket)
@@ -61,14 +59,14 @@ type (
 )
 
 // 注册服务器
-func NewService(info *common.ClusterInfo, Endpoints []string) *Service {
+func NewService(info *rpc.ClusterInfo, Endpoints []string) *Service {
 	service := &etv3.Service{}
 	service.Init(info, Endpoints)
 	return (*Service)(service)
 }
 
 // 监控服务器
-func NewMaster(info *common.ClusterInfo, Endpoints []string) *Master {
+func NewMaster(info *rpc.ClusterInfo, Endpoints []string) *Master {
 	master := &etv3.Master{}
 	master.Init(info, Endpoints)
 	return (*Master)(master)
@@ -81,20 +79,20 @@ func NewSnowflake(Endpoints []string) *Snowflake {
 	return (*Snowflake)(uuid)
 }
 
-func (c *Cluster) InitCluster(info *common.ClusterInfo, Endpoints []string) {
+func (c *Cluster) InitCluster(info *rpc.ClusterInfo, Endpoints []string) {
 	c.Actor.Init()
 	c.clusterLocker = &sync.RWMutex{}
 	c.clusterMap = make(map[uint32]*ClusterNode)
 	c.master = NewMaster(info, Endpoints)
 	c.hashRing = base.NewHashRing()
-	c.clusterInfoMapg = make(map[uint32]*common.ClusterInfo)
-	c.packetFuncList = vector.NewVector()
+	c.clusterInfoMapg = make(map[uint32]*rpc.ClusterInfo)
+	c.packetFuncList = &vector.Vector[network.PacketFunc]{}
 	actor.MGR.RegisterActor(c)
 	c.Actor.Start()
 }
 
 // 集群新加member
-func (c *Cluster) Cluster_Add(ctx context.Context, info *common.ClusterInfo) {
+func (c *Cluster) Cluster_Add(ctx context.Context, info *rpc.ClusterInfo) {
 	_, bEx := c.clusterInfoMapg[info.Id()]
 	if !bEx {
 		c.AddCluster(info)
@@ -103,7 +101,7 @@ func (c *Cluster) Cluster_Add(ctx context.Context, info *common.ClusterInfo) {
 }
 
 // 集群删除member
-func (c *Cluster) Cluster_Del(ctx context.Context, info *common.ClusterInfo) {
+func (c *Cluster) Cluster_Del(ctx context.Context, info *rpc.ClusterInfo) {
 	delete(c.clusterInfoMapg, info.Id())
 	c.DelCluster(info)
 }
@@ -117,7 +115,7 @@ func (c *Cluster) DISCONNECT(ctx context.Context, ClusterId uint32) {
 	delete(c.clusterInfoMapg, ClusterId)
 }
 
-func (c *Cluster) AddCluster(info *common.ClusterInfo) {
+func (c *Cluster) AddCluster(info *rpc.ClusterInfo) {
 	client := new(network.ClientSocket)
 	client.Init(info.Ip, int(info.Port))
 	packet := reflect.New(reflect.ValueOf(c.packet).Elem().Type()).Interface().(IClusterPacket)
@@ -125,7 +123,7 @@ func (c *Cluster) AddCluster(info *common.ClusterInfo) {
 	packet.SetClusterId(info.Id())
 	client.BindPacketFunc(actor.MGR.PacketFunc)
 	for _, v := range c.packetFuncList.Values() {
-		client.BindPacketFunc(v.(network.PacketFunc))
+		client.BindPacketFunc(v)
 	}
 	c.clusterLocker.Lock()
 	c.clusterMap[info.Id()] = &ClusterNode{ClientSocket: client, ClusterInfo: info}
@@ -134,7 +132,7 @@ func (c *Cluster) AddCluster(info *common.ClusterInfo) {
 	client.Start()
 }
 
-func (c *Cluster) DelCluster(info *common.ClusterInfo) {
+func (c *Cluster) DelCluster(info *rpc.ClusterInfo) {
 	c.clusterLocker.RLock()
 	cluster, bEx := c.clusterMap[info.Id()]
 	c.clusterLocker.RUnlock()
@@ -172,51 +170,4 @@ func (c *Cluster) sendPoint(head rpc.RpcHead, packet rpc.Packet) {
 	if pCluster != nil {
 		pCluster.Send(head, packet)
 	}
-}
-
-func (c *Cluster) balanceSend(head rpc.RpcHead, packet rpc.Packet) {
-	_, head.ClusterId = c.hashRing.Get64(head.Id)
-	pClient := c.GetCluster(head)
-	if pClient != nil {
-		pClient.Send(head, packet)
-	}
-}
-
-func (c *Cluster) boardCastSend(head rpc.RpcHead, packet rpc.Packet) {
-	clusterList := []*ClusterNode{}
-	c.clusterLocker.RLock()
-	for _, v := range c.clusterMap {
-		clusterList = append(clusterList, v)
-	}
-	c.clusterLocker.RUnlock()
-	for _, v := range clusterList {
-		v.Send(head, packet)
-	}
-}
-
-func (c *Cluster) SendMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
-	c.Send(head, rpc.Marshal(&head, &funcName, params...))
-}
-
-func (c *Cluster) Send(head rpc.RpcHead, packet rpc.Packet) {
-	switch head.SendType {
-	//case rpc.SEND_BALANCE:
-	//	c.balanceSend(head, packet)
-	case rpc.SEND_POINT:
-		c.sendPoint(head, packet)
-	default:
-		c.boardCastSend(head, packet)
-	}
-}
-
-func (c *Cluster) RandomCluster(head rpc.RpcHead) rpc.RpcHead {
-	if head.Id == 0 {
-		head.Id = int64(uint32(base.RAND.RandI(1, 0xFFFFFFFF)))
-	}
-	_, head.ClusterId = c.hashRing.Get64(head.Id)
-	pCluster := c.GetCluster(head)
-	if pCluster != nil {
-		head.SocketId = pCluster.SocketId
-	}
-	return head
 }

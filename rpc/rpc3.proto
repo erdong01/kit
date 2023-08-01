@@ -101,7 +101,6 @@ enum STUB{
 enum MAIL{
   Player = 0;//player
 };
-
 message F{
   RpcPacket RpcPacket = 1;
   int32 Id = 2;

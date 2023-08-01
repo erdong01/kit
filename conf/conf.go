@@ -1,4 +1,4 @@
-package common
+package conf
 
 import "github.com/erdong01/kit/rpc"
 
@@ -49,6 +49,6 @@ type (
 
 	Stub struct {
 		StubCount map[string]int64 `yaml:"stub_count"`
-		GmCount   int              `yaml:"gm_count"`
+		MaxCount  int64            `yaml:"max_count"`
 	}
 )

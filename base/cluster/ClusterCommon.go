@@ -2,13 +2,11 @@ package cluster
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/erdong01/kit/base"
-	"github.com/erdong01/kit/common"
-	"github.com/erdong01/kit/common/cluster/etv3"
+	"github.com/erdong01/kit/base/cluster/etv3"
 	"github.com/erdong01/kit/rpc"
 	"github.com/nats-io/nats.go"
+	"strings"
 )
 
 const (
@@ -23,14 +21,14 @@ type (
 )
 
 // 注册服务器
-func NewService(info *common.ClusterInfo, Endpoints []string) *Service {
+func NewService(info *rpc.ClusterInfo, Endpoints []string) *Service {
 	service := &etv3.Service{}
 	service.Init(info, Endpoints)
 	return (*Service)(service)
 }
 
 // 监控服务器
-func NewMaster(info common.IClusterInfo, Endpoints []string) *Master {
+func NewMaster(info rpc.IClusterInfo, Endpoints []string) *Master {
 	master := &etv3.Master{}
 	master.Init(info, Endpoints)
 	return (*Master)(master)
@@ -43,16 +41,16 @@ func NewSnowflake(Endpoints []string) *Snowflake {
 	return (*Snowflake)(uuid)
 }
 
-func getChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s/%d", ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
+func getChannel(clusterInfo rpc.ClusterInfo) string {
+	return fmt.Sprintf("%s/%s/%d", ETCD_DIR, clusterInfo.ServiceName(), clusterInfo.Id())
 }
 
-func getTopicChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s", ETCD_DIR, clusterInfo.String())
+func getTopicChannel(clusterInfo rpc.ClusterInfo) string {
+	return fmt.Sprintf("%s/%s", ETCD_DIR, clusterInfo.ServiceName())
 }
 
-func getCallChannel(clusterInfo common.ClusterInfo) string {
-	return fmt.Sprintf("%s/%s/call/%d", ETCD_DIR, clusterInfo.String(), clusterInfo.Id())
+func getCallChannel(clusterInfo rpc.ClusterInfo) string {
+	return fmt.Sprintf("%s/%s/call/%d", ETCD_DIR, clusterInfo.ServiceName(), clusterInfo.Id())
 }
 
 func getRpcChannel(head rpc.RpcHead) string {

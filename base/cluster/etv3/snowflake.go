@@ -3,11 +3,10 @@ package etv3
 import (
 	"context"
 	"fmt"
-	"log"
-	"time"
-
 	"github.com/erdong01/kit/base"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"log"
+	"time"
 )
 
 const (
@@ -49,7 +48,7 @@ func (s *Snowflake) SET() bool {
 		Else()
 	txnRes, err := tx.Commit()
 	if err != nil || !txnRes.Succeeded { //抢锁失败
-		s.id = int64(base.RAND.RandI(1, int(base.WorkeridMax)))
+		s.id = int64(base.RandI(1, int(base.WorkeridMax)))
 		return false
 	}
 
@@ -64,7 +63,7 @@ func (s *Snowflake) TTL() {
 	if err != nil {
 		s.status = SET
 	} else {
-		time.Sleep(ttl_time / 3)
+		time.Sleep(ttl_time * time.Second / 3)
 	}
 }
 
@@ -90,7 +89,7 @@ func (s *Snowflake) Init(endpoints []string) {
 		log.Fatal("Error: cannot connec to etcd:", err)
 	}
 	lease := clientv3.NewLease(etcdClient)
-	s.id = int64(base.RAND.RandI(1, int(base.WorkeridMax)))
+	s.id = int64(base.RandI(1, int(base.WorkeridMax)))
 	s.client = etcdClient
 	s.lease = lease
 	for !s.SET() {

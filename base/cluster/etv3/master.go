@@ -3,23 +3,20 @@ package etv3
 import (
 	"context"
 	"encoding/json"
-	"log"
-
-	"github.com/erdong01/kit/common"
-
 	"github.com/erdong01/kit/actor"
 	"github.com/erdong01/kit/rpc"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"log"
 )
 
 // 监控服务器
 type Master struct {
 	client *clientv3.Client
-	common.IClusterInfo
+	rpc.IClusterInfo
 }
 
 // 监控服务器
-func (m *Master) Init(info common.IClusterInfo, Endpoints []string) {
+func (m *Master) Init(info rpc.IClusterInfo, Endpoints []string) {
 	cfg := clientv3.Config{
 		Endpoints: Endpoints,
 	}
@@ -34,20 +31,21 @@ func (m *Master) Init(info common.IClusterInfo, Endpoints []string) {
 	m.IClusterInfo = info
 	m.InitServices()
 }
+
 func (m *Master) Start() {
 	go m.Run()
 }
 
-func (m *Master) addService(info *common.ClusterInfo) {
+func (m *Master) addService(info *rpc.ClusterInfo) {
 	actor.MGR.SendMsg(rpc.RpcHead{}, "Cluster.Cluster_Add", info)
 }
 
-func (m *Master) delService(info *common.ClusterInfo) {
+func (m *Master) delService(info *rpc.ClusterInfo) {
 	actor.MGR.SendMsg(rpc.RpcHead{}, "Cluster.Cluster_Del", info)
 }
 
-func NodeToService(val []byte) *common.ClusterInfo {
-	info := &common.ClusterInfo{}
+func NodeToService(val []byte) *rpc.ClusterInfo {
+	info := &rpc.ClusterInfo{}
 	err := json.Unmarshal([]byte(val), info)
 	if err != nil {
 		log.Print(err)
@@ -56,7 +54,7 @@ func NodeToService(val []byte) *common.ClusterInfo {
 }
 
 func (m *Master) Run() {
-	wch := m.client.Watch(context.Background(), ETCD_DIR+m.String(), clientv3.WithPrefix(), clientv3.WithPrevKV())
+	wch := m.client.Watch(context.Background(), ETCD_DIR, clientv3.WithPrefix(), clientv3.WithPrevKV())
 	for v := range wch {
 		for _, v1 := range v.Events {
 			if v1.Type.String() == "PUT" {

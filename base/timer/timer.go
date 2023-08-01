@@ -1,11 +1,10 @@
 package timer
 
 import (
+	"github.com/erdong01/kit/base"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/erdong01/kit/base"
 )
 
 const (
@@ -31,9 +30,8 @@ type (
 		expire uint32
 		handle TimerHandle
 		id     *int64
-		//readd
-		time  uint32
-		bOnce bool
+		time   uint32
+		IsOnce bool
 	}
 
 	//这个队列可以换成无锁队列
@@ -55,7 +53,7 @@ type (
 	}
 
 	Op struct {
-		bOnce bool
+		isOnce bool
 	}
 
 	OpOption func(*Op)
@@ -82,7 +80,7 @@ func (op *Op) applyOpts(opts []OpOption) {
 
 func WithOnce() OpOption {
 	return func(op *Op) {
-		op.bOnce = true
+		op.isOnce = true
 	}
 }
 
@@ -154,7 +152,7 @@ func (t *Timer) Add(id *int64, time uint32, handle TimerHandle, opts ...OpOption
 	op := Op{}
 	op.applyOpts(opts)
 	node := &TimerNode{expire: time + t.time, handle: handle,
-		time: time, bOnce: op.bOnce, id: id} //超时时间+当前计数
+		time: time, IsOnce: op.isOnce, id: id} //超时时间+当前计数
 	t.lock.Lock()
 	t.addNode(node)
 	t.lock.Unlock()
@@ -207,7 +205,7 @@ func (t *Timer) dispatch(current *TimerNode) {
 		id := current.LoadId()
 		if id > 0 {
 			current.handle()
-			if !current.bOnce {
+			if !current.IsOnce {
 				t.loop_node = append(t.loop_node, current)
 			}
 		}
@@ -283,8 +281,8 @@ func (t *Timer) run() {
 	t.pTimer.Stop()
 }
 
-func RegisterTimer(id *int64, duration time.Duration, handle TimerHandle, opts ...OpOption) {
-	TIMER.Add(id, uint32(duration/TICK_INTERVAL), handle, opts...)
+func RegisterTimer(id *int64, duration time.Duration, handle TimerHandle, opts ...OpOption) *TimerNode {
+	return TIMER.Add(id, uint32(duration/TICK_INTERVAL), handle, opts...)
 }
 
 func StopTimer(id *int64) {

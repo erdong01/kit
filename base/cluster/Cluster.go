@@ -3,17 +3,17 @@ package cluster
 import (
 	"context"
 	"errors"
+	"github.com/erdong01/kit/actor"
+	"github.com/erdong01/kit/base"
+	"github.com/erdong01/kit/base/cluster/etv3"
+	"github.com/erdong01/kit/base/vector"
+	"github.com/erdong01/kit/conf"
+	"github.com/erdong01/kit/network"
+	"github.com/erdong01/kit/rpc"
 	"reflect"
 	"sync"
 	"time"
 
-	"github.com/erdong01/kit/actor"
-	"github.com/erdong01/kit/base"
-	"github.com/erdong01/kit/base/vector"
-	"github.com/erdong01/kit/common"
-	"github.com/erdong01/kit/common/cluster/etv3"
-	"github.com/erdong01/kit/network"
-	"github.com/erdong01/kit/rpc"
 	"github.com/nats-io/nats.go"
 )
 
@@ -23,13 +23,13 @@ const (
 )
 
 type (
-	HashClusterMap       map[uint32]*common.ClusterInfo
-	HashClusterSocketMap map[uint32]*common.ClusterInfo
+	HashClusterMap       map[uint32]*rpc.ClusterInfo
+	HashClusterSocketMap map[uint32]*rpc.ClusterInfo
 
 	Op struct {
 		mailBoxEndpoints     []string
 		stubMailBoxEndpoints []string
-		stub                 common.Stub
+		stub                 conf.Stub
 	}
 
 	OpOption func(*Op)
@@ -44,20 +44,20 @@ type (
 		conn           *nats.Conn
 		dieChan        chan bool
 		master         *Master
-		clusterInfoMap map[uint32]*common.ClusterInfo
-		packetFuncList *vector.Vector //call back
+		clusterInfoMap map[uint32]*rpc.ClusterInfo
+		packetFuncList *vector.Vector[network.PacketFunc] //call back
 		MailBox        etv3.MailBox
 		StubMailBox    etv3.StubMailBox
-		Stub           common.Stub
+		Stub           conf.Stub
 	}
 
 	ICluster interface {
 		actor.IActor
-		InitCluster(info *common.ClusterInfo, Endpoints []string, natsUrl string, params ...OpOption)
+		InitCluster(info *rpc.ClusterInfo, Endpoints []string, natsUrl string, params ...OpOption)
 		RegisterClusterCall() //注册集群通用回调
-		AddCluster(info *common.ClusterInfo)
-		DelCluster(info *common.ClusterInfo)
-		GetCluster(rpc.RpcHead) *common.ClusterInfo
+		AddCluster(info *rpc.ClusterInfo)
+		DelCluster(info *rpc.ClusterInfo)
+		GetCluster(rpc.RpcHead) *rpc.ClusterInfo
 
 		BindPacketFunc(packetFunc network.PacketFunc)
 		CallMsg(interface{}, rpc.RpcHead, string, ...interface{}) error //同步给集群特定服务器
@@ -67,7 +67,7 @@ type (
 	}
 
 	EmptyClusterInfo struct {
-		common.ClusterInfo
+		rpc.ClusterInfo
 	}
 
 	CallFunc struct {
@@ -90,7 +90,7 @@ func WithMailBoxEtcd(Endpoints []string) OpOption {
 	}
 }
 
-func WithStubMailBoxEtcd(Endpoints []string, stub *common.Stub) OpOption {
+func WithStubMailBoxEtcd(Endpoints []string, stub *conf.Stub) OpOption {
 	return func(op *Op) {
 		op.stubMailBoxEndpoints = Endpoints
 		op.stub = *stub
@@ -101,15 +101,15 @@ func (c *EmptyClusterInfo) String() string {
 	return ""
 }
 
-func (c *Cluster) InitCluster(info *common.ClusterInfo, Endpoints []string, natsUrl string, params ...OpOption) {
+func (c *Cluster) InitCluster(info *rpc.ClusterInfo, Endpoints []string, natsUrl string, params ...OpOption) {
 	c.Actor.Init()
 	for i := 0; i < MAX_CLUSTER_NUM; i++ {
 		c.clusterLocker[i] = &sync.RWMutex{}
 		c.clusterMap[i] = make(HashClusterMap)
 		c.hashRing[i] = base.NewHashRing()
 	}
-	c.clusterInfoMap = make(map[uint32]*common.ClusterInfo)
-	c.packetFuncList = vector.NewVector()
+	c.clusterInfoMap = make(map[uint32]*rpc.ClusterInfo)
+	c.packetFuncList = &vector.Vector[network.PacketFunc]{}
 
 	conn, err := setupNatsConn(
 		natsUrl,
@@ -167,15 +167,15 @@ func (c *Cluster) Call(parmas ...interface{}) {
 	c.conn.Publish(reply, packet.Buff)
 }
 
-func (c *Cluster) AddCluster(info *common.ClusterInfo) {
+func (c *Cluster) AddCluster(info *rpc.ClusterInfo) {
 	c.clusterLocker[info.Type].Lock()
 	c.clusterMap[info.Type][info.Id()] = info
 	c.clusterLocker[info.Type].Unlock()
 	c.hashRing[info.Type].Add(info.IpString())
-	base.LOG.Printf("服务器[%s:%s:%d]建立连接", info.String(), info.Ip, info.Port)
+	base.LOG.Printf("服务器[%s:%s:%d]建立连接", info.ServiceName(), info.Ip, info.Port)
 }
 
-func (c *Cluster) DelCluster(info *common.ClusterInfo) {
+func (c *Cluster) DelCluster(info *rpc.ClusterInfo) {
 	c.clusterLocker[info.Type].RLock()
 	_, bEx := c.clusterMap[info.Type][info.Id()]
 	c.clusterLocker[info.Type].RUnlock()
@@ -186,10 +186,10 @@ func (c *Cluster) DelCluster(info *common.ClusterInfo) {
 	}
 
 	c.hashRing[info.Type].Remove(info.IpString())
-	base.LOG.Printf("服务器[%s:%s:%d]断开连接", info.String(), info.Ip, info.Port)
+	base.LOG.Printf("服务器[%s:%s:%d]断开连接", info.ServiceName(), info.Ip, info.Port)
 }
 
-func (c *Cluster) GetCluster(head rpc.RpcHead) *common.ClusterInfo {
+func (c *Cluster) GetCluster(head rpc.RpcHead) *rpc.ClusterInfo {
 	c.clusterLocker[head.DestServerType].RLock()
 	defer c.clusterLocker[head.DestServerType].RUnlock()
 	client, bEx := c.clusterMap[head.DestServerType][head.ClusterId]
@@ -205,7 +205,7 @@ func (c *Cluster) BindPacketFunc(callfunc network.PacketFunc) {
 
 func (c *Cluster) HandlePacket(packet rpc.Packet) {
 	for _, v := range c.packetFuncList.Values() {
-		if v.(network.PacketFunc)(packet) {
+		if v(packet) {
 			break
 		}
 	}
@@ -302,7 +302,7 @@ func (c *Cluster) CallMsg(cb interface{}, head rpc.RpcHead, funcName string, par
 
 func (c *Cluster) RandomCluster(head rpc.RpcHead) rpc.RpcHead {
 	if head.Id == 0 {
-		head.Id = int64(uint32(base.RAND.RandI(1, 0xFFFFFFFF)))
+		head.Id = int64(uint32(base.RandI(1, 0xFFFFFFFF)))
 	}
 	_, head.ClusterId = c.hashRing[head.DestServerType].Get64(head.Id)
 	pCluster := c.GetCluster(head)
@@ -317,7 +317,7 @@ func (c *Cluster) IsEnoughStub(stub rpc.STUB) bool {
 }
 
 // 集群新加member
-func (c *Cluster) Cluster_Add(ctx context.Context, info *common.ClusterInfo) {
+func (c *Cluster) Cluster_Add(ctx context.Context, info *rpc.ClusterInfo) {
 	_, bEx := c.clusterInfoMap[info.Id()]
 	if !bEx {
 		c.AddCluster(info)
@@ -326,7 +326,7 @@ func (c *Cluster) Cluster_Add(ctx context.Context, info *common.ClusterInfo) {
 }
 
 // 集群删除member
-func (c *Cluster) Cluster_Del(ctx context.Context, info *common.ClusterInfo) {
+func (c *Cluster) Cluster_Del(ctx context.Context, info *rpc.ClusterInfo) {
 	delete(c.clusterInfoMap, info.Id())
 	c.DelCluster(info)
 }
@@ -335,11 +335,11 @@ var (
 	MGR Cluster
 )
 
-func (this *Cluster) GetBalanceServer(head rpc.RpcHead) *common.ClusterInfo {
-	_, head.ClusterId = this.hashRing[head.DestServerType].Get64(head.Id)
-	client, bEx := this.clusterMap[head.DestServerType][head.ClusterId]
+//链接断开
+/*func (c *Cluster) DISCONNECT(ctx context.Context, ClusterId uint32) {
+	pInfo, bEx := c.clusterInfoMap[ClusterId]
 	if bEx {
-		return client
+		c.DelCluster(pInfo)
 	}
-	return nil
-}
+	delete(c.clusterInfoMap, ClusterId)
+}*/
