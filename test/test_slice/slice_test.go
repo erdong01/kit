@@ -73,3 +73,7 @@ func TestDiff(t *testing.T) {
 	data := slice.Diff(data1, data2)
 	fmt.Println("data", data)
 }
+
+func TestJson(t *testing.T) {
+
+}

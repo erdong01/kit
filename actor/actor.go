@@ -464,7 +464,7 @@ func (this *Actor) FindCallJson(funcName string) *CallFunc {
 }
 func (this *Actor) RegisterCallJson(funcName string, call interface{}) {
 	funcName = strings.ToLower(funcName)
-	if this.FindCall(funcName) != nil {
+	if this.FindCallJson(funcName) != nil {
 		log.Fatalf("betree error [%s] 消息重复定义", funcName)
 	}
 
@@ -472,12 +472,12 @@ func (this *Actor) RegisterCallJson(funcName string, call interface{}) {
 	this.CallMap[funcName] = callfunc
 }
 
-func (this *Actor) PacketFuncJson(packet api.Packet) bool {
+func (this *Actor) PacketFuncJson(packet rpc.Packet) bool {
 	var jsonPacket api.JsonPacket
 	json.Unmarshal(packet.Buff, &jsonPacket)
 	var head api.JsonHead
 	// rpcPacket, head := rpc.UnmarshalHead(packet.Buff)
-	if this.FindCall(jsonPacket.FuncName) != nil {
+	if this.FindCallJson(jsonPacket.FuncName) != nil {
 		head.SocketId = packet.Id
 		head.Reply = packet.Reply
 		this.SendJson(head, packet.Buff)
@@ -511,7 +511,7 @@ func (this *Actor) callJson(io CallIOJson) {
 	json.Unmarshal(io.Buff, &jsonPacket)
 	head := io.JsonHead
 	funcName := jsonPacket.FuncName
-	pFunc := this.FindCall(funcName)
+	pFunc := this.FindCallJson(funcName)
 	if pFunc != nil {
 		f := pFunc.FuncVal
 		k := pFunc.FuncType

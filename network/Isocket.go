@@ -26,8 +26,7 @@ const (
 )
 
 type (
-	ClientClose    func(id uint32) error
-	PacketJsonFunc func(packet api.Packet) bool
+	ClientClose func(id uint32) error
 
 	PacketFunc   func(packet rpc.Packet) bool //回调函数
 	HandlePacket func(buff []byte)
@@ -53,10 +52,9 @@ type (
 		acceptedNum  int
 		connectedNum int
 
-		sendTimes          int
-		receiveTimes       int
-		packetFuncList     *vector.Vector[PacketFunc]     //call back
-		packetJsonFuncList *vector.Vector[PacketJsonFunc] //call back
+		sendTimes      int
+		receiveTimes   int
+		packetFuncList *vector.Vector[PacketFunc] //call back
 
 		isHalf       bool
 		halfSize     int
@@ -97,7 +95,6 @@ type (
 		SetClientClose(ClientClose)
 		GetClientClose() ClientClose
 		SendJson(head api.JsonHead, funcName string, params ...interface{}) int
-		BindPacketFuncJson(callfunc PacketJsonFunc)
 		SetPacketParser(I IPacketParser)
 		HandlePacketJson(buff []byte)
 	}
@@ -120,7 +117,6 @@ func (this *Socket) Init(ip string, port int, params ...OpOption) bool {
 	op := &Op{}
 	op.applyOpts(params)
 	this.packetFuncList = &vector.Vector[PacketFunc]{}
-	this.packetJsonFuncList = &vector.Vector[PacketJsonFunc]{}
 	this.SetState(SSF_NULL)
 	this.receiveBufferSize = 1024
 	this.connectType = SERVER_CONNECT
@@ -232,10 +228,6 @@ func (this *Socket) BindPacketFunc(callfunc PacketFunc) {
 	this.packetFuncList.PushBack(callfunc)
 }
 
-func (s *Socket) BindPacketFuncJson(callfunc PacketJsonFunc) {
-	s.packetJsonFuncList.PushBack(callfunc)
-}
-
 func (this *Socket) CallMsg(head rpc.RpcHead, funcName string, params ...interface{}) {
 	this.HandlePacket(rpc.Marshal(&head, &funcName, params...).Buff)
 }
@@ -243,15 +235,6 @@ func (this *Socket) CallMsg(head rpc.RpcHead, funcName string, params ...interfa
 func (this *Socket) HandlePacket(buff []byte) {
 	packet := rpc.Packet{Id: this.clientId, Buff: buff}
 	for _, v := range this.packetFuncList.Values() {
-		if v(packet) {
-			break
-		}
-	}
-}
-
-func (this *Socket) HandlePacketJson(buff []byte) {
-	packet := api.Packet{Id: this.clientId, Buff: buff}
-	for _, v := range this.packetJsonFuncList.Values() {
 		if v(packet) {
 			break
 		}
