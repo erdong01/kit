@@ -35,6 +35,7 @@ func (v *Vector[T]) insert(index int) {
 		v.array[i] = v.array[i-1]
 	}
 }
+
 func (v *Vector[T]) increment() {
 	if v.elementCount == v.arraySize {
 		v.resize(v.elementCount + 1)
@@ -47,6 +48,7 @@ func (v *Vector[T]) decrement() {
 	assert(v.elementCount != 0, "Vector<T>::decrement - cannot decrement zero-length vector.")
 	v.elementCount--
 }
+
 func (v *Vector[T]) resize(newCount int) bool {
 	if newCount > 0 {
 		blocks := newCount / VectorBlockSize
