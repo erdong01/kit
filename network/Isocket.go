@@ -96,7 +96,6 @@ type (
 		GetClientClose() ClientClose
 		SendJson(head api.JsonHead, funcName string, params ...interface{}) int
 		SetPacketParser(I IPacketParser)
-		HandlePacketJson(buff []byte)
 	}
 )
 

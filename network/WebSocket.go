@@ -172,7 +172,7 @@ func (w *WebSocket) handleConn(tcpConn *websocket.Conn, addr string) bool {
 func (w *WebSocket) AddClinetJson(tcpConn *websocket.Conn, addr string, connectType int) IServerSocketClient {
 	client := &WebSocketClientJson{}
 	client.Init("", 0)
-	client.SetPacketParser(NewPacketParserJson(PacketConfig{Func: client.HandlePacketJson}))
+	client.SetPacketParser(NewPacketParserJson(PacketConfig{Func: client.HandlePacket}))
 	client.server = w
 	client.receiveBufferSize = w.receiveBufferSize
 	client.SetMaxPacketLen(w.GetMaxPacketLen())
