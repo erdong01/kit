@@ -17,6 +17,10 @@ type IWebSocket interface {
 
 	AssignClientId() uint32
 	GetClientById(uint32) IWebSocketClient
+	LoadClient() *WebSocketClient
+	AddClinet(tcpConn *websocket.Conn, addr string, connectType int) IServerSocketClient
+	DelClient(*IWebSocketClient) bool
+	StopClient(uint32)
 }
 
 type WebSocket struct {
