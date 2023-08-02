@@ -120,7 +120,7 @@ func (w *WebSocketClientJson) OnNetFail(error int) {
 		stream := base.NewBitStream(make([]byte, 32), 32)
 		stream.WriteInt(int(DISCONNECTINT), 32)
 		stream.WriteInt(int(w.clientId), 32)
-		w.HandlePacketJson(stream.GetBuffer())
+		w.HandlePacket(stream.GetBuffer())
 	} else {
 		w.CallMsg(rpc.RpcHead{}, "DISCONNECT", w.clientId)
 	}
