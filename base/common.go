@@ -37,16 +37,27 @@ func Abs(x float32) float32 {
 	return float32(math.Abs(float64(x)))
 }
 
-func Max(a, b int) int {
-	return int(math.Max(float64(a), float64(b)))
+type orderKey interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 |
+		~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64
 }
 
-func Min(a, b int) int {
-	return int(math.Min(float64(a), float64(b)))
+func Max[T orderKey](x, y T) T {
+	if x > y {
+		return x
+	}
+	return y
 }
 
-func Clamp(val, low, high int) int {
-	return int(math.Max(math.Min(float64(val), float64(high)), float64(low)))
+func Min[T orderKey](x, y T) T {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+func Clamp[T orderKey](val, low, high T) T {
+	return Max(Min(val, high), low)
 }
 
 func IFAssert(x bool, y string) {
@@ -235,6 +246,11 @@ func Int64(str string) int64 {
 	return n
 }
 
+func UInt64(str string) uint64 {
+	n, _ := strconv.ParseUint(str, 0, 64)
+	return n
+}
+
 func Float32(str string) float32 {
 	n, _ := strconv.ParseFloat(str, 32)
 	return float32(n)
@@ -288,7 +304,7 @@ func ToString(value interface{}) string {
 }
 
 // ---------遍历子目录------------//
-func WalkDir(dirpath string, filesVec *vector.Vector) {
+func WalkDir(dirpath string, filesVec *vector.Vector[os.FileInfo]) {
 	files, err := ioutil.ReadDir(dirpath) //读取目录下文件
 	if err != nil {
 		return
@@ -301,4 +317,39 @@ func WalkDir(dirpath string, filesVec *vector.Vector) {
 			filesVec.PushBack(file)
 		}
 	}
+}
+
+// ~map //~这里所有以map为基础类型的都能被约束到
+func Values[M ~map[K]V, K comparable, V any](m M) []V {
+	r := make([]V, len(m))
+	i := 0
+	for _, v := range m {
+		r[i] = v
+		i++
+	}
+	return r
+}
+
+func Keys[M ~map[K]V, K comparable, V any](m M) []K {
+	r := make([]K, len(m))
+	i := 0
+	for k, _ := range m {
+		r[i] = k
+		i++
+	}
+	return r
+}
+
+func CopyMap[M ~map[K]V, K comparable, V any](m M) M {
+	m1 := make(M, len(m))
+	for k, v := range m {
+		m1[k] = v
+	}
+	return m1
+}
+
+func CopySlice[M ~[]V, V any](m M) M {
+	m1 := make(M, len(m))
+	copy(m1, m)
+	return m1
 }

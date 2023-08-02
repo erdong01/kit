@@ -26,18 +26,18 @@ func TestHashRing(t *testing.T) {
 }
 
 func TestRandom(t *testing.T) {
-	vec := vector.NewVector()
+	vec := vector.Vector[int]{}
 	for i := 0; i < nHashRingSize*base.REPLICASNUM; i++ {
 		vec.PushBack(i)
 	}
 	for i := 0; i < int(nHashRingTimes); i++ {
-		nRand := base.RAND.RandI(0, vec.Len()-1)
+		nRand := base.RandI(0, vec.Len()-1)
 		vec.Get(nRand)
 	}
 }
 
 func TestMod(t *testing.T) {
-	vec := vector.NewVector()
+	vec := vector.Vector[int]{}
 	for i := 0; i < nHashRingSize*base.REPLICASNUM; i++ {
 		vec.PushBack(i)
 	}

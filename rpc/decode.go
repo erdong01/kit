@@ -25,7 +25,7 @@ func Unmarshal(buff []byte) (*RpcPacket, RpcHead) {
 	if rpcPacket.RpcHead == nil {
 		rpcPacket.RpcHead = &RpcHead{}
 	}
-	// actor funcname
+	// betree funcname
 	/*actorArgs := strings.Split(rpcPacket.FuncName, ".")
 	if len(actorArgs) == 2 {
 		rpcPacket.RpcHead.ActorName = actorArgs[0]

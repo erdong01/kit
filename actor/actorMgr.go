@@ -85,7 +85,7 @@ func (a *ActorMgr) RegisterActor(ac IActor, params ...OpOption) {
 	name := base.GetClassName(rType)
 	_, bEx := a.actorTypeMap[rType]
 	if bEx {
-		log.Panicf("InitActor actor[%s] must  global variable", name)
+		log.Panicf("InitActor betree[%s] must  global variable", name)
 		return
 	}
 

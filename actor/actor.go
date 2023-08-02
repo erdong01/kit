@@ -29,7 +29,7 @@ const (
 )
 
 // ********************************************************
-// actor 核心actor模式
+// betree 核心actor模式
 // ********************************************************
 type (
 	ActorBase struct {
@@ -374,7 +374,7 @@ func (this *Actor) FindCall(funcName string) *CallFunc {
 func (this *Actor) RegisterCall(funcName string, call interface{}) {
 	funcName = strings.ToLower(funcName)
 	if this.FindCall(funcName) != nil {
-		log.Fatalf("actor error [%s] 消息重复定义", funcName)
+		log.Fatalf("betree error [%s] 消息重复定义", funcName)
 	}
 
 	callfunc := &CallFunc{Func: call, FuncVal: reflect.ValueOf(call), FuncType: reflect.TypeOf(call), FuncParams: reflect.TypeOf(call).String()}
@@ -465,7 +465,7 @@ func (this *Actor) FindCallJson(funcName string) *CallFunc {
 func (this *Actor) RegisterCallJson(funcName string, call interface{}) {
 	funcName = strings.ToLower(funcName)
 	if this.FindCall(funcName) != nil {
-		log.Fatalf("actor error [%s] 消息重复定义", funcName)
+		log.Fatalf("betree error [%s] 消息重复定义", funcName)
 	}
 
 	callfunc := &CallFunc{Func: call, FuncVal: reflect.ValueOf(call), FuncType: reflect.TypeOf(call), FuncParams: reflect.TypeOf(call).String()}
