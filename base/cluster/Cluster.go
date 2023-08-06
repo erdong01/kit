@@ -335,7 +335,10 @@ func (c *Cluster) Cluster_Del(ctx context.Context, info *rpc.ClusterInfo) {
 }
 
 func (c *Cluster) GetBalanceCluster(head rpc.RpcHead) (clusterInfo *rpc.ClusterInfo) {
-	_, head.ClusterId = c.hashRing[c.Type].Get64(head.Id)
+	if head.Id == 0 {
+		head.Id = int64(uint32(base.RandI(1, 0xFFFFFFFF)))
+	}
+	_, head.ClusterId = c.hashRing[head.DestServerType].Get64(head.Id)
 	clusterInfo = c.GetCluster(head)
 	return
 }
