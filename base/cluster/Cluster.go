@@ -3,6 +3,10 @@ package cluster
 import (
 	"context"
 	"errors"
+	"reflect"
+	"sync"
+	"time"
+
 	"github.com/erdong01/kit/actor"
 	"github.com/erdong01/kit/base"
 	"github.com/erdong01/kit/base/cluster/etv3"
@@ -10,9 +14,6 @@ import (
 	"github.com/erdong01/kit/conf"
 	"github.com/erdong01/kit/network"
 	"github.com/erdong01/kit/rpc"
-	"reflect"
-	"sync"
-	"time"
 
 	"github.com/nats-io/nats.go"
 )
@@ -64,6 +65,8 @@ type (
 
 		RandomCluster(head rpc.RpcHead) rpc.RpcHead //随机分配
 		IsEnoughStub(stub rpc.STUB) bool
+
+		GetBalanceCluster(head rpc.RpcHead) (clusterInfo *rpc.ClusterInfo)
 	}
 
 	EmptyClusterInfo struct {
@@ -329,6 +332,12 @@ func (c *Cluster) Cluster_Add(ctx context.Context, info *rpc.ClusterInfo) {
 func (c *Cluster) Cluster_Del(ctx context.Context, info *rpc.ClusterInfo) {
 	delete(c.clusterInfoMap, info.Id())
 	c.DelCluster(info)
+}
+
+func (c *Cluster) GetBalanceCluster(head rpc.RpcHead) (clusterInfo *rpc.ClusterInfo) {
+	_, head.ClusterId = c.hashRing[c.Type].Get64(head.Id)
+	clusterInfo = c.GetCluster(head)
+	return
 }
 
 var (
