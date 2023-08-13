@@ -1,120 +1,66 @@
-package mpmc
+// Package mpsc provides an efficient implementation of a multi-producer, single-consumer lock-free queue.
+//
+// The Push function is safe to call from multiple goroutines. The Pop and Empty APIs must only be
+// called from a single, consumer goroutine.
+package mpsc
+
+// This implementation is based on http://www.1024cores.net/home/lock-free-algorithms/queues/non-intrusive-mpsc-node-based-queue
 
 import (
-	"runtime"
 	"sync/atomic"
+	"unsafe"
 )
 
-type (
-	Cursor [8]uint64 // prevent false sharing of the sequence cursor by padding the CPU cache line with 64 *bytes* of data.
-
-	node[T any] struct {
-		sequence uint64
-		val      T
-	}
-
-	Queue[T any] struct {
-		write      *Cursor // the ring buffer has been written up to q sequence
-		read       *Cursor // q reader has processed up to q sequence
-		bufferSize uint64
-		bufferMask uint64
-		ringBuffer []*node[T]
-		_nil       T
-	}
-)
-
-func (n *node[T]) Store(value uint64) { atomic.StoreUint64(&n.sequence, value) }
-func (n *node[T]) Load() uint64       { return atomic.LoadUint64(&n.sequence) }
-func (n *node[T]) CmpAndSwap(old, new uint64) bool {
-	return atomic.CompareAndSwapUint64(&n.sequence, old, new)
+type node[T any] struct {
+	next *node[T]
+	val  T
 }
 
-func NewCursor() *Cursor {
-	var c Cursor
-	c[0] = defaultCursorValue
-	return &c
+type Queue[T any] struct {
+	head, tail *node[T]
+	_nil       T
 }
 
-func New[T any](size uint64) *Queue[T] {
+func New[T any]() *Queue[T] {
 	q := &Queue[T]{}
-	q.Init(size)
+	stub := &node[T]{}
+	q.head = stub
+	q.tail = stub
 	return q
 }
 
-func (c *Cursor) Store(value uint64) { atomic.StoreUint64(&c[0], value) }
-func (c *Cursor) Load() uint64       { return atomic.LoadUint64(&c[0]) }
-func (c *Cursor) CmpAndSwap(old, new uint64) bool {
-	return atomic.CompareAndSwapUint64(&c[0], old, new)
+// Push adds x to the back of the queue.
+//
+// Push can be safely called from multiple goroutines
+func (q *Queue[T]) Push(x T) {
+	n := new(node[T])
+	n.val = x
+	// current producer acquires head node
+	prev := (*node[T])(atomic.SwapPointer((*unsafe.Pointer)(unsafe.Pointer(&q.head)), unsafe.Pointer(n)))
+
+	// release node to consumer
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&prev.next)), unsafe.Pointer(n))
 }
 
-const defaultCursorValue = 0
-
-func roundUp1(v uint64) uint64 {
-	v--
-	v |= v >> 1
-	v |= v >> 2
-	v |= v >> 4
-	v |= v >> 8
-	v |= v >> 16
-	v |= v >> 32
-	v++
-	return v
-}
-
-func (q *Queue[T]) Init(size uint64) {
-	q.bufferSize = roundUp1(size)
-	q.bufferMask = q.bufferSize - 1
-	q.write = NewCursor()
-	q.read = NewCursor()
-	q.ringBuffer = make([]*node[T], q.bufferSize)
-	for i := uint64(0); i < q.bufferSize; i++ {
-		n := &node[T]{}
-		atomic.StoreUint64(&n.sequence, i)
-		q.ringBuffer[i] = n
-	}
-}
-
-func (q *Queue[T]) Push(data T) {
-	var n *node[T]
-	pos := q.write.Load()
-	for true {
-		n = q.ringBuffer[pos&q.bufferMask]
-		seq := n.Load()
-		dif := int64(seq) - int64(pos)
-		if dif == 0 {
-			if q.write.CmpAndSwap(pos, pos+1) {
-				break
-			}
-		} else if dif < 0 {
-			runtime.Gosched() // LockSupport.parkNanos(1L)
-		} else {
-			pos = q.write.Load()
-		}
-	}
-
-	n.val = data
-	n.Store(pos + 1)
-}
-
+// Pop removes the item from the front of the queue or nil if the queue is empty
+//
+// Pop must be called from a single, consumer goroutine
 func (q *Queue[T]) Pop() T {
-	var n *node[T]
-	pos := q.read.Load()
-	for true {
-		n = q.ringBuffer[pos&q.bufferMask]
-		seq := n.Load()
-		dif := int64(seq) - (int64(pos + 1))
-		if dif == 0 {
-			if q.read.CmpAndSwap(pos, pos+1) {
-				break
-			}
-		} else if dif < 0 {
-			return q._nil
-		} else {
-			pos = q.read.Load()
-		}
+	tail := q.tail
+	next := (*node[T])(atomic.LoadPointer((*unsafe.Pointer)(unsafe.Pointer(&tail.next)))) // acquire
+	if next != nil {
+		q.tail = next
+		v := next.val
+		return v
 	}
+	return q._nil
+}
 
-	dat := n.val
-	n.Store(pos + q.bufferMask + 1)
-	return dat
+// Empty returns true if the queue is empty
+//
+// Empty must be called from a single, consumer goroutine
+func (q *Queue[T]) Empty() bool {
+	tail := q.tail
+	next := (*node[T])(atomic.LoadPointer((*unsafe.Pointer)(unsafe.Pointer(&tail.next))))
+	return next == nil
 }
