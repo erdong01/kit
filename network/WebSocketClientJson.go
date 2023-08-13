@@ -99,13 +99,7 @@ func (s *WebSocketClientJson) SendJson(head api.JsonHead, funcName string, param
 			base.TraceCode(err)
 		}
 	}()
-	var packet api.Packet
-	if len(params) == 1 {
-		packet = rpc.MarshalJson(head, funcName, params[0])
-	} else {
-		packet = rpc.MarshalJson(head, funcName, params...)
-	}
-
+	packet := rpc.MarshalJson(head, funcName, params...)
 	if s.connectType == CLIENT_CONNECT { //对外链接send不阻塞
 		select {
 		case s.sendChan <- packet.Buff:

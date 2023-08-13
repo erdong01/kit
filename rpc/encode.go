@@ -16,7 +16,11 @@ func MarshalJson(head api.JsonHead, funcName string, params ...interface{}) (pac
 	jsonPacket := api.JsonPacket{
 		Head:     &head,
 		FuncName: funcName,
-		Data:     params,
+	}
+	if len(params) == 1 {
+		jsonPacket.Data = params[0]
+	} else {
+		jsonPacket.Data = params
 	}
 	buf, _ := json.Marshal(jsonPacket)
 	packet.Buff = buf
