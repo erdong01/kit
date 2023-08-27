@@ -79,7 +79,6 @@ func (l *Log) Println(v1 ...interface{}) {
 	}
 	params[len(v1)] = "\r"
 	l.logger[LG_WARN].Output(2, fmt.Sprintln(params...))
-	log.Println(params...)
 }
 
 func (l *Log) Print(v1 ...interface{}) {
@@ -90,14 +89,12 @@ func (l *Log) Print(v1 ...interface{}) {
 	}
 	params[len(v1)] = "\r\n"
 	l.logger[LG_WARN].Output(2, fmt.Sprint(params...))
-	log.Print(params...)
 }
 
 func (l *Log) Printf(format string, params ...interface{}) {
 	l.Write(LG_WARN)
 	format += "\r\n"
 	l.logger[LG_WARN].Output(2, fmt.Sprintf(format, params...))
-	log.Printf(format, params...)
 }
 
 func (l *Log) Fatalln(v1 ...interface{}) {
@@ -108,7 +105,6 @@ func (l *Log) Fatalln(v1 ...interface{}) {
 	}
 	params[len(v1)] = "\r"
 	l.logger[LG_ERROR].Output(2, fmt.Sprintln(params...))
-	log.Println(params...)
 }
 
 func (l *Log) Fatal(v1 ...interface{}) {
@@ -119,14 +115,12 @@ func (l *Log) Fatal(v1 ...interface{}) {
 	}
 	params[len(v1)] = "\r\n"
 	l.logger[LG_ERROR].Output(2, fmt.Sprint(params...))
-	log.Print(params...)
 }
 
 func (l *Log) Fatalf(format string, params ...interface{}) {
 	l.Write(LG_ERROR)
 	format += "\r\n"
 	l.logger[LG_ERROR].Output(2, fmt.Sprintf(format, params...))
-	log.Printf(format, params...)
 }
 
 func (l *Log) WriteFile(nType LG_TYPE) {
