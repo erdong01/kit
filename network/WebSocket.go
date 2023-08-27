@@ -2,12 +2,12 @@ package network
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"sync"
 	"sync/atomic"
 
 	"github.com/erdong01/kit/api"
+	"github.com/erdong01/kit/base"
 	"github.com/erdong01/kit/rpc"
 	"golang.org/x/net/websocket"
 )
@@ -93,7 +93,7 @@ func (w *WebSocket) AddClinet(tcpConn *websocket.Conn, addr string, connectType 
 		client.Start()
 		return client
 	} else {
-		log.Printf("%s", "无法创建客户端连接对象")
+		base.LOG.Printf("%s", "无法创建客户端连接对象")
 	}
 	return nil
 }

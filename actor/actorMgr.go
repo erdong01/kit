@@ -1,7 +1,6 @@
 package actor
 
 import (
-	"log"
 	"reflect"
 
 	"github.com/erdong01/kit/base"
@@ -85,7 +84,7 @@ func (a *ActorMgr) RegisterActor(ac IActor, params ...OpOption) {
 	name := base.GetClassName(rType)
 	_, bEx := a.actorTypeMap[rType]
 	if bEx {
-		log.Panicf("InitActor betree[%s] must  global variable", name)
+		base.LOG.Printf("InitActor betree[%s] must  global variable", name)
 		return
 	}
 

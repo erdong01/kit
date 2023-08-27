@@ -8,6 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/erdong01/kit/base"
 	"github.com/erdong01/kit/rpc"
 	"github.com/xtaci/kcp-go/v5"
 	"google.golang.org/protobuf/proto"
@@ -110,7 +111,7 @@ func (s *ServerSocket) AddClinet(conn net.Conn, addr string, connectType int) *S
 		s.clientCount++
 		return client
 	} else {
-		log.Printf("%s", "无法创建客户端连接对象")
+		base.LOG.Printf("%s", "无法创建客户端连接对象")
 	}
 	return nil
 }

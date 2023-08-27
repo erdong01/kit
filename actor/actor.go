@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"reflect"
 	"runtime"
 	"strings"
@@ -250,7 +249,7 @@ func (a *Actor) call(io CallIO) {
 	funcName := rpcPacket.FuncName
 	m, bEx := a.rType.MethodByName(funcName)
 	if !bEx {
-		log.Printf("func [%s] has no method", funcName)
+		base.LOG.Printf("func [%s] has no method", funcName)
 		return
 	}
 	rpcPacket.RpcHead.SocketId = io.SocketId
@@ -273,7 +272,7 @@ func (a *Actor) call(io CallIO) {
 			rpc.MGR.Call(ret)
 		}
 	} else {
-		log.Printf("func [%s] params at least one context", funcName)
+		base.LOG.Printf("func [%s] params at least one context", funcName)
 		//f.Call([]reflect.Value{reflect.ValueOf(ctx)})
 	}
 }
@@ -374,7 +373,7 @@ func (this *Actor) FindCall(funcName string) *CallFunc {
 func (this *Actor) RegisterCall(funcName string, call interface{}) {
 	funcName = strings.ToLower(funcName)
 	if this.FindCall(funcName) != nil {
-		log.Fatalf("betree error [%s] 消息重复定义", funcName)
+		base.LOG.Fatalf("betree error [%s] 消息重复定义", funcName)
 	}
 
 	callfunc := &CallFunc{Func: call, FuncVal: reflect.ValueOf(call), FuncType: reflect.TypeOf(call), FuncParams: reflect.TypeOf(call).String()}
@@ -395,7 +394,7 @@ func (this *Actor) PacketFunc2(packet rpc.Packet) bool {
 func (this *Actor) Send2(head rpc.RpcHead, buff []byte) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Print(err)
+			base.LOG.Print(err)
 		}
 	}()
 	var io CallIO
@@ -435,7 +434,7 @@ func (this *Actor) call2(io CallIO) {
 				rpc.GCall.Call(ret)
 			}
 		} else {
-			log.Printf("func [%s] params at least one context", funcName)
+			base.LOG.Printf("func [%s] params at least one context", funcName)
 		}
 	}
 }
@@ -465,7 +464,7 @@ func (this *Actor) FindCallJson(funcName string) *CallFunc {
 func (this *Actor) RegisterCallJson(funcName string, call interface{}) {
 	funcName = strings.ToLower(funcName)
 	if this.FindCallJson(funcName) != nil {
-		log.Fatalf("betree error [%s] 消息重复定义", funcName)
+		base.LOG.Fatalf("betree error [%s] 消息重复定义", funcName)
 	}
 
 	callfunc := &CallFunc{Func: call, FuncVal: reflect.ValueOf(call), FuncType: reflect.TypeOf(call), FuncParams: reflect.TypeOf(call).String()}
@@ -489,7 +488,7 @@ func (this *Actor) PacketFuncJson(packet rpc.Packet) bool {
 func (this *Actor) SendJson(head api.JsonHead, buff []byte) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Print(err)
+			base.LOG.Print(err)
 		}
 	}()
 	var io CallIOJson
@@ -536,7 +535,7 @@ func (this *Actor) callJson(io CallIOJson) {
 				rpc.GCall.Call(ret)
 			}
 		} else {
-			log.Printf("func [%s] params at least one context", funcName)
+			base.LOG.Printf("func [%s] params at least one context", funcName)
 		}
 	}
 }

@@ -2,7 +2,6 @@ package network
 
 import (
 	"io"
-	"log"
 	"sync/atomic"
 	"time"
 
@@ -138,7 +137,7 @@ func (w *WebSocketClient) Run() bool {
 
 		n, err := w.conn.Read(buff)
 		if err == io.EOF {
-			log.Printf("远程链接：%s已经关闭！\n", w.conn.RemoteAddr().String())
+			base.LOG.Printf("远程链接：%s已经关闭！\n", w.conn.RemoteAddr().String())
 			w.OnNetFail(0)
 			return false
 		}
@@ -161,7 +160,7 @@ func (w *WebSocketClient) Run() bool {
 	}
 
 	w.Close()
-	log.Printf("%s关闭连接", w.ip)
+	base.LOG.Printf("%s关闭连接", w.ip)
 	return true
 }
 

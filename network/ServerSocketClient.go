@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"hash/crc32"
 	"io"
-	"log"
 	"sync/atomic"
 	"time"
 
@@ -41,7 +40,7 @@ func handleError(err error) {
 	if err == nil {
 		return
 	}
-	log.Printf("错误：%s\n", err.Error())
+	base.LOG.Printf("错误：%s\n", err.Error())
 }
 
 func (s *ServerSocketClient) Init(ip string, port int, params ...OpOption) bool {
