@@ -1,8 +1,8 @@
 package network
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"sync/atomic"
 	"time"
 
@@ -153,7 +153,7 @@ func (w *WebSocketClientJson) Run() bool {
 		}
 		n, err := w.conn.Read(buff)
 		if err == io.EOF {
-			fmt.Printf("远程链接：已经关闭！\n")
+			log.Printf("远程链接：已经关闭！\n")
 			w.OnNetFail(0)
 			return false
 		}
@@ -177,7 +177,7 @@ func (w *WebSocketClientJson) Run() bool {
 		w.server.clientClose(w.clientId)
 	}
 	w.Close()
-	fmt.Printf("%s关闭连接", w.ip)
+	log.Printf("%s关闭连接", w.ip)
 	return true
 }
 

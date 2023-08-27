@@ -2,7 +2,7 @@ package network
 
 import (
 	"encoding/binary"
-	"fmt"
+	"log"
 
 	"github.com/erdong01/kit/base"
 )
@@ -109,7 +109,7 @@ ParsePacekt:
 	} else if nBufferSize < p.maxPacketLen {
 		p.maxPacketBuffer = buff[nCurSize:]
 	} else {
-		fmt.Println("超出最大包限制，丢弃该包")
+		log.Println("超出最大包限制，丢弃该包")
 		return false
 	}
 	return true
@@ -120,7 +120,7 @@ func (p *PacketParser) Write(dat []byte) []byte {
 	msgLen := len(dat)
 	// check len
 	if msgLen+p.packetLen > base.MAX_PACKET {
-		fmt.Println("write over base.MAX_PACKET")
+		log.Println("write over base.MAX_PACKET")
 	}
 
 	msg := make([]byte, p.packetLen+msgLen)

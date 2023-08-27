@@ -26,11 +26,9 @@ func (c *ClientSocket) Init(ip string, port int, params ...OpOption) bool {
 	if c.port == port || c.ip == ip {
 		return false
 	}
-
 	c.Socket.Init(ip, port, params...)
 	c.ip = ip
 	c.port = port
-	fmt.Println(ip, port)
 	return true
 }
 
