@@ -494,7 +494,8 @@ func (this *Actor) SendJson(head api.JsonHead, buff []byte) {
 	}()
 	var io CallIOJson
 	io.JsonHead = head
-	io.Buff = buff
+	io.Buff = make([]byte, len(buff))
+	copy(io.Buff, buff)
 	this.mailBox2.Push(io)
 	if atomic.CompareAndSwapInt32(&this.mailIn2, 0, 1) {
 		this.mailChanJson <- true
