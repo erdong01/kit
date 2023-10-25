@@ -11,7 +11,7 @@ require (
 	github.com/xtaci/kcp-go/v5 v5.6.2
 	go.etcd.io/etcd/client/v3 v3.5.9
 	go.mongodb.org/mongo-driver v1.12.0
-	google.golang.org/grpc v1.57.0
+	google.golang.org/grpc v1.57.1
 	google.golang.org/protobuf v1.31.0
 	gorm.io/gorm v1.25.2
 )
