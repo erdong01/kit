@@ -2,10 +2,9 @@ package schedule
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
-
-	"github.com/erdong01/kit/base"
 )
 
 type (
@@ -54,7 +53,7 @@ func (s *Schedule) Start(ctx context.Context) {
 					go func(d DelayHandler) {
 						defer func() {
 							if err := recover(); err != nil {
-								base.TraceCode(err)
+								fmt.Println(err)
 							}
 						}()
 						d.OnTimer()

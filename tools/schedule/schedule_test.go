@@ -25,7 +25,7 @@ func TestXxx(t *testing.T) {
 		job2.TableId = i + 10
 		schedule.Add(&job2, time.Second*time.Duration(i), false)
 	}
-	select {}
+	time.Sleep(time.Second * 20)
 }
 
 type Job struct {
