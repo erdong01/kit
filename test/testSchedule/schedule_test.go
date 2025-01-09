@@ -1,6 +1,3 @@
-### 秒级定时任务
-
-```go
 package testSchedule
 
 import (
@@ -41,5 +38,3 @@ func (j *Job) OnTimer() {
 	fmt.Println(j.TableId)
 	panic(j.TableId)
 }
-
-```
