@@ -2,26 +2,37 @@ package httpClient
 
 import (
 	"bytes"
-	"crypto/tls"
 	"io"
 	"net/http"
 	"time"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 type HttpClient struct {
 	Url          string
 	RequestBody  []byte
 	ResponseBody []byte
-
-	Header    http.Header
-	Timeout   int64 //default time.Second * 60
-	Transport *http.Transport
+	Header       http.Header
+	Timeout      int64 //default time.Second * 60
+	Transport    *http.Transport
 }
 
-func (that *HttpClient) POST() (err error) {
-	client := &http.Client{
-		Timeout: time.Second * 60,
+func New(url string) *HttpClient {
+	return &HttpClient{
+		Url: url,
 	}
+}
+
+func (that *HttpClient) POST(data ...[]byte) (err error) {
+	client := &http.Client{
+		Timeout:   time.Second * 60,
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+	}
+	if len(data) > 0 {
+		that.RequestBody = data[0]
+	}
+
 	req, err := http.NewRequest("POST", that.Url, bytes.NewBuffer(that.RequestBody))
 	if err != nil {
 		return
@@ -37,12 +48,6 @@ func (that *HttpClient) POST() (err error) {
 	}
 	if that.Transport != nil {
 		client.Transport = that.Transport
-	} else {
-		client.Transport = &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: false,
-			},
-		}
 	}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -50,8 +55,54 @@ func (that *HttpClient) POST() (err error) {
 	}
 	defer resp.Body.Close()
 	that.ResponseBody, err = io.ReadAll(resp.Body)
+	return
+}
+
+func (that *HttpClient) HeaderAdd(key string, value string) {
+	if that.Header == nil {
+		that.Header = make(http.Header)
+	}
+	that.Header.Add(key, value)
+}
+
+func (that *HttpClient) SetTransport(transport *http.Transport) {
+	that.Transport = transport
+}
+
+func (that *HttpClient) SetTimeout(timeout int64) {
+	that.Timeout = timeout
+}
+
+func (that *HttpClient) Get(data ...[]byte) (err error) {
+	client := &http.Client{
+		Timeout:   time.Second * 60,
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+	}
+	if len(data) > 0 {
+		that.RequestBody = data[0]
+	}
+
+	req, err := http.NewRequest("GET", that.Url, bytes.NewBuffer(that.RequestBody))
 	if err != nil {
 		return
 	}
+	if len(that.Header) > 0 {
+		req.Header = that.Header
+	} else {
+		req.Header.Set("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1")
+		req.Header.Set("Content-Type", "application/json")
+	}
+	if that.Timeout > 0 {
+		client.Timeout = time.Duration(that.Timeout)
+	}
+	if that.Transport != nil {
+		client.Transport = that.Transport
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	that.ResponseBody, err = io.ReadAll(resp.Body)
 	return
 }
