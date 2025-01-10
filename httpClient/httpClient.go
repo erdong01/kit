@@ -19,6 +19,7 @@ type HttpClient struct {
 	Transport    *http.Transport
 	Status       string // e.g. "200 OK"
 	StatusCode   int    // e.g. 200
+	Err          error
 }
 
 func New(url string) *HttpClient {
@@ -27,7 +28,7 @@ func New(url string) *HttpClient {
 	}
 }
 
-func (that *HttpClient) POST(data ...[]byte) (responseBody []byte, err error) {
+func (that *HttpClient) POST(data ...[]byte) *HttpClient {
 	client := &http.Client{
 		Timeout:   time.Second * 60,
 		Transport: otelhttp.NewTransport(http.DefaultTransport),
@@ -38,7 +39,8 @@ func (that *HttpClient) POST(data ...[]byte) (responseBody []byte, err error) {
 
 	req, err := http.NewRequest("POST", that.Url, bytes.NewBuffer(that.RequestBody))
 	if err != nil {
-		return
+		that.Err = err
+		return that
 	}
 	if len(that.Header) > 0 {
 		req.Header = that.Header
@@ -54,13 +56,15 @@ func (that *HttpClient) POST(data ...[]byte) (responseBody []byte, err error) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return
+		that.Err = err
+		return that
 	}
 	defer resp.Body.Close()
 	that.ResponseBody, err = io.ReadAll(resp.Body)
 	that.StatusCode = resp.StatusCode
 	that.Status = resp.Status
-	return that.ResponseBody, nil
+	that.Err = err
+	return that
 }
 
 func (that *HttpClient) HeaderAdd(key string, value string) {
@@ -78,7 +82,7 @@ func (that *HttpClient) SetTimeout(timeout int64) {
 	that.Timeout = timeout
 }
 
-func (that *HttpClient) Get(data ...[]byte) (responseBody []byte, err error) {
+func (that *HttpClient) Get(data ...[]byte) *HttpClient {
 	client := &http.Client{
 		Timeout:   time.Second * 60,
 		Transport: otelhttp.NewTransport(http.DefaultTransport),
@@ -89,7 +93,8 @@ func (that *HttpClient) Get(data ...[]byte) (responseBody []byte, err error) {
 
 	req, err := http.NewRequest("GET", that.Url, bytes.NewBuffer(that.RequestBody))
 	if err != nil {
-		return
+		that.Err = err
+		return that
 	}
 	if len(that.Header) > 0 {
 		req.Header = that.Header
@@ -105,13 +110,15 @@ func (that *HttpClient) Get(data ...[]byte) (responseBody []byte, err error) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return
+		that.Err = err
+		return that
 	}
 	defer resp.Body.Close()
 	that.ResponseBody, err = io.ReadAll(resp.Body)
 	that.StatusCode = resp.StatusCode
 	that.Status = resp.Status
-	return that.ResponseBody, nil
+	that.Err = err
+	return that
 }
 
 func (that *HttpClient) Scan(v any) (err error) {
