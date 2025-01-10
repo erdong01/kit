@@ -24,7 +24,7 @@ func New(url string) *HttpClient {
 	}
 }
 
-func (that *HttpClient) POST(data ...[]byte) (err error) {
+func (that *HttpClient) POST(data ...[]byte) (responseBody []byte, err error) {
 	client := &http.Client{
 		Timeout:   time.Second * 60,
 		Transport: otelhttp.NewTransport(http.DefaultTransport),
@@ -55,7 +55,7 @@ func (that *HttpClient) POST(data ...[]byte) (err error) {
 	}
 	defer resp.Body.Close()
 	that.ResponseBody, err = io.ReadAll(resp.Body)
-	return
+	return that.ResponseBody, nil
 }
 
 func (that *HttpClient) HeaderAdd(key string, value string) {
@@ -73,7 +73,7 @@ func (that *HttpClient) SetTimeout(timeout int64) {
 	that.Timeout = timeout
 }
 
-func (that *HttpClient) Get(data ...[]byte) (err error) {
+func (that *HttpClient) Get(data ...[]byte) (responseBody []byte, err error) {
 	client := &http.Client{
 		Timeout:   time.Second * 60,
 		Transport: otelhttp.NewTransport(http.DefaultTransport),
@@ -104,5 +104,5 @@ func (that *HttpClient) Get(data ...[]byte) (err error) {
 	}
 	defer resp.Body.Close()
 	that.ResponseBody, err = io.ReadAll(resp.Body)
-	return
+	return that.ResponseBody, nil
 }
