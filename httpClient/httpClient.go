@@ -2,6 +2,7 @@ package httpClient
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 	"time"
@@ -16,6 +17,8 @@ type HttpClient struct {
 	Header       http.Header
 	Timeout      int64 //default time.Second * 60
 	Transport    *http.Transport
+	Status       string // e.g. "200 OK"
+	StatusCode   int    // e.g. 200
 }
 
 func New(url string) *HttpClient {
@@ -55,6 +58,8 @@ func (that *HttpClient) POST(data ...[]byte) (responseBody []byte, err error) {
 	}
 	defer resp.Body.Close()
 	that.ResponseBody, err = io.ReadAll(resp.Body)
+	that.StatusCode = resp.StatusCode
+	that.Status = resp.Status
 	return that.ResponseBody, nil
 }
 
@@ -104,5 +109,11 @@ func (that *HttpClient) Get(data ...[]byte) (responseBody []byte, err error) {
 	}
 	defer resp.Body.Close()
 	that.ResponseBody, err = io.ReadAll(resp.Body)
+	that.StatusCode = resp.StatusCode
+	that.Status = resp.Status
 	return that.ResponseBody, nil
+}
+
+func (that *HttpClient) Scan(v any) (err error) {
+	return json.Unmarshal(that.ResponseBody, v)
 }
