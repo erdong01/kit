@@ -24,15 +24,17 @@ type (
 	// 定时时间精确到秒，不精确管理goroutine的退出
 	// 主要逻辑只不过是对标准库Timer、Ticker封装管理而已
 	Schedule struct {
-		IDGen  uint64
-		mutex  sync.Mutex
-		events map[uint64]*event
+		IDGen        uint64
+		mutex        sync.Mutex
+		events       map[uint64]*event
+		intervalTime time.Duration
 	}
 )
 
 func New() *Schedule {
 	return &Schedule{
-		events: make(map[uint64]*event),
+		events:       make(map[uint64]*event),
+		intervalTime: time.Second,
 	}
 }
 
@@ -40,13 +42,17 @@ func (s *Schedule) Run(ctx context.Context) {
 	go s.Start(ctx)
 }
 
+func (s *Schedule) SetIntervalTime(v time.Duration) {
+	s.intervalTime = v
+}
+
 // Start 开始
 func (s *Schedule) Start(ctx context.Context) {
-	var timer = time.NewTimer(1 * time.Second)
+	secTicker := time.NewTicker(s.intervalTime)
+	defer secTicker.Stop()
 	for {
-		timer.Reset(1 * time.Second)
 		select {
-		case <-timer.C:
+		case <-secTicker.C:
 			s.mutex.Lock()
 			for k, v := range s.events {
 				if v.expire() {
@@ -60,6 +66,7 @@ func (s *Schedule) Start(ctx context.Context) {
 					}(s.events[k].delayHandler)
 
 					if v.timer != nil {
+						v.timer.Stop()
 						delete(s.events, k)
 					}
 					if v.ticker != nil {

@@ -71,7 +71,6 @@ func (that *HttpClient) Do(data ...[]byte) *HttpClient {
 	if len(data) > 0 {
 		that.RequestBody = data[0]
 	}
-
 	req, err := http.NewRequest(that.Method, that.Url, bytes.NewBuffer(that.RequestBody))
 	if err != nil {
 		that.Err = err

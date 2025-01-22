@@ -34,5 +34,4 @@ type Job struct {
 
 func (j *Job) OnTimer() {
 	fmt.Println(j.TableId)
-	panic(j.TableId)
 }
