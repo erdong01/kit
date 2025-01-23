@@ -1,5 +1,5 @@
 info:
-  name: rxtedu
+  name: kit
   env: local  #本地开发:local, 测试:test, 线上:production
 api_port:
   sc: 5001
@@ -18,7 +18,7 @@ redis:
   password: password
   db: 0
 jwt:
-  secret: Y1HH999gmSmGvVddzmhGhThiOEBQBPbj
+  secret: secret
   issuer: 127.0.0.1
   expire: 10
 cache:
