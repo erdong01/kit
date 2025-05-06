@@ -33,11 +33,29 @@ func (that *HttpClient) POST(data ...[]byte) *HttpClient {
 	return that.SetMethod("POST").Do(data...)
 }
 
+// Add adds the key, value pair to the header.
+// It appends to any existing values associated with key.
+// The key is case insensitive; it is canonicalized by
+// [CanonicalHeaderKey].
 func (that *HttpClient) HeaderAdd(key string, value string) *HttpClient {
 	if that.Header == nil {
 		that.Header = make(http.Header)
 	}
 	that.Header.Add(key, value)
+	return that
+}
+
+// Get gets the first value associated with the given key. If
+// there are no values associated with the key, Get returns "".
+// It is case insensitive; [textproto.CanonicalMIMEHeaderKey] is
+// used to canonicalize the provided key. Get assumes that all
+// keys are stored in canonical form. To use non-canonical keys,
+// access the map directly.
+func (that *HttpClient) HeaderSet(key string, value string) *HttpClient {
+	if that.Header == nil {
+		that.Header = make(http.Header)
+	}
+	that.Header.Set(key, value)
 	return that
 }
 
