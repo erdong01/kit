@@ -6,7 +6,7 @@ import (
 )
 
 func TestWork(t *testing.T) {
-	goworker := NewWorker(16)
+	goworker := New(16)
 	goworker.Go(func() {
 		fmt.Println("111")
 	})

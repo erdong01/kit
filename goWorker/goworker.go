@@ -15,7 +15,7 @@ type worker struct {
 	wg          sync.WaitGroup
 }
 
-func NewWorker(count ...int) (p *worker) {
+func New(count ...int) (p *worker) {
 	p = &worker{}
 	p.workerCount = 32
 	if len(count) > 0 {
