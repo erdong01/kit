@@ -2,30 +2,32 @@ package httpClient
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"io"
+	"net"
 	"net/http"
 	"time"
-
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 type HttpClient struct {
-	Url          string
-	RequestBody  []byte
-	ResponseBody []byte
-	Header       http.Header
-	Timeout      int64 //default time.Second * 60
-	Transport    *http.Transport
-	Status       string // e.g. "200 OK"
-	StatusCode   int    // e.g. 200
-	Err          error
-	Method       string
+	Url                string
+	RequestBody        []byte
+	ResponseBody       []byte
+	Header             http.Header
+	Timeout            int64 //default time.Second * 60
+	Transport          *http.Transport
+	Status             string // e.g. "200 OK"
+	StatusCode         int    // e.g. 200
+	Err                error
+	Method             string
+	InsecureSkipVerify bool
 }
 
 func New(url string) *HttpClient {
 	return &HttpClient{
-		Url: url,
+		Url:                url,
+		InsecureSkipVerify: true,
 	}
 }
 
@@ -82,9 +84,25 @@ func (that *HttpClient) Scan(v any) (err error) {
 }
 
 func (that *HttpClient) Do(data ...[]byte) *HttpClient {
+	if that.Transport == nil {
+		that.Transport = &http.Transport{
+			DialContext:           (&net.Dialer{Timeout: 30 * time.Second, KeepAlive: 60 * time.Second}).DialContext,
+			TLSHandshakeTimeout:   30 * time.Second, // 调整TLS握手超时时间
+			ResponseHeaderTimeout: 30 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+			MaxIdleConns:          64,               // 最大空闲连接数
+			MaxIdleConnsPerHost:   32,               // 每个主机的最大空闲连接数
+			IdleConnTimeout:       90 * time.Second, // 空闲连接的超时时间
+		}
+	}
+
+	if that.InsecureSkipVerify {
+		that.Transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+
 	client := &http.Client{
 		Timeout:   time.Second * 60,
-		Transport: otelhttp.NewTransport(http.DefaultTransport),
+		Transport: that.Transport,
 	}
 	if len(data) > 0 {
 		that.RequestBody = data[0]
