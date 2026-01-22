@@ -90,15 +90,13 @@ type Group struct {
 
 	wg sync.WaitGroup
 
-	sem chan token
-
 	errOnce sync.Once
 	err     error
 }
 
 func (g *Group) done() {
-	if g.sem != nil {
-		<-g.sem
+	if g.pool.sem != nil {
+		<-g.pool.sem
 	}
 	g.wg.Done()
 }
@@ -120,8 +118,8 @@ func (g *Group) Wait() error {
 }
 
 func (g *Group) Go(f func() error) {
-	if g.sem != nil {
-		g.sem <- token{}
+	if g.pool.sem != nil {
+		g.pool.sem <- token{}
 	}
 
 	g.wg.Add(1)
@@ -139,9 +137,9 @@ func (g *Group) Go(f func() error) {
 }
 
 func (g *Group) TryGo(f func() error) bool {
-	if g.sem != nil {
+	if g.pool.sem != nil {
 		select {
-		case g.sem <- token{}:
+		case g.pool.sem <- token{}:
 		default:
 			return false
 		}
