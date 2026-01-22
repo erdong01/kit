@@ -7,31 +7,44 @@ import (
 	"sync"
 )
 
-type worker struct {
-	// Record the number of running workers
-	// 协程数量
+type Pool struct {
 	workerCount int
 	sem         chan struct{}
-	wg          sync.WaitGroup
 }
 
-func New(count ...int) (p *worker) {
-	p = &worker{}
-	p.workerCount = 32
+type Worker struct {
+	pool *Pool
+	wg   sync.WaitGroup
+}
+
+func New(count ...int) *Pool {
+	var workerCount int
 	if len(count) > 0 {
-		p.workerCount = count[0]
+		workerCount = count[0]
+	} else {
+		workerCount = 64
 	}
-	p.sem = make(chan struct{}, p.workerCount)
-	return p
+	return &Pool{
+		workerCount: workerCount,
+		sem:         make(chan struct{}, workerCount),
+	}
 }
 
-func (that *worker) Go(f func()) {
-	that.sem <- struct{}{}
+func (that *Pool) WaitGroup() *Worker {
+	return &Worker{pool: that}
+}
+
+func (that *Pool) Tune(n int) {
+	that.workerCount = n
+}
+
+func (that *Worker) Go(f func()) {
+	that.pool.sem <- struct{}{}
 	that.wg.Add(1)
 	go func() {
-		defer that.wg.Add(-1)
-		defer func() { <-that.sem }()
 		defer func() {
+			<-that.pool.sem
+			that.wg.Add(-1)
 			if r := recover(); r != nil {
 				msg := fmt.Sprintf("GOWorker: panic %s", debug.Stack())
 				log.Fatal(msg)
@@ -41,6 +54,6 @@ func (that *worker) Go(f func()) {
 	}()
 }
 
-func (that *worker) Wait() {
+func (that *Worker) Wait() {
 	that.wg.Wait()
 }

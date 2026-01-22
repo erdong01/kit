@@ -4,7 +4,6 @@ go 1.25
 
 require (
 	github.com/erdong01/sharding v0.6.3
-	github.com/google/uuid v1.6.0
 	github.com/nats-io/nats.go v1.48.0
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
