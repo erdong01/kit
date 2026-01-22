@@ -10,6 +10,6 @@
 
 [Schedule](docs/schedule.md)
 
-[Schedule](docs/goWorker.md)
+[goWorker](docs/goWorker.md)
 
 [项目工程化]( https://github.com/golang-standards/project-layout)
