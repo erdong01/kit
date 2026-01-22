@@ -7,7 +7,7 @@ import (
 )
 
 func TestWork(t *testing.T) {
-	workerPool := New(2)
+	workerPool := New(1)
 	go func() {
 		goWorker := workerPool.WaitGroup()
 		goWorker.Go(func() {
@@ -65,5 +65,5 @@ func TestWork(t *testing.T) {
 		goWorker.Wait()
 		fmt.Println("Wait-B")
 	}()
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 }
