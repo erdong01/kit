@@ -33,6 +33,10 @@ func New(size ...int) *Pool {
 	}
 }
 
+func (that *Pool) Close(f func()) {
+	close(that.sem)
+}
+
 func (that *Pool) Go(f func()) {
 	if f == nil {
 		return
