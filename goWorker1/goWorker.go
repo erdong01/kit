@@ -20,22 +20,17 @@ type Worker struct {
 
 func New(count ...int) *Pool {
 	var workerCount int
+	var sem chan struct{}
 	if len(count) > 0 {
 		workerCount = count[0]
+		sem = make(chan struct{}, workerCount)
 	} else {
-		workerCount = 64
+		sem = make(chan struct{}, 1)
 	}
 	return &Pool{
 		workerCount: workerCount,
-		sem:         make(chan struct{}, workerCount),
+		sem:         sem,
 	}
-}
-
-func (that *Pool) Tune(n int) {
-
-	that.workerCount = n
-	close(that.sem)
-	that.sem = make(chan struct{}, that.workerCount)
 }
 
 func (that *Pool) Go(f func()) {
@@ -82,8 +77,6 @@ func (that *Worker) Wait() {
 	that.wg.Wait()
 }
 
-type token struct{}
-
 type Group struct {
 	pool   *Pool
 	cancel func(error)
@@ -119,7 +112,7 @@ func (g *Group) Wait() error {
 
 func (g *Group) Go(f func() error) {
 	if g.pool.sem != nil {
-		g.pool.sem <- token{}
+		g.pool.sem <- struct{}{}
 	}
 
 	g.wg.Add(1)
@@ -139,7 +132,7 @@ func (g *Group) Go(f func() error) {
 func (g *Group) TryGo(f func() error) bool {
 	if g.pool.sem != nil {
 		select {
-		case g.pool.sem <- token{}:
+		case g.pool.sem <- struct{}{}:
 		default:
 			return false
 		}

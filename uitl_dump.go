@@ -23,12 +23,19 @@ func DumpJson(value any) {
 }
 
 func doDumpJSON(jsonContent []byte) {
-	var (
-		buffer    = bytes.NewBuffer(nil)
-		jsonBytes = jsonContent
-	)
-	if err := json.Indent(buffer, jsonBytes, "", "    "); err != nil {
+	if len(jsonContent) == 0 {
+		fmt.Println("")
+		return
+	}
+	if !json.Valid(jsonContent) {
+		fmt.Println(string(jsonContent))
+		return
+	}
+	var buffer bytes.Buffer
+	if err := json.Indent(&buffer, jsonContent, "", "    "); err != nil {
 		fmt.Println(err.Error())
+		fmt.Println(string(jsonContent))
+		return
 	}
 	fmt.Println(buffer.String())
 }
