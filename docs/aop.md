@@ -88,3 +88,27 @@ func TestOrder(t *testing.T) {
 
 
 ```
+
+#### AOP 链式 (Around)
+
+使用 `Around` 可以控制是否继续执行后续链路，`RunAround` 会把切面按
+`beforeSlice -> I -> afterSlice` 串成一个链。
+
+```go
+type Trace struct {
+	aop.Aop
+	Name string
+}
+
+func (t *Trace) Around(next aop.NextFunc) error {
+	fmt.Println("before:", t.Name)
+	err := next()
+	fmt.Println("after:", t.Name)
+	return err
+}
+
+err := aop.New(context.Background(), &Order{}).
+	SetBefore(&Trace{Name: "pre"}).
+	SetAfter(&Trace{Name: "post"}).
+	RunAround()
+```

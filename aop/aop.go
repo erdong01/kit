@@ -32,6 +32,13 @@ type IAop interface {
 	getEnd() (b bool)
 }
 
+type NextFunc func() error
+
+// Arounder provides AOP-style chaining. Implement to control when next runs.
+type Arounder interface {
+	Around(next NextFunc) error
+}
+
 func New(Ctx context.Context, I IAop) *BaseAop {
 	aop := &BaseAop{}
 	aop.I = I
@@ -57,7 +64,15 @@ func (a *BaseAop) Run() (err error) {
 	for _, f := range a.beforeSlice {
 		f.setAop(a.I.getAop())
 		f.Before()
+		if f.getEnd() {
+			a.I.setAop(f.getAop())
+			return f.GetErr()
+		}
 		f.Handler()
+		if f.getEnd() {
+			a.I.setAop(f.getAop())
+			return f.GetErr()
+		}
 		f.After()
 		a.I.setAop(f.getAop())
 
@@ -66,6 +81,9 @@ func (a *BaseAop) Run() (err error) {
 		}
 	}
 	a.I.Handler()
+	if a.I.getEnd() {
+		return a.I.GetErr()
+	}
 	a.I.After()
 	if a.I.getEnd() {
 		return a.I.GetErr()
@@ -73,7 +91,15 @@ func (a *BaseAop) Run() (err error) {
 	for _, f := range a.afterSlice {
 		f.setAop(a.I.getAop())
 		f.Before()
+		if f.getEnd() {
+			a.I.setAop(f.getAop())
+			return f.GetErr()
+		}
 		f.Handler()
+		if f.getEnd() {
+			a.I.setAop(f.getAop())
+			return f.GetErr()
+		}
 		f.After()
 		a.I.setAop(f.getAop())
 		if f.getEnd() {
@@ -81,6 +107,87 @@ func (a *BaseAop) Run() (err error) {
 		}
 	}
 	return a.I.GetErr()
+}
+
+// RunAround executes a full AOP chain using Around if implemented.
+// Order is: beforeSlice -> I -> afterSlice. Each link may call next() or short-circuit.
+func (a *BaseAop) RunAround() (err error) {
+	chain := make([]IAop, 0, len(a.beforeSlice)+1+len(a.afterSlice))
+	chain = append(chain, a.beforeSlice...)
+	chain = append(chain, a.I)
+	chain = append(chain, a.afterSlice...)
+
+	state := &Aop{}
+	state.setAop(a.I.getAop())
+
+	var runAt func(i int) error
+	runAt = func(i int) error {
+		if i >= len(chain) {
+			return nil
+		}
+		if state.getEnd() {
+			return state.GetErr()
+		}
+
+		cur := chain[i]
+		cur.setAop(state)
+
+		if ar, ok := cur.(Arounder); ok {
+			next := func() error {
+				state.setAop(cur.getAop())
+				err := runAt(i + 1)
+				cur.setAop(state)
+				if err != nil {
+					cur.SetErr(err)
+				}
+				return err
+			}
+			err := ar.Around(next)
+			if err != nil && cur.GetErr() == nil {
+				cur.SetErr(err)
+			}
+			state.setAop(cur.getAop())
+			if cur.getEnd() {
+				return cur.GetErr()
+			}
+			if err != nil {
+				return err
+			}
+			return cur.GetErr()
+		}
+
+		cur.Before()
+		if cur.getEnd() {
+			state.setAop(cur.getAop())
+			return cur.GetErr()
+		}
+		cur.Handler()
+		if cur.getEnd() {
+			state.setAop(cur.getAop())
+			return cur.GetErr()
+		}
+
+		state.setAop(cur.getAop())
+		err := runAt(i + 1)
+		cur.setAop(state)
+		if err != nil {
+			cur.SetErr(err)
+		}
+		cur.After()
+		if cur.getEnd() {
+			state.setAop(cur.getAop())
+			return cur.GetErr()
+		}
+		state.setAop(cur.getAop())
+		if err != nil {
+			return err
+		}
+		return cur.GetErr()
+	}
+
+	err = runAt(0)
+	a.I.setAop(state)
+	return err
 }
 
 func (b *Aop) Before()  {}
@@ -125,6 +232,7 @@ func (a *Aop) Break(err error) {
 	a.end = true
 	a.Err = err
 }
+
 func (a *Aop) getEnd() (b bool) {
 	return a.end
 }

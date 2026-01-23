@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/erdong01/kit/aop"
@@ -65,6 +66,19 @@ func (s *Stock) Handler() {
 	// fmt.Println("减去库存数量：", s.form.GoodsNum)
 }
 
+type Trace struct {
+	aop.Aop
+	Name  string
+	Steps *[]string
+}
+
+func (t *Trace) Around(next aop.NextFunc) error {
+	*t.Steps = append(*t.Steps, t.Name+":before")
+	err := next()
+	*t.Steps = append(*t.Steps, t.Name+":after")
+	return err
+}
+
 func TestOrder(t *testing.T) {
 	form := Form{GoodsNo: 11, GoodsNum: 1}
 	for i := 0; i < 100000000; i++ {
@@ -77,6 +91,22 @@ func TestOrder(t *testing.T) {
 	}
 	fmt.Println("订单创建成功")
 	// Create()
+}
+
+func TestOrderAround(t *testing.T) {
+	form := Form{GoodsNo: 11, GoodsNum: 1}
+	steps := []string{}
+	err := aop.New(context.Background(), &Order{}).SetBefore(
+		&Trace{Name: "pre", Steps: &steps},
+		&Goods{form: form},
+	).SetAfter(&Trace{Name: "post", Steps: &steps}).RunAround()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	want := []string{"pre:before", "post:before", "post:after", "pre:after"}
+	if !reflect.DeepEqual(steps, want) {
+		t.Fatalf("unexpected steps: %v", steps)
+	}
 }
 
 func Create(form Form) {
@@ -96,4 +126,3 @@ func Create(form Form) {
 	stock := Stock{form: form}
 	stock.Handler()
 }
-
