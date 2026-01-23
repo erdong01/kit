@@ -18,11 +18,11 @@ type Worker struct {
 	wg   sync.WaitGroup
 }
 
-func New(count ...int) *Pool {
+func New(size ...int) *Pool {
 	var workerCount int
 	var sem chan struct{}
-	if len(count) > 0 {
-		workerCount = count[0]
+	if len(size) > 0 {
+		workerCount = size[0]
 		sem = make(chan struct{}, workerCount)
 	} else {
 		sem = make(chan struct{}, 1)
