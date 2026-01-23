@@ -45,8 +45,9 @@ func TestGo(t *testing.T) {
 }
 
 func TestWork(t *testing.T) {
-	workerPool := New(1)
+	workerPool := New()
 	go func() {
+
 		goWorker := workerPool.WaitGroup()
 		goWorker.Go(func() {
 			fmt.Println("111")
@@ -54,21 +55,19 @@ func TestWork(t *testing.T) {
 		goWorker.Go(func() {
 			fmt.Println("222")
 		})
-
 		goWorker.Go(func() {
 			fmt.Println("333")
 		})
-
 		goWorker.Go(func() {
 			fmt.Println("444")
 		})
+		goWorker.Go(func() {
+			fmt.Println("555")
+		})
+		goWorker.Go(func() {
+			fmt.Println("555")
+		})
 
-		goWorker.Go(func() {
-			fmt.Println("555")
-		})
-		goWorker.Go(func() {
-			fmt.Println("555")
-		})
 		goWorker.Go(func() {
 			fmt.Println("777")
 		})
@@ -78,7 +77,6 @@ func TestWork(t *testing.T) {
 		goWorker.Go(func() {
 			fmt.Println("999")
 		})
-
 		goWorker.Go(func() {
 			fmt.Println("10001")
 		})
@@ -89,6 +87,7 @@ func TestWork(t *testing.T) {
 		fmt.Println("Wait0")
 	}()
 	go func() {
+
 		goWorker := workerPool.WaitGroup()
 		goWorker.Go(func() {
 			fmt.Println("aaa111")

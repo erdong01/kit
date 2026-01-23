@@ -25,7 +25,7 @@ func New(size ...int) *Pool {
 		workerCount = size[0]
 		sem = make(chan struct{}, workerCount)
 	} else {
-		sem = make(chan struct{}, 1)
+		sem = nil
 	}
 	return &Pool{
 		workerCount: workerCount,
@@ -33,18 +33,28 @@ func New(size ...int) *Pool {
 	}
 }
 
-func (that *Pool) Close(f func()) {
-	close(that.sem)
+func (that *Pool) SetLimit(size int) {
+	if size <= 0 {
+		that.sem = nil
+		that.workerCount = 0
+		return
+	}
+	that.sem = make(chan struct{}, size)
+	that.workerCount = size
 }
 
 func (that *Pool) Go(f func()) {
 	if f == nil {
 		return
 	}
-	that.sem <- struct{}{}
+	if that.sem != nil {
+		that.sem <- struct{}{}
+	}
 	go func() {
 		defer func() {
-			<-that.sem
+			if that.sem != nil {
+				<-that.sem
+			}
 			if r := recover(); r != nil {
 				msg := fmt.Sprintf("GOWorker: panic %s", debug.Stack())
 				log.Fatal(msg)
@@ -62,11 +72,15 @@ func (that *Worker) Go(f func()) {
 	if f == nil {
 		return
 	}
-	that.pool.sem <- struct{}{}
+	if that.pool.sem != nil {
+		that.pool.sem <- struct{}{}
+	}
 	that.wg.Add(1)
 	go func() {
 		defer func() {
-			<-that.pool.sem
+			if that.pool.sem != nil {
+				<-that.pool.sem
+			}
 			that.wg.Done()
 			if r := recover(); r != nil {
 				msg := fmt.Sprintf("GOWorker: panic %s", debug.Stack())
