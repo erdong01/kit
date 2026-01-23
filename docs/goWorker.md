@@ -1,4 +1,4 @@
-# goWorker 协程池
+# goWorker go协程池
 
 Go 语言提供了轻量的 goroutine，但标准库没有线程/协程池组件。goWorker 通过一个带缓冲的通道实现并发上限控制，并提供三种使用方式：
 
