@@ -6,13 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/erdong01/kit/schedule"
+	"github.com/erdong01/kit"
 )
 
-var s *schedule.Schedule
+var s *kit.Schedule
 
 func TestXxx(t *testing.T) {
-	s = schedule.New()
+	s = kit.NewSchedule()
 	var context = context.Background()
 	s.Run(context)
 	var job3 Job

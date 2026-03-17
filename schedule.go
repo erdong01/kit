@@ -1,4 +1,4 @@
-package schedule
+package kit
 
 import (
 	"context"
@@ -31,7 +31,7 @@ type (
 	}
 )
 
-func New() *Schedule {
+func NewSchedule() *Schedule {
 	return &Schedule{
 		events:       make(map[uint64]*event),
 		intervalTime: time.Second,

@@ -1,4 +1,4 @@
-package schedule
+package kit
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 var schedule *Schedule
 
 func TestXxx(t *testing.T) {
-	schedule = New()
+	schedule = NewSchedule()
 	var context = context.Background()
 	schedule.Run(context)
 	var job3 Job
