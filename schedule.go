@@ -119,6 +119,15 @@ func (s *Schedule) Add(delayHandler DelayHandler, duration time.Duration, persis
 	return
 }
 
+// AddDate 按指定日期时间添加一次性任务
+func (s *Schedule) AddDate(delayHandler DelayHandler, date time.Time) (TID uint64) {
+	duration := time.Until(date)
+	if duration < 0 {
+		duration = 0
+	}
+	return s.Add(delayHandler, duration, false)
+}
+
 // Remove 移除
 func (s *Schedule) Remove(id uint64) {
 	s.mutex.Lock()
