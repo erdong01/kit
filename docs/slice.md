@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/erdong01/kit/slice"
+	"github.com/dongmu101/kit/slice"
 )
 
 func TestEqual(t *testing.T) {
@@ -33,7 +33,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/erdong01/kit/slice"
+	"github.com/dongmu101/kit/slice"
 )
 
 func TestPrepend(t *testing.T) {
@@ -63,7 +63,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/erdong01/kit/slice"
+	"github.com/dongmu101/kit/slice"
 )
 
 // 通过查找切片元素删除
@@ -107,7 +107,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/erdong01/kit/slice"
+	"github.com/dongmu101/kit/slice"
 )
 
 type Ball struct {

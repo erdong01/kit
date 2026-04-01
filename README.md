@@ -1,6 +1,6 @@
 ### Golang 工具
 
-安装: go get  github.com/erdong01/kit
+安装: go get  github.com/dongmu101/kit
 
 ### Doc：
 

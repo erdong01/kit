@@ -9,7 +9,7 @@ Go 语言提供了轻量的 goroutine，但标准库没有线程/协程池组件
 ## 安装
 
 ```bash
-go get github.com/erdong01/kit/goWorker
+go get github.com/dongmu101/kit/goWorker
 ```
 
 ## 快速开始
@@ -20,7 +20,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/erdong01/kit/goWorker"
+	"github.com/dongmu101/kit/goWorker"
 )
 
 func main() {
@@ -110,7 +110,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/erdong01/kit/goWorker"
+	"github.com/dongmu101/kit/goWorker"
 )
 
 pool := goWorker.New(3)

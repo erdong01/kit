@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/erdong01/kit/slice"
+	"github.com/dongmu101/kit/slice"
 )
 
 // 通过查找切片元素删除

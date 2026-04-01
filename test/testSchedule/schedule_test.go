@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/erdong01/kit"
+	"github.com/dongmu101/kit"
 )
 
 var s *kit.Schedule

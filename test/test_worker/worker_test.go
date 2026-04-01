@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/erdong01/kit/goWorker"
+	"github.com/dongmu101/kit/goWorker"
 )
 
 func TestWork(t *testing.T) {

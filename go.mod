@@ -1,3 +1,3 @@
-module github.com/erdong01/kit
+module github.com/dongmu101/kit
 
 go 1.25
