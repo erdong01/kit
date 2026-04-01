@@ -1,6 +1,7 @@
 package kit
 
 import (
+	"container/heap"
 	"context"
 	"fmt"
 	"sync"
@@ -9,14 +10,15 @@ import (
 
 type (
 	event struct {
-		timer        *time.Timer
-		ticker       *time.Ticker
+		id           uint64
 		endTime      time.Time
 		duration     time.Duration
 		recurring    bool
 		nextTime     func(time.Time) time.Time
 		delayHandler DelayHandler
+		index        int
 	}
+	eventHeap []*event
 	// DelayHandler 调度程序 需要传递参数通过 struct 传递
 	DelayHandler interface {
 		OnTimer()
@@ -29,105 +31,90 @@ type (
 		IDGen        uint64
 		mutex        sync.Mutex
 		events       map[uint64]*event
+		heap         eventHeap
 		intervalTime time.Duration
+		wakeup       chan struct{}
 	}
 )
 
 func NewSchedule() *Schedule {
-	return &Schedule{
+	s := &Schedule{
 		events:       make(map[uint64]*event),
 		intervalTime: time.Second,
+		wakeup:       make(chan struct{}, 1),
 	}
+	heap.Init(&s.heap)
+	return s
 }
 
 func (s *Schedule) Run(ctx context.Context) {
 	go s.Start(ctx)
 }
 
+// SetIntervalTime 仅为兼容保留，最小堆调度模型下不再依赖轮询间隔。
 func (s *Schedule) SetIntervalTime(v time.Duration) {
 	s.intervalTime = v
 }
 
 // Start 开始
 func (s *Schedule) Start(ctx context.Context) {
-	secTicker := time.NewTicker(s.intervalTime)
-	defer secTicker.Stop()
-	for {
-		select {
-		case <-secTicker.C:
-			s.mutex.Lock()
-			for k, v := range s.events {
-				if v.expire() {
-					handler := v.delayHandler
-					go func(d DelayHandler) {
-						defer func() {
-							if err := recover(); err != nil {
-								fmt.Println(err)
-							}
-						}()
-						d.OnTimer()
-					}(handler)
+	timer := time.NewTimer(time.Hour)
+	defer timer.Stop()
 
-					if v.timer != nil && !v.recurring {
-						v.timer.Stop()
-						delete(s.events, k)
-					}
-					if v.ticker != nil {
-						v.endTime = v.endTime.Add(v.duration)
-					}
-					if v.timer != nil && v.recurring && v.nextTime != nil {
-						next := v.nextTime(v.endTime)
-						delay := time.Until(next)
-						if delay < 0 {
-							delay = 0
-						}
-						v.endTime = next
-						v.timer.Reset(delay)
-					}
+	for {
+		wait := s.nextWait()
+		if wait < 0 {
+			select {
+			case <-s.wakeup:
+			case <-ctx.Done():
+				return
+			}
+			continue
+		}
+
+		resetTimer(timer, wait)
+		select {
+		case <-timer.C:
+			s.fireDue()
+		case <-s.wakeup:
+			if !timer.Stop() {
+				select {
+				case <-timer.C:
+				default:
 				}
 			}
-			s.mutex.Unlock()
 		case <-ctx.Done():
+			if !timer.Stop() {
+				select {
+				case <-timer.C:
+				default:
+				}
+			}
 			return
 		}
 	}
 }
 
-func (s *event) expire() bool {
-	if s.timer != nil {
-		select {
-		case <-s.timer.C:
-			return true
-		default:
-		}
-	}
-
-	if s.ticker != nil {
-		select {
-		case <-s.ticker.C:
-			return true
-		default:
-		}
-	}
-	return false
-}
-
 // Add 添加
 func (s *Schedule) Add(delayHandler DelayHandler, duration time.Duration, persistence bool) (TID uint64) {
+	if duration < 0 {
+		duration = 0
+	}
+
 	s.mutex.Lock()
-	defer s.mutex.Unlock()
 	s.IDGen++
 	TID = s.IDGen
-	var ev event
-	if !persistence {
-		ev.timer = time.NewTimer(duration)
-	} else {
-		ev.ticker = time.NewTicker(duration)
+	ev := &event{
+		id:           TID,
+		endTime:      time.Now().Add(duration),
+		duration:     duration,
+		recurring:    persistence,
+		delayHandler: delayHandler,
+		index:        -1,
 	}
-	ev.duration = duration
-	ev.delayHandler = delayHandler
-	ev.endTime = time.Now().Add(duration)
-	s.events[s.IDGen] = &ev
+	s.pushEventLocked(ev)
+	s.mutex.Unlock()
+	s.notify()
 	return
 }
 
@@ -169,26 +156,24 @@ func (s *Schedule) AddMonthly(delayHandler DelayHandler, day, hour, minute, seco
 }
 
 func (s *Schedule) addCalendarDate(delayHandler DelayHandler, first time.Time, persistence bool, next func(time.Time) time.Time) (TID uint64) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	duration := time.Until(first)
-	if duration < 0 {
-		duration = 0
+	if first.Before(time.Now()) {
+		first = time.Now()
 	}
 
+	s.mutex.Lock()
 	s.IDGen++
 	TID = s.IDGen
 	ev := &event{
-		timer:        time.NewTimer(duration),
+		id:           TID,
 		endTime:      first,
+		recurring:    persistence,
+		nextTime:     next,
 		delayHandler: delayHandler,
+		index:        -1,
 	}
-	if persistence {
-		ev.recurring = true
-		ev.nextTime = next
-	}
-	s.events[TID] = ev
+	s.pushEventLocked(ev)
+	s.mutex.Unlock()
+	s.notify()
 	return
 }
 
@@ -239,22 +224,20 @@ func nextMonth(year int, month time.Month) (int, time.Month) {
 }
 
 func daysInMonth(year int, month time.Month) int {
-	return time.Date(year, month+1, 0, 0, 0, 0, 0, time.Local).Day()
+	return time.Date(year, month+1, 0, 0, 0, 0, 0, time.UTC).Day()
 }
 
 // Remove 移除
 func (s *Schedule) Remove(id uint64) {
 	s.mutex.Lock()
-	defer s.mutex.Unlock()
 	if ev, ok := s.events[id]; ok {
-		if ev.timer != nil && !ev.timer.Stop() {
-			<-ev.timer.C
-		}
-		if ev.ticker != nil {
-			ev.ticker.Stop()
+		if ev.index >= 0 {
+			heap.Remove(&s.heap, ev.index)
 		}
 		delete(s.events, id)
 	}
+	s.mutex.Unlock()
+	s.notify()
 }
 
 // Surplus 剩余
@@ -268,4 +251,124 @@ func (s *Schedule) Surplus(id uint64) (duration time.Duration) {
 		duration = 0
 	}
 	return
+}
+
+func (s *Schedule) nextWait() time.Duration {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if len(s.heap) == 0 {
+		return -1
+	}
+	wait := time.Until(s.heap[0].endTime)
+	if wait < 0 {
+		return 0
+	}
+	return wait
+}
+
+func (s *Schedule) fireDue() {
+	var handlers []DelayHandler
+	s.mutex.Lock()
+	now := time.Now()
+	for len(s.heap) > 0 {
+		ev := s.heap[0]
+		if ev.endTime.After(now) {
+			break
+		}
+
+		heap.Pop(&s.heap)
+		handlers = append(handlers, ev.delayHandler)
+
+		if !ev.recurring {
+			delete(s.events, ev.id)
+			continue
+		}
+
+		s.scheduleNextLocked(ev, now)
+		heap.Push(&s.heap, ev)
+	}
+	s.mutex.Unlock()
+
+	for _, handler := range handlers {
+		go safeCall(handler)
+	}
+}
+
+func (s *Schedule) scheduleNextLocked(ev *event, now time.Time) {
+	switch {
+	case ev.nextTime != nil:
+		next := ev.nextTime(ev.endTime)
+		for !next.After(now) {
+			next = ev.nextTime(next)
+		}
+		ev.endTime = next
+	case ev.duration > 0:
+		next := ev.endTime.Add(ev.duration)
+		for !next.After(now) {
+			next = next.Add(ev.duration)
+		}
+		ev.endTime = next
+	default:
+		ev.endTime = now
+	}
+}
+
+func (s *Schedule) pushEventLocked(ev *event) {
+	s.events[ev.id] = ev
+	heap.Push(&s.heap, ev)
+}
+
+func (s *Schedule) notify() {
+	select {
+	case s.wakeup <- struct{}{}:
+	default:
+	}
+}
+
+func safeCall(d DelayHandler) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+	d.OnTimer()
+}
+
+func resetTimer(timer *time.Timer, wait time.Duration) {
+	if !timer.Stop() {
+		select {
+		case <-timer.C:
+		default:
+		}
+	}
+	timer.Reset(wait)
+}
+
+func (h eventHeap) Len() int {
+	return len(h)
+}
+
+func (h eventHeap) Less(i, j int) bool {
+	return h[i].endTime.Before(h[j].endTime)
+}
+
+func (h eventHeap) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
+	h[i].index = i
+	h[j].index = j
+}
+
+func (h *eventHeap) Push(x interface{}) {
+	ev := x.(*event)
+	ev.index = len(*h)
+	*h = append(*h, ev)
+}
+
+func (h *eventHeap) Pop() interface{} {
+	old := *h
+	n := len(old)
+	ev := old[n-1]
+	ev.index = -1
+	*h = old[:n-1]
+	return ev
 }
